@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -58,7 +57,7 @@ public class SharedFolderWithWritePermissionMoveInTest extends BaseShareReadWrit
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'fileFromA' into root folder of A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("fileFromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				rootA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				rootA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Move file 'fileFromA' at A into shared folder 'sharedfolder'.");
@@ -78,7 +77,7 @@ public class SharedFolderWithWritePermissionMoveInTest extends BaseShareReadWrit
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'fileFromB' into root folder of B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("fileFromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				rootB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				rootB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Move file 'fileFromB' at B into shared folder 'sharedfolder'.");
@@ -138,7 +137,7 @@ public class SharedFolderWithWritePermissionMoveInTest extends BaseShareReadWrit
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'subfileFromA' into root folder of A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfileFromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				rootA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				rootA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Move file 'subfileFromA' at A into shared folder 'sharedfolder/subfolderA'.");
@@ -158,7 +157,7 @@ public class SharedFolderWithWritePermissionMoveInTest extends BaseShareReadWrit
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'subfileFromB' into root folder of B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfileFromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				rootB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				rootB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Move file 'subfileFromB' at B into shared folder 'sharedfolder/subfolder'.");

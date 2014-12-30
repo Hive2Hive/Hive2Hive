@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.Set;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -64,7 +63,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends BaseShareReadWrite
 	public void testSynchronizeAddFileAtADeleteAtA() throws NoSessionException, NoPeerConnectionException, IOException,
 			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				sharedFolderA);
 
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
@@ -87,7 +86,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends BaseShareReadWrite
 	public void testSynchronizeAddFileAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException, IOException,
 			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				sharedFolderA);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -106,7 +105,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends BaseShareReadWrite
 	public void testSynchronizeTryToAddFileAtB() throws NoSessionException, NoPeerConnectionException, IOException,
 			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileAtB = FileTestUtil.createFileRandomContent("fileFromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				sharedFolderB);
 		logger.info("Try to upload a new file '{}' from B.", fileAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance()
 				.createAddFileProcess(fileAtB, nodeB, fileConfig));
@@ -167,7 +166,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends BaseShareReadWrite
 	public void testSynchronizeAddSubfileAtADeleteAtA() throws NoSessionException, NoPeerConnectionException, IOException,
 			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolderA);
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -189,7 +188,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends BaseShareReadWrite
 	public void testSynchronizeAddSubfileAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolderA);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -208,7 +207,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends BaseShareReadWrite
 	public void testSynchronizeTryToAddSubfileAtB() throws NoSessionException, NoPeerConnectionException, IOException,
 			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileAtB = FileTestUtil.createFileRandomContent("subfileFromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolderB);
 		logger.info("Try to upload a new file '{}' from B.", fileAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance()
 				.createAddFileProcess(fileAtB, nodeB, fileConfig));

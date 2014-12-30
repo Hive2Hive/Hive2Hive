@@ -63,7 +63,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	@Test
 	public void testDeleteFile() throws IOException, IllegalArgumentException, GetFailedException, InterruptedException,
 			NoPeerConnectionException, NoSessionException, InvalidProcessStateException, ProcessExecutionException {
-		File file = FileTestUtil.createFileRandomContent(3, root, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file = FileTestUtil.createFileRandomContent(3, root);
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// store the keys of the meta file to verify them later
@@ -116,8 +116,9 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFileInFolder() throws IOException, IllegalArgumentException, GetFailedException, InterruptedException,
-			NoSessionException, NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
+	public void testDeleteFileInFolder() throws IOException, IllegalArgumentException, GetFailedException,
+			InterruptedException, NoSessionException, NoPeerConnectionException, InvalidProcessStateException,
+			ProcessExecutionException {
 		// add a folder to the network
 		File folder = new File(root, randomString());
 		folder.mkdir();

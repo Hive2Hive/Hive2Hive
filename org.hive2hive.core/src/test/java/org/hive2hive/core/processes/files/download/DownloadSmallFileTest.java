@@ -78,7 +78,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 	public void uploadFile() throws IOException, NoSessionException, NoPeerConnectionException, GetFailedException {
 		// upload a small file
 		String fileName = randomString();
-		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
+		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot);
 		testContent = FileUtils.readFileToString(uploadedFile);
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);

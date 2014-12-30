@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -68,7 +67,7 @@ public class SharedFolderWithReadPermissionMoveInternalTest extends BaseShareRea
 	public void testSynchronizeAddFileAtAMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				sharedFolderA);
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.getName());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -92,7 +91,7 @@ public class SharedFolderWithReadPermissionMoveInternalTest extends BaseShareRea
 	public void testSynchronizeAddFileAtATryToMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				sharedFolderA);
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.getName());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -154,7 +153,7 @@ public class SharedFolderWithReadPermissionMoveInternalTest extends BaseShareRea
 	public void testSynchronizeAddSubfileAtAMoveToFolderAtA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1A, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1A);
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.getName());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -178,7 +177,7 @@ public class SharedFolderWithReadPermissionMoveInternalTest extends BaseShareRea
 	public void testSynchronizeAddSubfileAtATryToMoveToFolderAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1A, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1A);
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.getName());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -240,7 +239,7 @@ public class SharedFolderWithReadPermissionMoveInternalTest extends BaseShareRea
 	public void testSynchronizeAddSubFileAtAMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile3FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1A, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1A);
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.getName());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -264,7 +263,7 @@ public class SharedFolderWithReadPermissionMoveInternalTest extends BaseShareRea
 	public void testSynchronizeAddSubfileAtATryToMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile4FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1A, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1A);
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.getName());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 

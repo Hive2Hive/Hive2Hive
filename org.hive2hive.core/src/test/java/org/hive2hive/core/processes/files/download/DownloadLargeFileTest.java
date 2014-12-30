@@ -6,7 +6,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -18,6 +17,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileConfiguration;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -69,10 +69,9 @@ public class DownloadLargeFileTest extends H2HJUnitTest {
 			GetFailedException {
 		// upload a large file
 		BigInteger maxFileSize = FileConfiguration.createDefault().getMaxFileSize();
-		int minChunks = (int) maxFileSize.longValue() / H2HConstants.DEFAULT_CHUNK_SIZE;
+		int minChunks = (int) maxFileSize.longValue() / TestFileConfiguration.CHUNK_SIZE;
 		String fileName = randomString();
-		uploadedFile = FileTestUtil.createFileRandomContent(fileName, minChunks + 1, uploaderRoot,
-				H2HConstants.DEFAULT_CHUNK_SIZE);
+		uploadedFile = FileTestUtil.createFileRandomContent(fileName, minChunks + 1, uploaderRoot);
 		testContent = FileUtils.readFileToString(uploadedFile);
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);

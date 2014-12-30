@@ -6,7 +6,6 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -62,19 +61,19 @@ public class AddFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadSingleChunk() throws IOException, IllegalArgumentException, NoSessionException, GetFailedException,
-			NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
-		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
+	public void testUploadSingleChunk() throws IOException, IllegalArgumentException, NoSessionException,
+			GetFailedException, NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
+		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot);
 
 		UseCaseTestUtil.uploadNewFile(network.get(0), file);
 		verifyUpload(file, 1);
 	}
 
 	@Test
-	public void testUploadMultipleChunks() throws IOException, IllegalArgumentException, NoSessionException, GetFailedException,
-			NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
+	public void testUploadMultipleChunks() throws IOException, IllegalArgumentException, NoSessionException,
+			GetFailedException, NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		// creates a file with length of at least 5 chunks
-		File file = FileTestUtil.createFileRandomContent(5, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file = FileTestUtil.createFileRandomContent(5, uploaderRoot);
 
 		UseCaseTestUtil.uploadNewFile(network.get(0), file);
 		verifyUpload(file, 5);
@@ -91,8 +90,8 @@ public class AddFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadFolderWithFile() throws IOException, IllegalArgumentException, NoSessionException, GetFailedException,
-			NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
+	public void testUploadFolderWithFile() throws IOException, IllegalArgumentException, NoSessionException,
+			GetFailedException, NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
 		// create a container
 		File folder = new File(uploaderRoot, "folder-with-file");
 		folder.mkdirs();
@@ -124,7 +123,7 @@ public class AddFileTest extends H2HJUnitTest {
 		// skip the login and continue with the newfile process
 		NetworkManager client = network.get(2);
 
-		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot);
 		IProcessComponent<Void> process = ProcessFactory.instance().createAddFileProcess(file, client,
 				FileConfiguration.createDefault());
 		process.execute();

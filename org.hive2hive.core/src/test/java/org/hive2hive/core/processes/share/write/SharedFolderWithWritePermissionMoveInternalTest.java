@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -70,7 +69,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file1FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				sharedFolderA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/file1FromA' gets synchronized with B.");
@@ -94,7 +93,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file2FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				sharedFolderA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/file2FromA' gets synchronized with B.");
@@ -118,7 +117,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file1FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				sharedFolderB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/file1FromB' gets synchronized with A.");
@@ -142,7 +141,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file2FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				sharedFolderB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/file2FromB' gets synchronized with A.");
@@ -262,7 +261,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile1FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1AtA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1AtA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile1FromA' gets synchronized with B.");
@@ -286,7 +285,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile2FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1AtA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1AtA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile2FromA' gets synchronized with B.");
@@ -310,7 +309,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile1FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile1FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1AtB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1AtB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile1FromB' gets synchronized with A.");
@@ -334,7 +333,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile2FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile2FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1AtB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1AtB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile2FromB' gets synchronized with A.");
@@ -454,7 +453,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile3FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile3FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1AtA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1AtA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile3FromA' gets synchronized with B.");
@@ -478,7 +477,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile4FromA' from A.");
 		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile4FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1AtA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1AtA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile4FromA' gets synchronized with B.");
@@ -502,7 +501,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile3FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile3FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1AtB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1AtB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile3FromB' gets synchronized with A.");
@@ -526,7 +525,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile4FromB' from B.");
 		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile4FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
-				subFolder1AtB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				subFolder1AtB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile4FromB' gets synchronized with A.");

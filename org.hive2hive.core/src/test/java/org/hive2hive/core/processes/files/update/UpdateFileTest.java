@@ -6,7 +6,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.configs.FileConfiguration;
@@ -26,6 +25,7 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileConfiguration;
 import org.hive2hive.core.utils.TestProcessComponentListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
@@ -78,7 +78,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, downloader, rootDownloader);
 
 		// create a file
-		file = FileTestUtil.createFileRandomContent(3, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
+		file = FileTestUtil.createFileRandomContent(3, uploaderRoot);
 		UseCaseTestUtil.uploadNewFile(uploader, file);
 	}
 
@@ -105,8 +105,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadSameVersion() throws IllegalArgumentException, GetFailedException, IOException, NoSessionException,
-			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
+	public void testUploadSameVersion() throws IllegalArgumentException, GetFailedException, IOException,
+			NoSessionException, InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
 		// upload the same content again
 		IProcessComponent<Void> process = ProcessFactory.instance().createUpdateFileProcess(file, uploader,
 				FileConfiguration.createDefault());
@@ -153,7 +153,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 			@Override
 			public int getChunkSize() {
-				return H2HConstants.DEFAULT_CHUNK_SIZE;
+				return TestFileConfiguration.CHUNK_SIZE;
 			}
 		};
 
@@ -201,7 +201,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 			@Override
 			public int getChunkSize() {
-				return H2HConstants.DEFAULT_CHUNK_SIZE;
+				return TestFileConfiguration.CHUNK_SIZE;
 			}
 		};
 

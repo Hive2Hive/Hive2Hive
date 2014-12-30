@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileShareEvent;
@@ -73,17 +72,14 @@ public class ShareFolderTest extends H2HJUnitTest {
 		folderToShare.mkdirs();
 		UseCaseTestUtil.uploadNewFile(network.get(0), folderToShare);
 
-		File file1 = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5) + 1, folderToShare,
-				H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file1 = FileTestUtil.createFileRandomContent("file1", new Random().nextInt(5) + 1, folderToShare);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1);
-		File file2 = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1, folderToShare,
-				H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file2 = FileTestUtil.createFileRandomContent("file2", new Random().nextInt(5) + 1, folderToShare);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file2);
 		File subfolder = new File(folderToShare, "subfolder1");
 		subfolder.mkdir();
 		UseCaseTestUtil.uploadNewFile(network.get(0), subfolder);
-		File file3 = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5) + 1, subfolder,
-				H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file3 = FileTestUtil.createFileRandomContent("file3", new Random().nextInt(5) + 1, subfolder);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file3);
 
 		// share the filled folder
