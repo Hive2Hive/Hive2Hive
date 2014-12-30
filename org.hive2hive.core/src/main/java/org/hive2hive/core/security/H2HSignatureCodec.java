@@ -10,7 +10,7 @@ import net.tomp2p.message.SignatureCodec;
 import org.hive2hive.core.H2HConstants;
 
 /**
- * An ASN.1 encoder and decoder for the signature.
+ * A RSA encoder and decoder for the signature.
  * 
  * @author Thomas, Seppi
  */
