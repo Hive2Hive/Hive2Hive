@@ -12,24 +12,42 @@ import org.hive2hive.core.H2HConstants;
 /**
  * A RSA encoder and decoder for the signature.
  * 
- * @author Thomas, Seppi
+ * @author Thomas
+ * @author Seppi
+ * @author Nico
  */
 public class H2HSignatureCodec implements SignatureCodec {
 
+	// get the default byte count
+	private static final int SIGNATURE_SIZE = H2HConstants.KEYLENGTH_PROTECTION.value() / 8;
+
 	private byte[] encodedData;
 
-	@Override
-	public SignatureCodec decode(byte[] encodedData) throws IOException {
-		// no decoding necessary
-		if (encodedData.length != signatureSize()) {
-			throw new IOException("RSA signature has size " + signatureSize() + " received: " + encodedData.length);
+	/**
+	 * Create a signature codec using an already existing signature (encoded)
+	 * 
+	 * @param encodedData the encoded signature
+	 * @throws IOException
+	 */
+	public H2HSignatureCodec(byte[] encodedData) throws IOException {
+		if (encodedData.length != SIGNATURE_SIZE) {
+			throw new IOException("RSA signature has size " + SIGNATURE_SIZE + " received: " + encodedData.length);
 		}
 		this.encodedData = encodedData;
-		return this;
+	}
+
+	/**
+	 * Create a signature codec from a buffer
+	 * 
+	 * @param buf the buffer containing the signature at its reader index
+	 */
+	public H2HSignatureCodec(ByteBuf buf) {
+		encodedData = new byte[SIGNATURE_SIZE];
+		buf.readBytes(encodedData);
 	}
 
 	@Override
-	public byte[] encode() throws IOException {
+	public byte[] encode() {
 		// no encoding necessary
 		return encodedData;
 	}
@@ -38,19 +56,6 @@ public class H2HSignatureCodec implements SignatureCodec {
 	public SignatureCodec write(ByteBuf buf) {
 		buf.writeBytes(encodedData);
 		return this;
-	}
-
-	@Override
-	public SignatureCodec read(ByteBuf buf) {
-		encodedData = new byte[signatureSize()];
-		buf.readBytes(encodedData);
-		return this;
-	}
-
-	@Override
-	public int signatureSize() {
-		// get the default byte count
-		return H2HConstants.KEYLENGTH_PROTECTION.value() / 8;
 	}
 
 	@Override

@@ -26,7 +26,6 @@ import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
-import net.tomp2p.message.SignatureCodec;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
@@ -773,7 +772,6 @@ public class SecurityTest extends H2HJUnitTest {
 
 		// create custom RSA factories
 		SignatureFactory factory = new H2HSignatureFactory();
-		SignatureCodec codec = new H2HSignatureCodec();
 
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
@@ -826,7 +824,7 @@ public class SecurityTest extends H2HJUnitTest {
 				.data().verify(keyPair1.getPublic(), factory));
 
 		// change data signature to keys 2, assign the reused hash from signature
-		data = new Data().ttlSeconds(ttl).signature(codec.decode(signatureNew));
+		data = new Data().ttlSeconds(ttl).signature(new H2HSignatureCodec(signatureNew));
 		// don't forget to set signed flag, create meta data
 		data.signed(true).duplicateMeta();
 		FuturePut futurePutMeta = p1.put(lKey).domainKey(dKey).putMeta().data(cKey, data).versionKey(vKey).start();
@@ -849,7 +847,6 @@ public class SecurityTest extends H2HJUnitTest {
 
 		// create custom RSA factories
 		SignatureFactory factory = new H2HSignatureFactory();
-		SignatureCodec codec = new H2HSignatureCodec();
 
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
@@ -999,7 +996,7 @@ public class SecurityTest extends H2HJUnitTest {
 		byte[] signatureNew = rsa.doFinal(hash);
 
 		// change data signature to keys 2, assign the reused hash from signature
-		data = new Data().ttlSeconds(ttl).signature(codec.decode(signatureNew)).protectEntry();
+		data = new Data().ttlSeconds(ttl).signature(new H2HSignatureCodec(signatureNew)).protectEntry();
 		// don't forget to set signed flag, create meta data
 		data.signed(true).duplicateMeta();
 		// put meta using content content protection key 1 to sign message
@@ -1133,7 +1130,6 @@ public class SecurityTest extends H2HJUnitTest {
 
 		// create custom RSA factories
 		SignatureFactory factory = new H2HSignatureFactory();
-		SignatureCodec codec = new H2HSignatureCodec();
 
 		// replace default signature factories
 		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
@@ -1191,7 +1187,7 @@ public class SecurityTest extends H2HJUnitTest {
 		byte[] signatureNew = rsa.doFinal(hash);
 
 		// change data signature to keys 2, assign the reused hash from signature
-		data = new Data().ttlSeconds(ttl).signature(codec.decode(signatureNew)).protectEntry();
+		data = new Data().ttlSeconds(ttl).signature(new H2HSignatureCodec(signatureNew)).protectEntry();
 		// don't forget to set signed flag
 		data.signed(true);
 		// change the content protection keys to 2
