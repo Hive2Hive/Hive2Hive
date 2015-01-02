@@ -78,7 +78,7 @@ public class SecurityTest extends H2HJUnitTest {
 		Number160 cKey = Number160.createHash("content");
 
 		String testData = "data";
-		Data data = new Data(testData).protectEntry();
+		Data data = new Data(testData).protectEntry(keyPair);
 
 		// put with protection key
 		FuturePut futurePut1 = p1.put(lKey).data(cKey, data).domainKey(dKey).keyPair(keyPair).start();
@@ -127,7 +127,7 @@ public class SecurityTest extends H2HJUnitTest {
 
 		// overwrite
 		String newTestData = "new data";
-		data = new Data(newTestData).protectEntry();
+		data = new Data(newTestData).protectEntry(keyPair);
 		// sign put message with protection keys
 		FuturePut futurePut4 = p1.put(lKey).data(cKey, data).keyPair(keyPair).domainKey(dKey).start();
 		futurePut4.awaitUninterruptibly();
@@ -234,7 +234,7 @@ public class SecurityTest extends H2HJUnitTest {
 
 		// initial put using content protection keys 1
 		String testData1 = "data1";
-		Data data = new Data(testData1).protectEntry();
+		Data data = new Data(testData1).protectEntry(keyPair1);
 		FuturePut futurePut1 = p1.put(lKey).data(cKey, data).domainKey(dKey).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
@@ -303,7 +303,7 @@ public class SecurityTest extends H2HJUnitTest {
 
 		// put with content protection keys 1
 		String testData1 = "data1";
-		Data data = new Data(testData1).protectEntry();
+		Data data = new Data(testData1).protectEntry(keyPair1);
 		FuturePut futurePut1 = p1.put(lKey).data(cKey, data).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
@@ -381,7 +381,7 @@ public class SecurityTest extends H2HJUnitTest {
 
 		// put with content protection keys 1
 		String testData1 = "data1";
-		Data data = new Data(testData1).protectEntry();
+		Data data = new Data(testData1).protectEntry(keyPair1);
 		FuturePut futurePut1 = p1.put(lKey).data(cKey, data).versionKey(vKey).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
@@ -460,7 +460,7 @@ public class SecurityTest extends H2HJUnitTest {
 
 		// put with content protection keys 1
 		String testData1 = "data1";
-		Data data = new Data(testData1).protectEntry();
+		Data data = new Data(testData1).protectEntry(key1);
 		FuturePut futurePut1 = p1.put(lKey).domainKey(dKey).data(cKey, data).versionKey(vKey).keyPair(key1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
@@ -533,14 +533,14 @@ public class SecurityTest extends H2HJUnitTest {
 		Number160 cKey = Number160.createHash("content");
 
 		// put version 1 with content protection keys
-		Data data1 = new Data("data1").protectEntry();
+		Data data1 = new Data("data1").protectEntry(key);
 		Number160 vKey1 = Number160.createHash("version1");
 		FuturePut futurePut1 = p1.put(lKey).domainKey(dKey).data(cKey, data1).versionKey(vKey1).keyPair(key).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
 		// put version 2 basing on version 1 with content protection keys
-		Data data2 = new Data("data2").addBasedOn(vKey1).protectEntry();
+		Data data2 = new Data("data2").addBasedOn(vKey1).protectEntry(key);
 		Number160 vKey2 = Number160.createHash("version2");
 		FuturePut futurePut2 = p1.put(lKey).domainKey(dKey).data(cKey, data2).versionKey(vKey2).keyPair(key).start();
 		futurePut2.awaitUninterruptibly();
@@ -595,7 +595,7 @@ public class SecurityTest extends H2HJUnitTest {
 		Number160 cKey = Number160.createHash("content");
 
 		// initial put with protection keys 1
-		Data data1 = new Data("data1").protectEntry();
+		Data data1 = new Data("data1").protectEntry(keyPair1);
 		FuturePut futurePut1 = p1.put(lKey).data(cKey, data1).domainKey(dKey).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
@@ -614,7 +614,7 @@ public class SecurityTest extends H2HJUnitTest {
 		assertEquals(keyPair2.getPublic(), futureGet.data().publicKey());
 
 		// overwrite with protection keys 2
-		Data data4 = new Data("data4").protectEntry();
+		Data data4 = new Data("data4").protectEntry(keyPair2);
 		FuturePut futurePut4 = p1.put(lKey).data(cKey, data4).domainKey(dKey).keyPair(keyPair2).start();
 		futurePut4.awaitUninterruptibly();
 		assertTrue(futurePut4.isSuccess());
@@ -636,7 +636,7 @@ public class SecurityTest extends H2HJUnitTest {
 		assertEquals(keyPair2.getPublic(), futureGet.data().publicKey());
 
 		// try to overwrite with wrong protection keys 1 (expected to fail)
-		Data data5B = new Data("data5B").protectEntry();
+		Data data5B = new Data("data5B").protectEntry(keyPair1);
 		FuturePut futurePut5B = p1.put(lKey).data(cKey, data5B).domainKey(dKey).keyPair(keyPair1).start();
 		futurePut5B.awaitUninterruptibly();
 		assertFalse(futurePut5B.isSuccess());
@@ -675,13 +675,13 @@ public class SecurityTest extends H2HJUnitTest {
 		Number160 bKey = Number160.createHash("based on");
 
 		// initial put with protection keys 1
-		Data data1 = new Data("data1").addBasedOn(bKey).protectEntry();
+		Data data1 = new Data("data1").addBasedOn(bKey).protectEntry(keyPair1);
 		FuturePut futurePut1 = p1.put(lKey).data(cKey, data1).domainKey(dKey).versionKey(vKey).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
 		// overwrite with protection keys 1
-		Data data2 = new Data("data2").addBasedOn(bKey).protectEntry();
+		Data data2 = new Data("data2").addBasedOn(bKey).protectEntry(keyPair1);
 		FuturePut futurePut2 = p1.put(lKey).data(cKey, data2).domainKey(dKey).versionKey(vKey).keyPair(keyPair1).start();
 		futurePut2.awaitUninterruptibly();
 		assertTrue(futurePut2.isSuccess());
@@ -703,7 +703,7 @@ public class SecurityTest extends H2HJUnitTest {
 		assertEquals(keyPair1.getPublic(), futureGet.data().publicKey());
 
 		// try to overwrite with wrong protection keys 2 (expected to fail)
-		Data data2B = new Data("data2B").addBasedOn(bKey).protectEntry();
+		Data data2B = new Data("data2B").addBasedOn(bKey).protectEntry(keyPair2);
 		FuturePut futurePut2B = p1.put(lKey).data(cKey, data2B).domainKey(dKey).versionKey(vKey).keyPair(keyPair2).start();
 		futurePut2B.awaitUninterruptibly();
 		assertFalse(futurePut2B.isSuccess());
@@ -729,7 +729,7 @@ public class SecurityTest extends H2HJUnitTest {
 		assertEquals(keyPair2.getPublic(), futureGet.data().publicKey());
 
 		// overwrite with protection keys 2
-		Data data4 = new Data("data4").addBasedOn(bKey).protectEntry();
+		Data data4 = new Data("data4").addBasedOn(bKey).protectEntry(keyPair2);
 		FuturePut futurePut4 = p1.put(lKey).data(cKey, data4).domainKey(dKey).versionKey(vKey).keyPair(keyPair2).start();
 		futurePut4.awaitUninterruptibly();
 		assertTrue(futurePut4.isSuccess());
@@ -751,7 +751,7 @@ public class SecurityTest extends H2HJUnitTest {
 		assertEquals(keyPair2.getPublic(), futureGet.data().publicKey());
 
 		// try to overwrite with wrong protection keys 1 (expected to fail)
-		Data data5B = new Data("data5B").addBasedOn(bKey).protectEntry();
+		Data data5B = new Data("data5B").addBasedOn(bKey).protectEntry(keyPair1);
 		FuturePut futurePut5B = p1.put(lKey).data(cKey, data5B).domainKey(dKey).versionKey(vKey).keyPair(keyPair1).start();
 		futurePut5B.awaitUninterruptibly();
 		assertFalse(futurePut5B.isSuccess());
@@ -1256,7 +1256,7 @@ public class SecurityTest extends H2HJUnitTest {
 		Number160 cKey = Number160.createHash("content");
 
 		// put version 1 with protection keys 1
-		Data data1 = new Data("data1").protectEntry();
+		Data data1 = new Data("data1").protectEntry(keyPair1);
 		Number160 vKey1 = Number160.ZERO;
 		FuturePut futurePut1 = p1.put(lKey).data(cKey, data1).domainKey(dKey).versionKey(vKey1).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
@@ -1280,7 +1280,7 @@ public class SecurityTest extends H2HJUnitTest {
 		Assert.assertEquals(keyPair1.getPublic(), retData.publicKey());
 
 		// try to overwrite version 1 with wrong protection keys 2 (expected to fail)
-		Data data1B = new Data("data1B").protectEntry();
+		Data data1B = new Data("data1B").protectEntry(keyPair2);
 		FuturePut futurePut1B = p1.put(lKey).data(cKey, data1B).domainKey(dKey).versionKey(vKey1).keyPair(keyPair2).start();
 		futurePut1B.awaitUninterruptibly();
 		assertFalse(futurePut1B.isSuccess());
@@ -1291,7 +1291,7 @@ public class SecurityTest extends H2HJUnitTest {
 		Assert.assertEquals(keyPair1.getPublic(), retData.publicKey());
 
 		// overwrite version 1 with protection keys 1
-		Data data1Overwrite = new Data("data1Overwrite").protectEntry();
+		Data data1Overwrite = new Data("data1Overwrite").protectEntry(keyPair1);
 		FuturePut futurePutOverwrite = p1.put(lKey).data(cKey, data1Overwrite).domainKey(dKey).versionKey(vKey1)
 				.keyPair(keyPair1).start();
 		futurePutOverwrite.awaitUninterruptibly();
@@ -1303,7 +1303,7 @@ public class SecurityTest extends H2HJUnitTest {
 		Assert.assertEquals(keyPair1.getPublic(), retData.publicKey());
 
 		// try to put new version 2 (basing on version 1) with wrong protection keys 2 (expected to fail)
-		Data data2 = new Data("data2").addBasedOn(vKey1).protectEntry();
+		Data data2 = new Data("data2").addBasedOn(vKey1).protectEntry(keyPair2);
 		// version 2 takes new version key
 		Number160 vKey2 = Number160.createHash("version2");
 		FuturePut futurePut2 = p1.put(lKey).data(cKey, data2).domainKey(dKey).versionKey(vKey2).keyPair(keyPair2).start();
@@ -1314,7 +1314,7 @@ public class SecurityTest extends H2HJUnitTest {
 		assertNull(p2.get(lKey).contentKey(cKey).versionKey(vKey2).domainKey(dKey).start().awaitUninterruptibly().data());
 
 		// put new version 3 (basing on version 1) with correct protection keys 1
-		Data data3 = new Data("data3").addBasedOn(vKey1).protectEntry();
+		Data data3 = new Data("data3").addBasedOn(vKey1).protectEntry(keyPair1);
 		Number160 vKey3 = Number160.createHash("version3");
 		FuturePut futurePut3 = p1.put(lKey).data(cKey, data3).domainKey(dKey).versionKey(vKey3).keyPair(keyPair1).start();
 		futurePut3.awaitUninterruptibly();
@@ -1330,7 +1330,7 @@ public class SecurityTest extends H2HJUnitTest {
 
 		// try to put a version X in version key range of version 1 and 3 with wrong protection keys 2
 		// (expected to fail)
-		Data dataX = new Data("dataX").protectEntry();
+		Data dataX = new Data("dataX").protectEntry(keyPair2);
 		Number160 vKeyX = Number160.createHash("versionX");
 		FuturePut futurePut4 = p1.put(lKey).data(cKey, dataX).domainKey(dKey).versionKey(vKeyX).keyPair(keyPair2).start();
 		futurePut4.awaitUninterruptibly();
@@ -1379,14 +1379,14 @@ public class SecurityTest extends H2HJUnitTest {
 		Number160 cKey = Number160.createHash("content");
 
 		// put version 1 with protection keys 1
-		Data data1 = new Data("data1").protectEntry();
+		Data data1 = new Data("data1").protectEntry(keyPair1);
 		Number160 vKey1 = Number160.ZERO;
 		FuturePut futurePut1 = p1.put(lKey).data(cKey, data1).domainKey(dKey).versionKey(vKey1).keyPair(keyPair1).start();
 		futurePut1.awaitUninterruptibly();
 		assertTrue(futurePut1.isSuccess());
 
 		// put new version 2 (basing on version 1) with protection keys 1
-		Data data2 = new Data("data2").addBasedOn(vKey1).protectEntry();
+		Data data2 = new Data("data2").addBasedOn(vKey1).protectEntry(keyPair1);
 		// version 2 takes new version key
 		Number160 vKey2 = Number160.createHash("version2");
 		FuturePut futurePut2 = p1.put(lKey).data(cKey, data2).domainKey(dKey).versionKey(vKey2).keyPair(keyPair1).start();
@@ -1415,7 +1415,7 @@ public class SecurityTest extends H2HJUnitTest {
 																		// keypair2
 
 		// overwrite version 1 with protection keys 2
-		Data data1Overwrite = new Data("data1Overwrite").protectEntry();
+		Data data1Overwrite = new Data("data1Overwrite").protectEntry(keyPair2);
 		FuturePut futurePut1Overwrite = p1.put(lKey).data(cKey, data1Overwrite).domainKey(dKey).versionKey(vKey1)
 				.keyPair(keyPair2).start();
 		futurePut1Overwrite.awaitUninterruptibly();
@@ -1427,7 +1427,7 @@ public class SecurityTest extends H2HJUnitTest {
 		Assert.assertEquals(keyPair2.getPublic(), retData.publicKey());
 
 		// overwrite version 2 with protection keys 2
-		Data data2Overwrite = new Data("data2Overwrite").protectEntry();
+		Data data2Overwrite = new Data("data2Overwrite").protectEntry(keyPair2);
 		FuturePut futurePut2Overwrite = p1.put(lKey).data(cKey, data2Overwrite).domainKey(dKey).versionKey(vKey2)
 				.keyPair(keyPair2).start();
 		futurePut2Overwrite.awaitUninterruptibly();
@@ -1439,7 +1439,7 @@ public class SecurityTest extends H2HJUnitTest {
 		Assert.assertEquals(keyPair2.getPublic(), retData.publicKey());
 
 		// put new version 3 (basing on version 2) with protection keys 2
-		Data data3 = new Data("data3").addBasedOn(vKey2).protectEntry();
+		Data data3 = new Data("data3").addBasedOn(vKey2).protectEntry(keyPair2);
 		Number160 vKey3 = Number160.createHash("version3");
 		FuturePut futurePut3 = p1.put(lKey).data(cKey, data3).domainKey(dKey).versionKey(vKey3).keyPair(keyPair2).start();
 		futurePut3.awaitUninterruptibly();
@@ -1452,7 +1452,7 @@ public class SecurityTest extends H2HJUnitTest {
 
 		// try to put a version X in version key range of version 1, 2 and 3 with wrong protection keys 1
 		// (expected to fail)
-		Data dataX = new Data("dataX").protectEntry();
+		Data dataX = new Data("dataX").protectEntry(keyPair1);
 		Number160 vKeyX = Number160.createHash("versionX");
 		FuturePut futurePut4 = p1.put(lKey).data(cKey, dataX).domainKey(dKey).versionKey(vKeyX).keyPair(keyPair1).start();
 		futurePut4.awaitUninterruptibly();
