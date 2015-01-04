@@ -86,13 +86,9 @@ public class NetworkTestUtil {
 	public static void shutdownNetwork(ArrayList<NetworkManager> network) {
 		if (network != null) {
 			for (NetworkManager networkManager : network) {
-				networkManager.disconnect();
+				networkManager.disconnect(false);
 			}
 		}
-		// if (!network.isEmpty()) {
-		// // shutdown of master peer is enough
-		// network.get(0).disconnect();
-		// }
 	}
 
 	/**
