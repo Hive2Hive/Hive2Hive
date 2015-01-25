@@ -73,7 +73,12 @@ public class H2HNode implements IH2HNode {
 
 	@Override
 	public boolean disconnect() {
-		return networkManager.disconnect();
+		return networkManager.disconnect(false);
+	}
+
+	@Override
+	public boolean disconnectKeepSession() {
+		return networkManager.disconnect(true);
 	}
 
 	@Override

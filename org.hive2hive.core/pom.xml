@@ -26,13 +26,13 @@
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-dht</artifactId>
-			<version>5.0-Beta1</version>
+			<version>5.0-Beta3-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-replication</artifactId>
-			<version>5.0-Beta1</version>
+			<version>5.0-Beta3-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

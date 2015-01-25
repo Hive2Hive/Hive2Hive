@@ -71,10 +71,12 @@ public class NetworkManager {
 	/**
 	 * Disconnects from the network.
 	 * 
+	 * @param keepSession <code>false</code> if the session should also be wiped.
+	 * 
 	 * @return <code>true</code> if the disconnection was successful, <code>false</code> otherwise
 	 */
-	public boolean disconnect() {
-		if (session != null) {
+	public boolean disconnect(boolean keepSession) {
+		if (session != null && !keepSession) {
 			if (session.getProfileManager() != null) {
 				session.getProfileManager().stopQueueWorker();
 			}

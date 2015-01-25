@@ -18,7 +18,7 @@ import org.hive2hive.core.H2HConstants;
 public class H2HSignatureCodec extends RSASignatureCodec {
 
 	// get the default byte count
-	private static final int SIGNATURE_SIZE = H2HConstants.KEYLENGTH_PROTECTION.value() / 8;
+	public static final int SIGNATURE_SIZE = H2HConstants.KEYLENGTH_PROTECTION.value() / 8;
 
 	public H2HSignatureCodec(byte[] encodedData) throws IOException {
 		super(encodedData);

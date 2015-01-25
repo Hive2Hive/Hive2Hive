@@ -137,4 +137,9 @@ public class H2HSignatureFactory implements SignatureFactory {
 	public SignatureCodec signatureCodec(ByteBuf buf) {
 		return new H2HSignatureCodec(buf);
 	}
+
+	@Override
+	public int signatureSize() {
+		return H2HSignatureCodec.SIGNATURE_SIZE;
+	}
 }

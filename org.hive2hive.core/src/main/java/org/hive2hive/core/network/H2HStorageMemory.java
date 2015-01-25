@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Allows to deny data and/or return manipulated data. <b>Important:</b> This features are used only for
  * testing purposes.
- * 
+ *
  * @author Seppi, Nico
  */
 public class H2HStorageMemory extends StorageLayer {
