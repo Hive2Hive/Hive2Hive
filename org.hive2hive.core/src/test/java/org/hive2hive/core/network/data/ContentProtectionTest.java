@@ -195,7 +195,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 		// try to remove version without a protection key
 		Parameters parameters2a = new Parameters().setLocationKey(locationKey).setDomainKey(domainKey)
-				.setContentKey(contentKey).setVersionKey(data1.getVersionKey()).setNetworkContent(data1);
+				.setContentKey(contentKey).setVersionKey(data1.getVersionKey());
 		Assert.assertFalse(node.getDataManager().removeVersion(parameters2a));
 
 		// should have been not modified
@@ -203,7 +203,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 		// try to remove all versions without a protection key
 		Parameters parameters2b = new Parameters().setLocationKey(locationKey).setDomainKey(domainKey)
-				.setContentKey(contentKey).setVersionKey(data1.getVersionKey()).setNetworkContent(data1);
+				.setContentKey(contentKey).setVersionKey(data1.getVersionKey());
 		Assert.assertFalse(node.getDataManager().remove(parameters2b));
 
 		// should have been not modified
@@ -227,8 +227,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 
 		// remove version with correct content protection key
 		Parameters parameters4 = new Parameters().setLocationKey(locationKey).setDomainKey(domainKey)
-				.setContentKey(contentKey).setVersionKey(data1.getVersionKey()).setNetworkContent(data1)
-				.setProtectionKeys(protectionKey1);
+				.setContentKey(contentKey).setVersionKey(data1.getVersionKey()).setProtectionKeys(protectionKey1);
 		Assert.assertTrue(node.getDataManager().removeVersion(parameters4));
 
 		// should have been removed
