@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.Set;
 
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -19,6 +18,7 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.share.BaseShareReadWriteTest;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
+import org.hive2hive.core.utils.TestFileConfiguration;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.Assert;
 import org.junit.Before;
@@ -56,7 +56,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends BaseShareReadWrite
 		subFolderB = new File(sharedFolderB, subFolderA.getName());
 		waitTillSynchronized(subFolderB, true);
 
-		fileConfig = FileConfiguration.createDefault();
+		fileConfig = new TestFileConfiguration();
 	}
 
 	@Test

@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -46,7 +45,7 @@ public class FileAddEventsTest extends FileEventsTest {
 	@Test
 	public void testBigFileAddEvent() throws NoPeerConnectionException, IOException, NoSessionException {
 		// upload a big file from machine A
-		BigInteger maxFileSize = FileConfiguration.createDefault().getMaxFileSize();
+		BigInteger maxFileSize = new TestFileConfiguration().getMaxFileSize();
 		int minChunks = (int) maxFileSize.longValue() / TestFileConfiguration.CHUNK_SIZE;
 		String fileName = randomString();
 		File file = FileTestUtil.createFileRandomContent(fileName, minChunks + 1, rootA);

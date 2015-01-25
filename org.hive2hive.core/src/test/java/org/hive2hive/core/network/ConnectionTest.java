@@ -7,7 +7,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -16,6 +15,7 @@ import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.IH2HSerialize;
 import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.TestFileConfiguration;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -34,8 +34,7 @@ public class ConnectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testConnectAsInitial() {
-		NetworkManager initialNode = new NetworkManager(new H2HDummyEncryption(), serializer,
-				FileConfiguration.createDefault());
+		NetworkManager initialNode = new NetworkManager(new H2HDummyEncryption(), serializer, new TestFileConfiguration());
 
 		try {
 			INetworkConfiguration netConfig = NetworkConfiguration.createInitial("initial node");
@@ -47,8 +46,8 @@ public class ConnectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testConnectToOtherPeer() throws UnknownHostException {
-		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), serializer, FileConfiguration.createDefault());
-		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), serializer, FileConfiguration.createDefault());
+		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), serializer, new TestFileConfiguration());
+		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), serializer, new TestFileConfiguration());
 
 		INetworkConfiguration netConfigA = NetworkConfiguration.createInitial("nodeA");
 		INetworkConfiguration netConfigB = NetworkConfiguration.create("nodeB", InetAddress.getLocalHost());
@@ -63,8 +62,8 @@ public class ConnectionTest extends H2HJUnitTest {
 
 	@Test
 	public void testConnectDisconnect() throws UnknownHostException {
-		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), serializer, FileConfiguration.createDefault());
-		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), serializer, FileConfiguration.createDefault());
+		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), serializer, new TestFileConfiguration());
+		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), serializer, new TestFileConfiguration());
 
 		INetworkConfiguration netConfigA = NetworkConfiguration.createInitial("nodeA");
 		INetworkConfiguration netConfigB = NetworkConfiguration.create("nodeB", InetAddress.getLocalHost());
@@ -83,8 +82,8 @@ public class ConnectionTest extends H2HJUnitTest {
 	@Test
 	public void testConnectDisconnectKeepSession() throws UnknownHostException, NoPeerConnectionException,
 			NoSessionException {
-		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), serializer, FileConfiguration.createDefault());
-		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), serializer, FileConfiguration.createDefault());
+		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), serializer, new TestFileConfiguration());
+		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), serializer, new TestFileConfiguration());
 
 		INetworkConfiguration netConfigA = NetworkConfiguration.createInitial("nodeA");
 		INetworkConfiguration netConfigB = NetworkConfiguration.create("nodeB", InetAddress.getLocalHost());

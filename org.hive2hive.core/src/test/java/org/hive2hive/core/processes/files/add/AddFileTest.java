@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -20,6 +19,7 @@ import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileConfiguration;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -125,13 +125,13 @@ public class AddFileTest extends H2HJUnitTest {
 
 		File file = FileTestUtil.createFileRandomContent(1, uploaderRoot);
 		IProcessComponent<Void> process = ProcessFactory.instance().createAddFileProcess(file, client,
-				FileConfiguration.createDefault());
+				new TestFileConfiguration());
 		process.execute();
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testUploadNull() throws NoSessionException, NoPeerConnectionException {
-		ProcessFactory.instance().createAddFileProcess(null, network.get(0), FileConfiguration.createDefault());
+		ProcessFactory.instance().createAddFileProcess(null, network.get(0), new TestFileConfiguration());
 	}
 
 	private void verifyUpload(File originalFile, int expectedChunks) throws IOException, GetFailedException,

@@ -11,7 +11,6 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.H2HNode;
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
@@ -109,7 +108,7 @@ public class NetworkTestUtil {
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeyPair,
 					node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					FileConfiguration.createDefault());
+					new TestFileConfiguration());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 
@@ -139,7 +138,7 @@ public class NetworkTestUtil {
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeys,
 					node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					FileConfiguration.createDefault());
+					new TestFileConfiguration());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 

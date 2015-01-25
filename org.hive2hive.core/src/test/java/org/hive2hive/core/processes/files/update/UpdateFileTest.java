@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -109,7 +108,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 			NoSessionException, InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
 		// upload the same content again
 		IProcessComponent<Void> process = ProcessFactory.instance().createUpdateFileProcess(file, uploader,
-				FileConfiguration.createDefault());
+				new TestFileConfiguration());
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 

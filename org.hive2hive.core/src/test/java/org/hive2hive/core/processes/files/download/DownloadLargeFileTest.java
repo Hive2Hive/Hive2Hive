@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -68,7 +67,7 @@ public class DownloadLargeFileTest extends H2HJUnitTest {
 	public static void uploadLargeFile() throws IOException, NoSessionException, NoPeerConnectionException,
 			GetFailedException {
 		// upload a large file
-		BigInteger maxFileSize = FileConfiguration.createDefault().getMaxFileSize();
+		BigInteger maxFileSize = new TestFileConfiguration().getMaxFileSize();
 		int minChunks = (int) maxFileSize.longValue() / TestFileConfiguration.CHUNK_SIZE;
 		String fileName = randomString();
 		uploadedFile = FileTestUtil.createFileRandomContent(fileName, minChunks + 1, uploaderRoot);
