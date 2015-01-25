@@ -2,7 +2,7 @@ package org.hive2hive.core.processes.share;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
@@ -33,7 +33,7 @@ import org.junit.Test;
 public class ShareFolderTest extends H2HJUnitTest {
 
 	private static final int networkSize = 6;
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 
 	private static File rootA;
 	private static File rootB;

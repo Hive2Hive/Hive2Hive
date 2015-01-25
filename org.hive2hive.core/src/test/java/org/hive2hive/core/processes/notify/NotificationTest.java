@@ -1,8 +1,8 @@
 package org.hive2hive.core.processes.notify;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.H2HJUnitTest;
@@ -39,7 +39,7 @@ import org.junit.Test;
 public class NotificationTest extends H2HJUnitTest {
 
 	private static final int NETWORK_SIZE = 6;
-	private ArrayList<NetworkManager> network;
+	private List<NetworkManager> network;
 
 	private UserCredentials userACredentials;
 	private UserCredentials userBCredentials;

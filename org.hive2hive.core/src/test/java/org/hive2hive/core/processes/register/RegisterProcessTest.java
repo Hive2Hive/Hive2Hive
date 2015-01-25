@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.H2HConstants;
@@ -31,7 +31,7 @@ import org.junit.Test;
 
 public class RegisterProcessTest extends H2HJUnitTest {
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
 	private static final Random random = new Random();
 
@@ -83,9 +83,11 @@ public class RegisterProcessTest extends H2HJUnitTest {
 		UserCredentials credentials = generateRandomCredentials();
 
 		// already put a locations map
-		assertEquals(H2HPutStatus.OK, client.getDataManager().put(
-				new Parameters().setLocationKey(credentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS)
-				.setNetworkContent(new Locations(credentials.getUserId()))));
+		assertEquals(
+				H2HPutStatus.OK,
+				client.getDataManager().put(
+						new Parameters().setLocationKey(credentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS)
+								.setNetworkContent(new Locations(credentials.getUserId()))));
 
 		IProcessComponent<Void> registerProcess = ProcessFactory.instance().createRegisterProcess(credentials, client);
 		TestExecutionUtil.executeProcessTillFailed(registerProcess);

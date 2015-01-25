@@ -4,7 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.security.PublicKey;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.hive2hive.core.H2HConstants;
@@ -29,7 +29,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 
 	private static final int networkSize = 10;
 	private static Random random = new Random();
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 
 	@BeforeClass
 	public static void initTest() throws Exception {

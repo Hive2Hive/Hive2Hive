@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.files.add;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
@@ -38,7 +38,7 @@ public class AddFileTest extends H2HJUnitTest {
 
 	private final static int NETWORK_SIZE = 6;
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static UserCredentials userCredentials;
 	private static File uploaderRoot;
 	private static File downloaderRoot;

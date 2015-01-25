@@ -45,7 +45,7 @@ import org.junit.Test;
 public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
 	private static final int networkSize = 6;
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static H2HDummyEncryption dummyEncryption;
 
 	@BeforeClass

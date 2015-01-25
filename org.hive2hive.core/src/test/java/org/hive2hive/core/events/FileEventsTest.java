@@ -37,7 +37,7 @@ import org.junit.Test;
 public class FileEventsTest extends H2HJUnitTest {
 
 	protected static final int networkSize = 6;
-	protected static ArrayList<NetworkManager> network;
+	protected static List<NetworkManager> network;
 	protected static UserCredentials userCredentials;
 	protected static File rootA;
 	protected static File rootB;

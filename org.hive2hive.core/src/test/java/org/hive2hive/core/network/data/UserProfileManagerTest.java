@@ -52,7 +52,7 @@ import org.junit.Test;
  */
 public class UserProfileManagerTest extends H2HJUnitTest {
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
 
 	private UserCredentials userCredentials;

@@ -2,7 +2,7 @@ package org.hive2hive.core.processes.share;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
@@ -23,7 +23,7 @@ public abstract class BaseShareReadWriteTest extends H2HJUnitTest {
 	protected static final int NETWORK_SIZE = 6;
 	protected static final int MAX_NUM_CHUNKS = 2;
 
-	protected ArrayList<NetworkManager> network;
+	protected List<NetworkManager> network;
 	protected NetworkManager nodeA;
 	protected NetworkManager nodeB;
 

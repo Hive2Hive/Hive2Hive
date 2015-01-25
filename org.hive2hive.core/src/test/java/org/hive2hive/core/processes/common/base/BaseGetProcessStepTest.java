@@ -1,6 +1,6 @@
 package org.hive2hive.core.processes.common.base;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -26,7 +26,7 @@ import org.junit.Test;
 public class BaseGetProcessStepTest extends H2HJUnitTest {
 
 	private final static int networkSize = 10;
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 
 	@BeforeClass
 	public static void initTest() throws Exception {

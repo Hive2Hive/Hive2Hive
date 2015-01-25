@@ -48,14 +48,14 @@ public class NetworkTestUtil {
 	 *            size of the network (has to be larger than one)
 	 * @return list containing all nodes where the first one is the bootstrapping node (initial)
 	 */
-	public static ArrayList<NetworkManager> createNetwork(int numberOfNodes) {
+	public static List<NetworkManager> createNetwork(int numberOfNodes) {
 		if (numberOfNodes < H2HConstants.REPLICATION_FACTOR) {
 			throw new IllegalArgumentException(String.format("Network size must be at least %s (replication factor).",
 					H2HConstants.REPLICATION_FACTOR));
 		}
 
 		IFileConfiguration fileConfig = new TestFileConfiguration();
-		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
+		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (initial)
 		FSTSerializer serializer = new FSTSerializer();
@@ -84,7 +84,7 @@ public class NetworkTestUtil {
 	 * @param network
 	 *            list containing all nodes which has to be disconnected.
 	 */
-	public static void shutdownNetwork(ArrayList<NetworkManager> network) {
+	public static void shutdownNetwork(List<NetworkManager> network) {
 		if (network != null) {
 			for (NetworkManager networkManager : network) {
 				networkManager.disconnect(false);

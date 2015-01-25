@@ -1,7 +1,7 @@
 package org.hive2hive.core.processes.logout;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import net.tomp2p.dht.FutureGet;
 
@@ -32,7 +32,7 @@ import org.junit.Test;
 public class LogoutTest extends H2HJUnitTest {
 
 	private static final int networkSize = 10;
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static UserCredentials userCredentials;
 
 	@BeforeClass
