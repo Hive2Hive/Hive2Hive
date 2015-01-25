@@ -1,11 +1,32 @@
-# ![Hive2Hive logo](http://hive2hive.com/wp-content/uploads/2014/04/Hive2Hive_Icon-e1398611873118.png) Hive2Hive
+# ![Hive2Hive logo](http://hive2hive.com/wp-content/uploads/2014/04/Hive2Hive_Icon-e1398611873118.png) Hive2Hive 
 master: [![Build Status](https://travis-ci.org/Hive2Hive/Hive2Hive.svg?branch=master)](https://travis-ci.org/Hive2Hive/Hive2Hive) dev: [![Build Status](https://travis-ci.org/Hive2Hive/Hive2Hive.svg?branch=dev)](https://travis-ci.org/Hive2Hive/Hive2Hive)
 
-[Hive2Hive](http://www.hive2hive.org) is an open-source library, written in Java, for secure, distributed, P2P-based file synchronization and sharing. It is built on top of [TomP2P](https://github.com/tomp2p/TomP2P), which is an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
+[Hive2Hive](https://github.com/Hive2Hive/Hive2Hive/wiki) is an open-source library, written in Java, for secure, distributed, P2P-based file synchronization and sharing. It is built on top of [TomP2P](https://github.com/tomp2p/TomP2P), an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
 
-Although many well-known synchronization and sharing services exist, most of them base on centralized client-server approaches and thus store all user data in large external data centers. Regrettably, such private data is often not encrypted and just stored as clear text. This revokes the user’s control over their data as they cannot check who else might have access to it. In addition, such centralized systems suffer from the single-point-of-failure property and hence are vulnerable to targeted attacks. Furthermore, users are bound to these services’ respective pricing and terms of service.
+**Problems of common sync and sharing services**
 
-**The Hive2Hive library addresses these issues by providing a free, distributed solution that focuses on maximum security and privacy of both users and data. It supports the whole feature set known from similar centralized approaches, such as Dropbox or Google Drive, all packed in a clean API.**
+Although many well-known synchronization and sharing services exist, most of them exhibit the following drawbacks:
+* centralized client-server approaches, data resides in large, external data centers
+  * single-point-of-failure, vulnerable to targeted attacks
+  * often not scalable
+* private data is not encrypted
+* user control is revoked, no control over who has access to the private data
+* user is bound to the respective pricing and terms of service
+* no version control, no conflict management
+
+**Hive2Hive is the solution!**
+
+The Hive2Hive library addresses these issues by providing a **free** and **open-sourced**, **distributed** and **scalable** solution that focuses on maximum **security** and **privacy** of both users and data. Aside of this, it supports the whole feature set known from similar centralized approaches, such as *Dropbox*, *OneDrive* or *Google Drive*, and adds functionality for file **versioning** and **conflict management**. All packed in a **clean, simple API**.
+
+There are many simple ways to improve this experience even more. [Start to contribute now!](https://github.com/Hive2Hive/Hive2Hive/wiki/Contribution)
+
+Check our [GitHub Wiki](https://github.com/Hive2Hive/Hive2Hive/wiki) to learn more about [How To Use](https://github.com/Hive2Hive/Hive2Hive/wiki/How-To-Use) and [How It Works](https://github.com/Hive2Hive/Hive2Hive/wiki/How-It-Works).
+
+**Are you looking for a demo application?**
+
+* [PeerBox](https://github.com/Hive2Hive/PeerBox), a Windows-based shell extension à la Dropbox.
+* [H2H Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client), an executable `.jar` console application.
+* [Eclipse RCP Client](https://github.com/Hive2Hive/RCP_Client), an RCP-based client.
 
 ### Table of Contents
 
@@ -18,48 +39,52 @@ Although many well-known synchronization and sharing services exist, most of the
 
 ## API Demonstration
 
-A short demonstration of the API and its basic usage are given here. ([see more](http://hive2hive.com/?page_id=429))
+The Hive2Hive library provides a simple API that is straightforward to use. ([View Source](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.core/src/main/java/org/hive2hive/core/api))
+A short demonstration of the API and its basic usage are given here.
+
 ### Network Management
 
-**Create P2P Network**  
+#### Creating a P2P Network
+
 Configuring and setting up a new P2P network is very easy. Just specify the configurations and setup an initial node.
 
-1. `NetworkConfiguration` and `FileConfiguration` factory classes may help to specify your configurations
-2. create the initial node and connect it
+1. The `NetworkConfiguration` and `FileConfiguration` factory classes may help to specify your configurations.
+2. Create an initial peer node and connect it.
 
 ```java
 INetworkConfiguration netConfig = NetworkConfiguration.create("first");
 IFileConfiguration fileConfig = FileConfiguration.createDefault();
 
-IH2HNode node = H2HNode.createNode(netConfig, fileConfig);
-node.connect();
+IH2HNode peerNode = H2HNode.createNode(netConfig, fileConfig);
+peerNode.connect();
 ```
 
-**Join Existing P2P Network**  
-You may want to add other nodes to your created network. Any node can join by bootstrapping to another node that is already part of the network.
+#### Joining an Existing P2P Network
 
-1. specify the network configuration for the joining node (i.e., provide bootstrap address of another node)
-2. create the new node and connect it (it will bootstrap according to its network configuration)
+You may want to add other peer nodes to the created network. Any node can join by bootstrapping to another node that is already part of the network.
+
+1. Specify the network configuration for the joining node (i.e., provide the bootstrap address of another node).
+2. Create the new node and connect it. It will bootstrap according to its network configuration.
 
 ```java
 INetworkConfiguration netConfig2 = NetworkConfiguration.create("second", InetAddress.getByName("192.168.1.100"));
-IH2HNode node2 = H2HNode.createNode(netConfig2, fileConfig);
-node2.connect();
+IH2HNode peerNode2 = H2HNode.createNode(netConfig2, fileConfig);
+peerNode2.connect();
 ```
 
 ### User Management
 
-Once a node is connected to a network, users can interact with it. For this, each node provides a user management interface.
+Once a peer node is connected to a network, users can interact with it. For this, each node provides a user management interface.
 
-1. user has to provide its credentials
-2. login user (if a user is new to the network, she has to register on her first visit)
-3. user can interact with the network (i.e., file management is enabled)
+1. The user has to provide her credentials.
+2. Login the user to the network. If it's the *first* login, she has to register herself, one-time.
+3. Then, the user can interact with the network (i.e., file management is enabled).
 
 ```java
-IUserManager userManager = node.getUserManager();
+IUserManager userManager = peerNode.getUserManager();
 
 UserCredentials credentials = new UserCredentials("userId", "password", "pin");
-Path rootDirectory = Paths.get("C:/User/XYZ/...");
+Path rootDirectory = Paths.get("sample/path/to/rootDirectory");
 
 if (!userManager.isRegistered(credentials.getUserId())) {
 	userManager.register(credentials).await();
@@ -76,7 +101,7 @@ As soon as a user is logged in to the network, her files are automatically synch
 - **move** file
 
 ```java
-IFileManager fileManager = node.getFileManager();
+IFileManager fileManager = peerNode.getFileManager();
 
 File folder = new File("folderpath");
 File file = new File(folder, "filepath");
@@ -100,9 +125,9 @@ fileManager.move(folder, new File("other-folder"));
 fileManager.delete(file);
 ```
 
-### File Watchdog
+#### File Watchdog
 
-In order to keep track of changes in the local file system, a file observer is needed. This observer then notifies its attached listeners on all file system events. You can either use the provided `H2HFileObserver` and `H2HFileObserverListener` or implement your own adhering to the `IFileObserver` and `IFileObserverListener` interfaces.  
+In order to keep track of changes in the local file system, a file observer is needed. This observer notifies its attached listeners about all file system events. Either use the provided `H2HFileObserver` and `H2HFileObserverListener` or implement your own observer adhering to the `IFileObserver` and `IFileObserverListener` interfaces.  
 The `H2HFileObserverListener` automatically synchronizes the Hive2Hive root folder with the network.
 
 ```java
@@ -115,19 +140,18 @@ observer.start();
 
 ## Features & Advantages
 
-Hive2Hive offers the same basic functionality known from popular synchronization services. (e.g., [Dropbox](http://www.dropbox.com))  
+Hive2Hive offers the same basic functionality known from popular synchronization services (e.g., [Dropbox](http://www.dropbox.com)).  
 On top of that, Hive2Hive provides additional features such as security and versioning.
 
-- File Synchronization
-- File Sharing (including user permissions (*write*, *read-only*))
-- File Versioning (including conflict detection)
-- File Watchdog / Change Detection (automated, configurable)
-- Security (configurable, [see more](http://hive2hive.com/security-aspects/))
-  - Encryption of files
-  - Encryption of messages
-  - Authenticity of data and messages
-- Users can use multiple clients (simulatenously)
-- Multiple users can use the same machine (simultaneously)
+* File Synchronization
+* File Sharing and Access Permissions *(read/write and read-only)*
+* File Versioning and Conflict Management
+* File Watchdog / Change Detection *(automated, configurable)*
+* [Security](https://github.com/Hive2Hive/Hive2Hive/wiki/Security-Concepts) *(configurable)*
+  * [Encryption](https://github.com/Hive2Hive/Hive2Hive/wiki/Security-Concepts#encryption) of files and messages
+  * [Authentication](https://github.com/Hive2Hive/Hive2Hive/wiki/Security-Concepts#authentication) of data and messages
+* Users can use multiple clients *(simulatenously)*
+* Multiple users can use the same machine *(simultaneously)*
 
 **Using the Hive2Hive library is very simple and has several advantages:**
 - P2P Decentralization
@@ -162,16 +186,16 @@ If you want to [contribute to the project](#contribution), please refer to optio
 - **Option 1: Add Maven dependency** *(recommended)*  
   You can add the latest stable release as an [Apache Maven](http://maven.apache.org/) dependency and fetch it from our repository. Add the following to your `pom.xml` and make sure to select the most recent version.  
 ```xml
-  <repository>
-    <id>hive2hive.org</id>
-    <url>http://repo.hive2hive.org</url>
-  </repository>
-  ...
-  <dependency>
-    <groupId>org.hive2hive</groupId>
-    <artifactId>org.hive2hive.core</artifactId>
-    <version>1.X.X</version>
-  </dependency>
+<repository>
+  <id>hive2hive.org</id>
+  <url>http://repo.hive2hive.org</url>
+</repository>
+...
+<dependency>
+  <groupId>org.hive2hive</groupId>
+  <artifactId>org.hive2hive.core</artifactId>
+  <version>1.X.X</version>
+</dependency>
 ```
 - **Option 2: Add JAR-file directly**  
   In case you don't want to use Maven, you can just download the [latest stable release](https://github.com/Hive2Hive/Hive2Hive/releases) that comes directly with all necessary sources. All required `.jar`-files are packed and delivered to you as a `.zip`.
@@ -180,9 +204,9 @@ If you want to [contribute to the project](#contribution), please refer to optio
 
 ## Documentation
 
-For more details and documentation about the project, please visit http://www.hive2hive.com/.
-
-The source code itself is thoroughly documented using JavaDoc.
+- For more details and documentation of the Hive2Hive project, please visit the [GitHub Wiki](https://github.com/Hive2Hive/Hive2Hive/wiki).
+- You can also take a look at our project website at [www.hive2hive.com](http://www.hive2hive.com).
+- The source code itself is thoroughly documented using JavaDoc.
 
 ## Contribution
 
@@ -191,15 +215,16 @@ The library is intended to be improved and extended so that we all profit from i
 **We believe that everyone can contribute to make Hive2Hive even better!** 
 
 There are several things - from simple to complex - you can do to help:
-- [watch](https://github.com/Hive2Hive/Hive2Hive/watchers) and/or [star](https://github.com/Hive2Hive/Hive2Hive/stargazers) the project here on GitHub
-- help us getting attention (e.g., follow/tweet about [@Hive2Hive](https://twitter.com/Hive2Hive))
-- suggest and post your ideas about improvements or extensions on the [issues](https://github.com/Hive2Hive/Hive2Hive/issues?state=open) page
-- participate in the [discussions](https://github.com/Hive2Hive/Hive2Hive/issues?labels=&page=1&state=open), share your expertise
-- help us with the implementation of (your) features
-- fork the project and send your pull requests
-- help the community by answering questions on StackOverflow (tagged with [`hive2hive`](http://stackoverflow.com/questions/tagged/hive2hive))
+- [Star](https://github.com/Hive2Hive/Hive2Hive/stargazers) and [watch](https://github.com/Hive2Hive/Hive2Hive/watchers) the project here on GitHub
+- Spread the word and help us getting attention (e.g., follow/tweet about [@Hive2Hive](https://twitter.com/Hive2Hive))
+- Suggest and post **your ideas** about improvements or extensions on the [issues](https://github.com/Hive2Hive/Hive2Hive/issues?state=open) page
+- Participate in [discussions](https://github.com/Hive2Hive/Hive2Hive/issues?labels=&page=1&state=open), share your expertise
+- Help us with the documentation: JavaDoc, [GitHub Wiki](https://github.com/Hive2Hive/Hive2Hive/wiki), etc.
+- Help us with the implementation of (your) features
+- **Fork the project** and send your pull requests
+- Help the community by answering questions on StackOverflow (tagged with [`hive2hive`](http://stackoverflow.com/questions/tagged/hive2hive))
 
-Also, if you are a professional cryptographer with interest in this project, any feedback on the project is very welcome.
+**Also, if you are a professional cryptographer with interest in this project, any feedback on the project is very welcome!**
 
 ## Contact
 

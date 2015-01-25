@@ -59,7 +59,8 @@ public class NetworkTestUtil {
 
 		// create the first node (initial)
 		FSTSerializer serializer = new FSTSerializer();
-		NetworkManager initial = new NetworkManager(new H2HDummyEncryption(), serializer, fileConfig);
+		H2HDummyEncryption encryption = new H2HDummyEncryption();
+		NetworkManager initial = new NetworkManager(encryption, serializer, fileConfig);
 		INetworkConfiguration netConfig = NetworkConfiguration.createInitialLocalPeer("Node A");
 		initial.connect(netConfig);
 		nodes.add(initial);
@@ -67,7 +68,7 @@ public class NetworkTestUtil {
 		// create the other nodes and bootstrap them to the initial peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
-			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), serializer, fileConfig);
+			NetworkManager node = new NetworkManager(encryption, serializer, fileConfig);
 			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
 					initial.getConnection().getPeer().peer());
 			node.connect(otherNetConfig);
@@ -168,8 +169,9 @@ public class NetworkTestUtil {
 
 		// create initial peer
 		FSTSerializer serializer = new FSTSerializer();
+		H2HDummyEncryption encryption = new H2HDummyEncryption();
 		IFileConfiguration fileConfig = new TestFileConfiguration();
-		IH2HNode initial = H2HNode.createNode(fileConfig, new H2HDummyEncryption(), serializer);
+		IH2HNode initial = H2HNode.createNode(fileConfig, encryption, serializer);
 		initial.connect(NetworkConfiguration.createInitial("initial"));
 
 		nodes.add(initial);
@@ -177,7 +179,7 @@ public class NetworkTestUtil {
 		try {
 			InetAddress bootstrapAddress = InetAddress.getLocalHost();
 			for (int i = 1; i < numberOfNodes; i++) {
-				IH2HNode node = H2HNode.createNode(fileConfig, new H2HDummyEncryption(), serializer);
+				IH2HNode node = H2HNode.createNode(fileConfig, encryption, serializer);
 				node.connect(NetworkConfiguration.create("node " + i, bootstrapAddress));
 				nodes.add(node);
 			}

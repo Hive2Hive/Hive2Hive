@@ -13,7 +13,7 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 public class TestFileConfiguration implements IFileConfiguration {
 
 	// for fast access
-	public static final int CHUNK_SIZE = 128;
+	public static final int CHUNK_SIZE = 64;
 
 	@Override
 	public BigInteger getMaxFileSize() {
@@ -22,7 +22,7 @@ public class TestFileConfiguration implements IFileConfiguration {
 
 	@Override
 	public int getMaxNumOfVersions() {
-		return 10;
+		return 5;
 	}
 
 	@Override
