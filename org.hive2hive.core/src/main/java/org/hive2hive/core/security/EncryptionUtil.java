@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -32,7 +33,6 @@ import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,11 +138,11 @@ public final class EncryptionUtil {
 		BigInteger publicExp = new BigInteger("10001", 16);
 
 		try {
-			JDKKeyPairGenerator gen = new JDKKeyPairGenerator.RSA();
+			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", SECURITY_PROVIDER);
 			RSAKeyGenParameterSpec params = new RSAKeyGenParameterSpec(strength, publicExp);
 			gen.initialize(params, new SecureRandom());
 			return gen.generateKeyPair();
-		} catch (InvalidAlgorithmParameterException e) {
+		} catch (InvalidAlgorithmParameterException | NoSuchProviderException | NoSuchAlgorithmException e) {
 			logger.error("Exception while generation of RSA key pair of length {}:", keyLength, e);
 		}
 		return null;
