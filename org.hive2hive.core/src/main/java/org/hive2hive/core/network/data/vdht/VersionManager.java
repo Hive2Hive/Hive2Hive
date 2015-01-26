@@ -40,9 +40,9 @@ public class VersionManager<T extends BaseVersionedNetworkContent> {
 	private final Random random = new Random();
 
 	// limit constants
-	private final static int getFailedLimit = 2;
-	private final static int forkAfterGetLimit = 2;
-	private final static int delayLimit = 2;
+	private static final int getFailedLimit = 2;
+	private static final int forkAfterGetLimit = 2;
+	private static final int delayLimit = 2;
 
 	// caches
 	private Cache<Set<Number160>> digestCache = new Cache<Set<Number160>>();
