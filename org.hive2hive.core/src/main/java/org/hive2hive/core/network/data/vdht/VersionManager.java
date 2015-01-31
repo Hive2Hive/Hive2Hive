@@ -37,12 +37,12 @@ public class VersionManager<T extends BaseVersionedNetworkContent> {
 	private final DataManager dataManager;
 	private final Parameters parameters;
 
-	private Random random = new Random();
+	private final Random random = new Random();
 
 	// limit constants
-	private final int getFailedLimit = 2;
-	private final int forkAfterGetLimit = 2;
-	private final int delayLimit = 2;
+	private static final int getFailedLimit = 2;
+	private static final int forkAfterGetLimit = 2;
+	private static final int delayLimit = 2;
 
 	// caches
 	private Cache<Set<Number160>> digestCache = new Cache<Set<Number160>>();
