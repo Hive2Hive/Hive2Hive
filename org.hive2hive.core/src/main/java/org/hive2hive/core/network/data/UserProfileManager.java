@@ -99,13 +99,6 @@ public class UserProfileManager {
 			queueWaiter.notify();
 		}
 
-		try {
-			entry.waitForGet();
-		} catch (GetFailedException e) {
-			// just stop the modification if an error occurs.
-			throw e;
-		}
-
 		UserProfile profile = entry.getUserProfile();
 		if (profile == null) {
 			throw new GetFailedException("User Profile not found");
@@ -133,7 +126,6 @@ public class UserProfileManager {
 
 		UserProfile profile;
 		try {
-			entry.waitForGet();
 			profile = entry.getUserProfile();
 			if (profile == null) {
 				throw new GetFailedException("User Profile not found");
@@ -214,7 +206,6 @@ public class UserProfileManager {
 						while (!readOnlyQueue.isEmpty()) {
 							QueueEntry readOnly = readOnlyQueue.poll();
 							readOnly.setUserProfile(userProfile);
-							readOnly.notifyGet();
 						}
 					} catch (GetFailedException e) {
 						logger.warn("Notifying {} processes that getting latest user profile version failed. reason = '{}'",
@@ -222,7 +213,6 @@ public class UserProfileManager {
 						while (!readOnlyQueue.isEmpty()) {
 							QueueEntry readOnly = readOnlyQueue.poll();
 							readOnly.setGetError(e);
-							readOnly.notifyGet();
 						}
 					}
 				} else {
@@ -231,13 +221,15 @@ public class UserProfileManager {
 
 					logger.trace("Process {} is waiting to make profile modifications.", modifying.getPid());
 
+					UserProfile userProfile;
 					try {
 						logger.trace("Loading latest version of user profile for process {} to modify.", modifying.getPid());
-						modifying.setUserProfile(versionManager.get());
+						userProfile = versionManager.get();
+						modifying.setUserProfile(userProfile);
 					} catch (GetFailedException e) {
 						modifying.setGetError(e);
+						continue;
 					}
-					modifying.notifyGet();
 
 					int counter = 0;
 					long sleepTime = MAX_MODIFICATION_TIME / 10;
@@ -255,14 +247,13 @@ public class UserProfileManager {
 						logger.trace("Process {} made modifcations and uploads them now.", modifying.getPid());
 						try {
 							// put updated user profile version into network
-							versionManager.put(modifying.getUserProfile(), protectionKeys);
+							versionManager.put(userProfile, protectionKeys);
 							modifying.notifyPut();
 
 							// notify all read only processes with newest version
 							while (!readOnlyQueue.isEmpty()) {
 								QueueEntry readOnly = readOnlyQueue.poll();
-								readOnly.setUserProfile(modifying.getUserProfile());
-								readOnly.notifyGet();
+								readOnly.setUserProfile(userProfile);
 							}
 						} catch (PutFailedException e) {
 							modifying.setPutError(e);

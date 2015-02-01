@@ -38,7 +38,7 @@ public class CheckWriteAccessStep extends ProcessStep<Void> {
 		File file = context.consumeFile();
 		File root = context.consumeRoot();
 
-		logger.trace("Check write access in folder '{}' to add file '{}'.", file.getParentFile().getName(), file.getName());
+		logger.debug("Check write access in folder '{}' for file '{}'.", file.getParentFile().getName(), file.getName());
 
 		UserProfile userProfile = null;
 		try {
@@ -60,6 +60,7 @@ public class CheckWriteAccessStep extends ProcessStep<Void> {
 					"The directory '%s' is write protected (and we don't have the keys).", file.getParentFile().getName()));
 		}
 
+		logger.debug("Write access check for file {}{} has been passed.", parentNode.getFullPath(), file.getName());
 		// provide the content protection keys, use same for chunks and meta file
 		context.provideChunkProtectionKeys(parentNode.getProtectionKeys());
 		context.provideMetaFileProtectionKeys(parentNode.getProtectionKeys());
