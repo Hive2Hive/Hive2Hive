@@ -3,6 +3,14 @@ package org.hive2hive.core.security;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.hive2hive.core.model.Chunk;
+import org.hive2hive.core.model.UserPublicKey;
+import org.hive2hive.core.model.versioned.Locations;
+import org.hive2hive.core.model.versioned.MetaFileLarge;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
+import org.hive2hive.core.model.versioned.UserProfile;
+import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
+import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.nustaq.serialization.FSTConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +31,11 @@ public final class FSTSerializer implements IH2HSerialize {
 
 	public FSTSerializer() {
 		fst = FSTConfiguration.createDefaultConfiguration();
+
+		// register all often serialized classes for speedup. Note that every peer should have the same
+		// configuration, which also depends on the order!
+		fst.registerClass(UserProfile.class, Locations.class, UserPublicKey.class, MetaFileSmall.class, MetaFileLarge.class,
+				Chunk.class, ContactPeerMessage.class, ResponseMessage.class);
 	}
 
 	@Override

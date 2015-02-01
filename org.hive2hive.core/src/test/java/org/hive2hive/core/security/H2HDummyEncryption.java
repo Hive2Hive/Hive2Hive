@@ -23,7 +23,7 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
  */
 public class H2HDummyEncryption implements IH2HEncryption {
 
-	private final FSTSerializer serializer;
+	private final IH2HSerialize serializer;
 
 	public H2HDummyEncryption() {
 		serializer = new FSTSerializer();
