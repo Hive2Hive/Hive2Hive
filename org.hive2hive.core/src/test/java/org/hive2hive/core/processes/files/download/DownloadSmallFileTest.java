@@ -77,12 +77,11 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 	@Before
 	public void uploadFile() throws IOException, NoSessionException, NoPeerConnectionException, GetFailedException {
 		// upload a small file
-		String fileName = randomString();
-		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot);
+		uploadedFile = FileTestUtil.createFileRandomContent(3, uploaderRoot);
 		testContent = FileUtils.readFileToString(uploadedFile);
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);
-		fileNode = up.getRoot().getChildByName(fileName);
+		fileNode = up.getRoot().getChildByName(uploadedFile.getName());
 	}
 
 	@Test
