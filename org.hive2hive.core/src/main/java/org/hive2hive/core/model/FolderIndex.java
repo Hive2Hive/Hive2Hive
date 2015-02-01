@@ -40,7 +40,6 @@ public class FolderIndex extends Index {
 	 * @param keyPair
 	 * @param name
 	 */
-	// TODO keypair can be generated here, no need to hand over as parameter
 	public FolderIndex(FolderIndex parent, KeyPair keyPair, String name) {
 		super(keyPair, name, parent);
 	}
@@ -114,7 +113,6 @@ public class FolderIndex extends Index {
 	 * @param name
 	 * @return the child with the given name or <code>null</code> if none was found with that name
 	 */
-	// TODO get child by full path??
 	public Index getChildByName(String name) {
 		if (name != null) {
 			String withoutSeparator = name.replace(FileUtil.getFileSep(), "");

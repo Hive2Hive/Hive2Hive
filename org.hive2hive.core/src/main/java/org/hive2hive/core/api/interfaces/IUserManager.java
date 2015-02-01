@@ -35,7 +35,6 @@ public interface IUserManager {
 	 * @return A login process.
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
-	// TODO the file root path should not be part of this interface, but have a place in IFileManagement
 	IProcessComponent<Void> createLoginProcess(UserCredentials credentials, IFileAgent fileAgent)
 			throws NoPeerConnectionException;
 

@@ -9,6 +9,7 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.exceptions.ProcessRollbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,14 +43,13 @@ public abstract class BaseModifyUserProfileStep extends ProcessStep<Void> implem
 	}
 
 	@Override
-	protected final Void doRollback() throws InvalidProcessStateException {
+	protected final Void doRollback() throws InvalidProcessStateException, ProcessRollbackException {
 		// only do this if the modification of the UP was successful
 		try {
 			profileManager.modifyUserProfile(getID(), new RollbackUPModification());
 		} catch (GetFailedException | PutFailedException | AbortModifyException e) {
 			logger.error("Cannot modify the user profile", e);
-			// TODO replace exception by RollbackException
-			throw new InvalidProcessStateException(this, getState());
+			throw new ProcessRollbackException(this, e);
 		}
 		return null;
 	}

@@ -21,8 +21,6 @@ import org.hive2hive.core.security.IH2HSerialize;
  */
 public class H2HNode implements IH2HNode {
 
-	// TODO remove manager singletons
-	// TODO atm, this class is just a wrapper for the NetworkManager
 	private final IFileConfiguration fileConfiguration;
 	private final NetworkManager networkManager;
 
