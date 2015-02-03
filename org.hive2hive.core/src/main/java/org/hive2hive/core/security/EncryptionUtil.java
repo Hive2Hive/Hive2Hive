@@ -51,6 +51,8 @@ public final class EncryptionUtil {
 
 	private static final String SECURITY_PROVIDER = "BC";
 	private static final String SINGATURE_ALGORITHM = "SHA1withRSA";
+	// Fermat F4, largest known fermat prime
+	private static final BigInteger RSA_PUBLIC_EXP = new BigInteger("10001", 16);
 	private static final int IV_LENGTH = 16;
 
 	public enum AES_KEYLENGTH {
@@ -133,20 +135,14 @@ public final class EncryptionUtil {
 	 * @return An asymmetric RSA key pair of the specified length.
 	 */
 	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
-		// installBCProvider();
-
-		int strength = keyLength.value();
-		// Fermat F4, largest known fermat prime
-		BigInteger publicExp = new BigInteger("10001", 16);
+		installBCProvider();
 
 		try {
-			// TODO Use default key generator until this bug is fixed:
-			// https://github.com/RuedigerMoeller/fast-serialization/issues/52
-			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA"/* , "BC */);
-			RSAKeyGenParameterSpec params = new RSAKeyGenParameterSpec(strength, publicExp);
+			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "BC");
+			RSAKeyGenParameterSpec params = new RSAKeyGenParameterSpec(keyLength.value(), RSA_PUBLIC_EXP);
 			gen.initialize(params, new SecureRandom());
 			return gen.generateKeyPair();
-		} catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
+		} catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchProviderException e) {
 			logger.error("Exception while generation of RSA key pair of length {}:", keyLength, e);
 		}
 		return null;
