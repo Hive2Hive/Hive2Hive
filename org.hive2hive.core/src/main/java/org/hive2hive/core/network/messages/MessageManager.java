@@ -75,9 +75,8 @@ public final class MessageManager implements IMessageManager {
 		}
 
 		// send message to the peer which is responsible for the given key
-		FutureSend futureSend = networkManager.getConnection().getPeer()
-				.send(Number160.createHash(message.getTargetKey())).object(encryptedMessage)
-				.requestP2PConfiguration(createSendingConfiguration()).start();
+		FutureSend futureSend = networkManager.getConnection().getPeer().send(Number160.createHash(message.getTargetKey()))
+				.object(encryptedMessage).requestP2PConfiguration(createSendingConfiguration()).start();
 
 		// attach a future listener to log, handle and notify events
 		FutureRoutedListener listener = new FutureRoutedListener(message, targetPublicKey, this);
@@ -116,8 +115,8 @@ public final class MessageManager implements IMessageManager {
 		}
 
 		// send message directly to the peer with the given peer address
-		FutureDirect futureDirect = networkManager.getConnection().getPeer().peer()
-				.sendDirect(message.getTargetAddress()).object(encryptedMessage).start();
+		FutureDirect futureDirect = networkManager.getConnection().getPeer().peer().sendDirect(message.getTargetAddress())
+				.object(encryptedMessage).start();
 		// attach a future listener to log, handle and notify events
 		FutureDirectListener listener = new FutureDirectListener(message, targetPublicKey, this);
 		futureDirect.addListener(listener);
@@ -215,7 +214,8 @@ public final class MessageManager implements IMessageManager {
 
 		try {
 			// create signature
-			byte[] signature = EncryptionUtil.sign(messageBytes, session.getKeyPair().getPrivate());
+			byte[] signature = EncryptionUtil.sign(messageBytes, session.getKeyPair().getPrivate(),
+					encryption.getSecurityProvider());
 			encryptedMessage.setSignature(session.getUserId(), signature);
 			return encryptedMessage;
 		} catch (InvalidKeyException | SignatureException e) {

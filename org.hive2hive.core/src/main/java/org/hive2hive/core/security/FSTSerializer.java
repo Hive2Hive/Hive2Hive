@@ -12,6 +12,7 @@ import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.nustaq.serialization.FSTConfiguration;
+import org.nustaq.serialization.util.FSTUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,12 +31,29 @@ public final class FSTSerializer implements IH2HSerialize {
 	private final FSTConfiguration fst;
 
 	public FSTSerializer() {
+		this(true);
+	}
+
+	/**
+	 * Create a FST serializer (faster and more efficient than Java default serialization).
+	 * 
+	 * @param useUnsafe <code>true</code> to use <code>sun.misc.Unsafe</code> class, otherwise, a fallback is
+	 *            used.
+	 */
+	public FSTSerializer(boolean useUnsafe) {
+		if (!useUnsafe) {
+			// don't use sun.misc.Unsafe class
+			FSTUtil.unFlaggedUnsafe = null;
+			logger.debug("Disabled the use of 'sun.misc.Unsafe' for the serialization");
+		}
+
 		fst = FSTConfiguration.createDefaultConfiguration();
 
 		// register all often serialized classes for speedup. Note that every peer should have the same
 		// configuration, which also depends on the order!
 		fst.registerClass(UserProfile.class, Locations.class, UserPublicKey.class, MetaFileSmall.class, MetaFileLarge.class,
 				Chunk.class, ContactPeerMessage.class, ResponseMessage.class);
+
 	}
 
 	@Override

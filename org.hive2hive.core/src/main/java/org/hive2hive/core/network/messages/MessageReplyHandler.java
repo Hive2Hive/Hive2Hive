@@ -138,7 +138,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 	private boolean verifySignature(String senderId, byte[] decryptedMessage, byte[] signature) {
 		try {
 			PublicKey publicKey = networkManager.getSession().getKeyManager().getPublicKey(senderId);
-			if (EncryptionUtil.verify(decryptedMessage, signature, publicKey)) {
+			if (EncryptionUtil.verify(decryptedMessage, signature, publicKey, encryption.getSecurityProvider())) {
 				logger.debug("Message signature from user '{}' verified. Node ID = '{}'.", senderId,
 						networkManager.getNodeId());
 				return true;
