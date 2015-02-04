@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Security;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
@@ -24,9 +26,20 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 public class H2HDummyEncryption implements IH2HEncryption {
 
 	private final IH2HSerialize serializer;
+	private static String SECURITY_PROVIDER = "BC";
 
 	public H2HDummyEncryption() {
 		serializer = new FSTSerializer();
+
+		// install the provider anyway because probably key pairs need to be generated
+		if (Security.getProvider(SECURITY_PROVIDER) == null) {
+			Security.addProvider(new BouncyCastleProvider());
+		}
+	}
+
+	@Override
+	public String getSecurityProvider() {
+		return SECURITY_PROVIDER;
 	}
 
 	@Override

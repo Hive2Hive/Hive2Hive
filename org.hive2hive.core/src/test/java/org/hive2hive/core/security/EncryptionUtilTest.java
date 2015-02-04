@@ -44,10 +44,16 @@ import org.junit.Test;
 
 public class EncryptionUtilTest extends H2HJUnitTest {
 
+	private static String SECURITY_PROVIDER = "BC";
+
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = EncryptionUtilTest.class;
 		beforeClass();
+
+		if (Security.getProvider(SECURITY_PROVIDER) == null) {
+			Security.addProvider(new BouncyCastleProvider());
+		}
 	}
 
 	@Test
@@ -62,7 +68,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			// generate AES key
 			long start = System.currentTimeMillis();
-			SecretKey aesKey = EncryptionUtil.generateAESKey(sizes[s]);
+			SecretKey aesKey = EncryptionUtil.generateAESKey(sizes[s], SECURITY_PROVIDER);
 			long stop = System.currentTimeMillis();
 			logger.debug("Generated AES key: {}.", EncryptionUtil.byteToHex(aesKey.getEncoded()));
 			logger.debug("Time: {} ms.", stop - start);
@@ -111,7 +117,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			byte[] data = generateRandomContent(2097152);
 
 			// generate AES key
-			SecretKey aesKey = EncryptionUtil.generateAESKey(sizes[s]);
+			SecretKey aesKey = EncryptionUtil.generateAESKey(sizes[s], SECURITY_PROVIDER);
 
 			// generate IV
 			byte[] initVector = EncryptionUtil.generateIV();
@@ -165,7 +171,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			// encrypt data with public key
 			byte[] encryptedData = null;
 			try {
-				encryptedData = EncryptionUtil.encryptRSA(data, rsaKeyPair.getPublic());
+				encryptedData = EncryptionUtil.encryptRSA(data, rsaKeyPair.getPublic(), SECURITY_PROVIDER);
 			} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
 				logger.error("Exception while testing RSA encryption:", e);
 				e.printStackTrace();
@@ -182,7 +188,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			byte[] decryptedData = null;
 
 			try {
-				decryptedData = EncryptionUtil.decryptRSA(encryptedData, rsaKeyPair.getPrivate());
+				decryptedData = EncryptionUtil.decryptRSA(encryptedData, rsaKeyPair.getPrivate(), SECURITY_PROVIDER);
 			} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
 				logger.error("Exception while testing RSA decryption:", e);
 				e.printStackTrace();
@@ -225,7 +231,8 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				HybridEncryptedContent encryptedData = null;
 				try {
 					start = System.currentTimeMillis();
-					encryptedData = EncryptionUtil.encryptHybrid(data, rsaKeyPair.getPublic(), aesSizes[s2]);
+					encryptedData = EncryptionUtil.encryptHybrid(data, rsaKeyPair.getPublic(), aesSizes[s2],
+							SECURITY_PROVIDER);
 					stop = System.currentTimeMillis();
 					logger.debug("Hybrid Encryption Time: {} ms.", stop - start);
 				} catch (DataLengthException | InvalidKeyException | IllegalStateException | InvalidCipherTextException
@@ -243,7 +250,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				byte[] decryptedData = null;
 				try {
 					start = System.currentTimeMillis();
-					decryptedData = EncryptionUtil.decryptHybrid(encryptedData, rsaKeyPair.getPrivate());
+					decryptedData = EncryptionUtil.decryptHybrid(encryptedData, rsaKeyPair.getPrivate(), SECURITY_PROVIDER);
 					stop = System.currentTimeMillis();
 					logger.debug("Hybrid Decryption Time: {} ms.", stop - start);
 				} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
@@ -278,7 +285,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			// sign data with private key
 			byte[] signature = null;
 			try {
-				signature = EncryptionUtil.sign(data, rsaKeyPair.getPrivate());
+				signature = EncryptionUtil.sign(data, rsaKeyPair.getPrivate(), SECURITY_PROVIDER);
 			} catch (InvalidKeyException | SignatureException e) {
 				logger.error("Exception while testing signing:", e);
 				e.printStackTrace();
@@ -291,7 +298,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			// verify data with public key
 			boolean isVerified = false;
 			try {
-				isVerified = EncryptionUtil.verify(data, signature, rsaKeyPair.getPublic());
+				isVerified = EncryptionUtil.verify(data, signature, rsaKeyPair.getPublic(), SECURITY_PROVIDER);
 			} catch (InvalidKeyException | SignatureException e) {
 				logger.error("Exception while testing verification:", e);
 				e.printStackTrace();

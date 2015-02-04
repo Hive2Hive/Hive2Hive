@@ -18,6 +18,11 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 public interface IH2HEncryption {
 
 	/**
+	 * @return the installed security provider identifier. This can for example be "BC" for BouncyCastle.
+	 */
+	String getSecurityProvider();
+
+	/**
 	 * Symmetrically encrypts content inheriting from {@link BaseNetworkContent} by means of the AES
 	 * algorithm.
 	 * The content first gets serialized, then encrypted.

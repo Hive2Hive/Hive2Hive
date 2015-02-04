@@ -5,12 +5,14 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Security;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
@@ -19,9 +21,34 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 public final class H2HDefaultEncryption implements IH2HEncryption {
 
 	private final IH2HSerialize serializer;
+	private final String securityProvider;
 
+	/**
+	 * Create a default encryption using bouncy castle as the security provider
+	 */
 	public H2HDefaultEncryption(IH2HSerialize serializer) {
+		this(serializer, "BC");
+
+		if (Security.getProvider("BC") == null) {
+			Security.addProvider(new BouncyCastleProvider());
+		}
+	}
+
+	/**
+	 * Create a default encryption using any installed security provider identifier.
+	 * 
+	 * @param serializer the serializer to encode / decode objects
+	 * @param securityProvider the security provider identifier. Note that the provider must be installed
+	 *            separately.
+	 */
+	public H2HDefaultEncryption(IH2HSerialize serializer, String securityProvider) {
 		this.serializer = serializer;
+		this.securityProvider = securityProvider;
+	}
+
+	@Override
+	public String getSecurityProvider() {
+		return securityProvider;
 	}
 
 	@Override
@@ -56,7 +83,7 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	@Override
 	public HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) throws InvalidKeyException,
 			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException {
-		return EncryptionUtil.encryptHybrid(content, publicKey, H2HConstants.KEYLENGTH_HYBRID_AES);
+		return EncryptionUtil.encryptHybrid(content, publicKey, H2HConstants.KEYLENGTH_HYBRID_AES, securityProvider);
 	}
 
 	@Override
@@ -69,7 +96,7 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	@Override
 	public byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
-		return EncryptionUtil.decryptHybrid(content, privateKey);
+		return EncryptionUtil.decryptHybrid(content, privateKey, securityProvider);
 	}
 
 	/**

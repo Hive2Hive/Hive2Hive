@@ -10,7 +10,6 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -32,7 +31,6 @@ import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +41,16 @@ import org.slf4j.LoggerFactory;
  * to generate various parameters, such as keys and key pairs.
  * 
  * @author Christian
+ * @author Nico
  * 
  */
 public final class EncryptionUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(EncryptionUtil.class);
 
-	private static final String SECURITY_PROVIDER = "BC";
+	// This variable is not final in order to swap the provider with another (like SpongyCastle)
+	// public static String SECURITY_PROVIDER = "BC";
+
 	private static final String SINGATURE_ALGORITHM = "SHA1withRSA";
 	// Fermat F4, largest known fermat prime
 	private static final BigInteger RSA_PUBLIC_EXP = new BigInteger("10001", 16);
@@ -110,14 +111,12 @@ public final class EncryptionUtil {
 	 * Generates a symmetric AES key of the specified key length.
 	 * 
 	 * @param keyLength The length the AES key should have.
+	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return A symmetric AES key of the specified length.
 	 */
-	public static SecretKey generateAESKey(AES_KEYLENGTH keyLength) {
-
-		installBCProvider();
-
+	public static SecretKey generateAESKey(AES_KEYLENGTH keyLength, String securityProvider) {
 		try {
-			final KeyGenerator kg = KeyGenerator.getInstance("AES", SECURITY_PROVIDER);
+			final KeyGenerator kg = KeyGenerator.getInstance("AES", securityProvider);
 			kg.init(keyLength.value(), new SecureRandom());
 			byte[] encoded = kg.generateKey().getEncoded();
 			return new SecretKeySpec(encoded, "AES");
@@ -135,8 +134,6 @@ public final class EncryptionUtil {
 	 * @return An asymmetric RSA key pair of the specified length.
 	 */
 	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
-		installBCProvider();
-
 		try {
 			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "BC");
 			RSAKeyGenParameterSpec params = new RSAKeyGenParameterSpec(keyLength.value(), RSA_PUBLIC_EXP);
@@ -178,18 +175,16 @@ public final class EncryptionUtil {
 	 * 
 	 * @param data The data to be encrypted.
 	 * @param publicKey The asymmetric public key with which the data shall be encrypted.
+	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return Returns the encrypted data.
 	 * @throws InvalidKeyException
 	 * @throws BadPaddingException
 	 * @throws IllegalBlockSizeException
 	 */
-	public static byte[] encryptRSA(byte[] data, PublicKey publicKey) throws InvalidKeyException, IllegalBlockSizeException,
-			BadPaddingException {
-
-		installBCProvider();
-
+	public static byte[] encryptRSA(byte[] data, PublicKey publicKey, String securityProvider) throws InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException {
 		try {
-			Cipher cipher = Cipher.getInstance("RSA", SECURITY_PROVIDER);
+			Cipher cipher = Cipher.getInstance("RSA", securityProvider);
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 			return cipher.doFinal(data);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
@@ -204,18 +199,16 @@ public final class EncryptionUtil {
 	 * 
 	 * @param data The data to be decrypted.
 	 * @param privateKey The asymmetric private key with which the data shall be decrypted.
+	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return Returns the decrypted data.
 	 * @throws InvalidKeyException
 	 * @throws BadPaddingException
 	 * @throws IllegalBlockSizeException
 	 */
-	public static byte[] decryptRSA(byte[] data, PrivateKey privateKey) throws InvalidKeyException,
+	public static byte[] decryptRSA(byte[] data, PrivateKey privateKey, String securityProvider) throws InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException {
-
-		installBCProvider();
-
 		try {
-			Cipher cipher = Cipher.getInstance("RSA", SECURITY_PROVIDER);
+			Cipher cipher = Cipher.getInstance("RSA", securityProvider);
 			cipher.init(Cipher.DECRYPT_MODE, privateKey);
 			return cipher.doFinal(data);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
@@ -233,6 +226,7 @@ public final class EncryptionUtil {
 	 * @param data The data to be encrypted in a hybrid manner.
 	 * @param publicKey The RSA public key with which the data shall be encrypted.
 	 * @param aesKeyLength The key length of the inner AES encryption.
+	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return Returns a {@link HybridEncryptedContent} object containing the RSA encrypted parameters and the
 	 *         AES encrypted content.
 	 * @throws DataLengthException
@@ -242,11 +236,12 @@ public final class EncryptionUtil {
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
-	public static HybridEncryptedContent encryptHybrid(byte[] data, PublicKey publicKey, AES_KEYLENGTH aesKeyLength)
-			throws InvalidCipherTextException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public static HybridEncryptedContent encryptHybrid(byte[] data, PublicKey publicKey, AES_KEYLENGTH aesKeyLength,
+			String securityProvider) throws InvalidCipherTextException, InvalidKeyException, IllegalBlockSizeException,
+			BadPaddingException {
 
 		// generate AES key
-		SecretKey aesKey = generateAESKey(aesKeyLength);
+		SecretKey aesKey = generateAESKey(aesKeyLength, securityProvider);
 		byte[] encodedAesKey = aesKey.getEncoded();
 
 		// generate IV
@@ -262,7 +257,7 @@ public final class EncryptionUtil {
 		byte[] aesEncryptedData = encryptAES(data, aesKey, initVector);
 
 		// encrypt parameters asymmetrically
-		byte[] rsaEncryptedParams = encryptRSA(params, publicKey);
+		byte[] rsaEncryptedParams = encryptRSA(params, publicKey, securityProvider);
 
 		return new HybridEncryptedContent(rsaEncryptedParams, aesEncryptedData);
 	}
@@ -274,6 +269,7 @@ public final class EncryptionUtil {
 	 * 
 	 * @param data The {@link HybridEncryptedContent} to be decrypted in a hybrid manner.
 	 * @param privateKey The RSA private key with which the data shall be decrypted.
+	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return Returns the decrypted data.
 	 * @throws InvalidKeyException
 	 * @throws IllegalBlockSizeException
@@ -282,11 +278,11 @@ public final class EncryptionUtil {
 	 * @throws IllegalStateException
 	 * @throws InvalidCipherTextException
 	 */
-	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException {
+	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey, String securityProvider)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException {
 
 		// decrypt parameters asymmetrically
-		byte[] params = decryptRSA(data.getEncryptedParameters(), privateKey);
+		byte[] params = decryptRSA(data.getEncryptedParameters(), privateKey, securityProvider);
 
 		// split symmetric encryption parameters
 		byte[] initVector = Arrays.copyOfRange(params, 0, IV_LENGTH);
@@ -302,16 +298,15 @@ public final class EncryptionUtil {
 	 * 
 	 * @param data The content to be signed.
 	 * @param privateKey The private key used to sign the content.
+	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return The created signature of the data.
 	 * @throws InvalidKeyException
 	 * @throws SignatureException
 	 */
-	public static byte[] sign(byte[] data, PrivateKey privateKey) throws InvalidKeyException, SignatureException {
-
-		installBCProvider();
-
+	public static byte[] sign(byte[] data, PrivateKey privateKey, String securityProvider) throws InvalidKeyException,
+			SignatureException {
 		try {
-			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, SECURITY_PROVIDER);
+			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, securityProvider);
 			signEngine.initSign(privateKey);
 			signEngine.update(data);
 			return signEngine.sign();
@@ -328,17 +323,15 @@ public final class EncryptionUtil {
 	 * @param data The data to be verified.
 	 * @param signature The signature with which the data should be verified.
 	 * @param publicKey The public key used to verify the content.
+	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return Returns true if the signature could be verified and false otherwise.
 	 * @throws InvalidKeyException
 	 * @throws SignatureException
 	 */
-	public static boolean verify(byte[] data, byte[] signature, PublicKey publicKey) throws InvalidKeyException,
-			SignatureException {
-
-		installBCProvider();
-
+	public static boolean verify(byte[] data, byte[] signature, PublicKey publicKey, String securityProvider)
+			throws InvalidKeyException, SignatureException {
 		try {
-			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, SECURITY_PROVIDER);
+			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, securityProvider);
 			signEngine.initVerify(publicKey);
 			signEngine.update(data);
 			return signEngine.verify(signature);
@@ -347,12 +340,6 @@ public final class EncryptionUtil {
 		}
 
 		return false;
-	}
-
-	private static void installBCProvider() {
-		if (Security.getProvider(SECURITY_PROVIDER) == null) {
-			Security.addProvider(new BouncyCastleProvider());
-		}
 	}
 
 	private static byte[] processAESCiphering(boolean forEncrypting, byte[] data, SecretKey key, byte[] initVector)
