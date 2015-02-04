@@ -152,10 +152,10 @@ public final class NodeMenu extends H2HConsoleMenu {
 		IFileConfiguration fileConfig = FileConfiguration.createCustom(maxFileSize, maxNumOfVersions, maxSizeAllVersions,
 				chunkSize);
 		IH2HSerialize serializer;
-		if ("java".equalsIgnoreCase(config.getString("Serializer"))) {
+		if ("java".equalsIgnoreCase(config.getString("Serializer.mode"))) {
 			serializer = new JavaSerializer();
 		} else {
-			serializer = new FSTSerializer();
+			serializer = new FSTSerializer(config.getBoolean("Serializer.FST.unsafe"));
 		}
 
 		node = H2HNode.createNode(fileConfig, new H2HDefaultEncryption(serializer), serializer);
