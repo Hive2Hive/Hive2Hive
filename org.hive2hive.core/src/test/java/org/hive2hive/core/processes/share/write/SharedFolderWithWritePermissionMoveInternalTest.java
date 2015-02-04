@@ -2,13 +2,10 @@ package org.hive2hive.core.processes.share.write;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -17,15 +14,14 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.processes.share.BaseShareReadWriteTest;
 import org.hive2hive.core.utils.FileTestUtil;
-import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
-import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -34,95 +30,51 @@ import org.junit.Test;
  * shared folder.
  * 
  * @author Seppi
+ * @author Nico
  */
-public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTest {
+public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareReadWriteTest {
 
-	private static final int networkSize = 6;
-	private static final int maxNumChunks = 2;
-	private static ArrayList<NetworkManager> network;
+	private File subFolder1AtA;
+	private File subFolder1AtB;
+	private File subFolder2AtA;
+	private File subFolder2AtB;
 
-	private static File rootA;
-	private static File rootB;
-	private static File sharedFolderA;
-	private static File sharedFolderB;
-	private static File subFolder1AtA;
-	private static File subFolder1AtB;
-	private static File subFolder2AtA;
-	private static File subFolder2AtB;
-
-	private static UserCredentials userA;
-	private static UserCredentials userB;
-
-	private static TestFileEventListener eventsAtA;
-	private static TestFileEventListener eventsAtB;
-
-	/**
-	 * Setup network. Setup two users with each one client, log them in.
-	 * 
-	 * @throws Exception
-	 */
 	@BeforeClass
-	public static void initTest() throws Exception {
+	public static void printIdentifier() throws Exception {
 		testClass = SharedFolderWithWritePermissionMoveInternalTest.class;
 		beforeClass();
+	}
 
-		logger.info("Setup network.");
-		network = NetworkTestUtil.createNetwork(networkSize);
-
-		logger.info("Create user A.");
-		rootA = FileTestUtil.getTempDirectory();
-		userA = generateRandomCredentials();
-		logger.info("Register and login user A.");
-		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
-
-		eventsAtA = new TestFileEventListener(network.get(0));
-		network.get(0).getEventBus().subscribe(eventsAtA);
-
-		logger.info("Create user B.");
-		rootB = FileTestUtil.getTempDirectory();
-		userB = generateRandomCredentials();
-		logger.info("Register and login user B.");
-		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
-
-		eventsAtB = new TestFileEventListener(network.get(1));
-		network.get(1).getEventBus().subscribe(eventsAtB);
-
-		logger.info("Upload folder 'sharedfolder' from A.");
-		sharedFolderA = new File(rootA, "sharedfolder");
-		sharedFolderA.mkdirs();
-		UseCaseTestUtil.uploadNewFile(network.get(0), sharedFolderA);
-
-		logger.info("Share folder 'sharedfolder' with user B giving write permission.");
-		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderA, userB.getUserId(), PermissionType.WRITE);
-		sharedFolderB = new File(rootB, sharedFolderA.getName());
-		waitTillSynchronized(sharedFolderB);
+	@Before
+	public void initTest() throws Exception {
+		setupNetworkAndShares(PermissionType.WRITE);
 
 		logger.info("Upload a new subfolder 'sharedfolder/subfolder1'.");
 		subFolder1AtA = new File(sharedFolderA, "subfolder1");
 		subFolder1AtA.mkdir();
 		UseCaseTestUtil.uploadNewFile(network.get(0), subFolder1AtA);
 		subFolder1AtB = new File(sharedFolderB, subFolder1AtA.getName());
-		waitTillSynchronized(subFolder1AtB);
+		waitTillSynchronized(subFolder1AtB, true);
 
 		logger.info("Upload a new subfolder 'sharedfolder/subfolder2'.");
 		subFolder2AtA = new File(sharedFolderA, "subfolder2");
 		subFolder2AtA.mkdir();
 		UseCaseTestUtil.uploadNewFile(network.get(0), subFolder2AtA);
 		subFolder2AtB = new File(sharedFolderB, subFolder2AtA.getName());
-		waitTillSynchronized(subFolder2AtB);
+		waitTillSynchronized(subFolder2AtB, true);
 	}
 
 	@Test
 	public void testSynchronizeAddFileFromAMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file1FromA' from A.");
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/file1FromA' gets synchronized with B.");
 		File fileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
-		waitTillSynchronized(fileFromAAtB);
+		waitTillSynchronized(fileFromAAtB, true);
 
 		logger.info("Move file 'fileFromA' at A into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFileFromAAtA = new File(subFolder1AtA, fileFromAAtA.getName());
@@ -131,7 +83,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'file1FromA' gets synchronized with B.");
 		File movedFileFromAAtB = new File(subFolder1AtB, fileFromAAtA.getName());
-		waitTillSynchronized(movedFileFromAAtB);
+		waitTillSynchronized(movedFileFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
 		checkIndex(fileFromAAtA, fileFromAAtB, movedFileFromAAtA, movedFileFromAAtB);
 	}
@@ -140,13 +92,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddFileFromAMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file2FromA' from A.");
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/file2FromA' gets synchronized with B.");
 		File fileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
-		waitTillSynchronized(fileFromAAtB);
+		waitTillSynchronized(fileFromAAtB, true);
 
 		logger.info("Move file 'file2FromA' at B into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFileFromAAtB = new File(subFolder1AtB, fileFromAAtA.getName());
@@ -155,7 +107,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'file2FromA' gets synchronized with A.");
 		File movedFileFromAAtA = new File(subFolder1AtA, fileFromAAtB.getName());
-		waitTillSynchronized(movedFileFromAAtB);
+		waitTillSynchronized(movedFileFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
 		checkIndex(fileFromAAtA, fileFromAAtB, movedFileFromAAtA, movedFileFromAAtB);
 	}
@@ -164,13 +116,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddFileFromBMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file1FromB' from B.");
-		File fileFromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/file1FromB' gets synchronized with A.");
 		File fileFromBAtA = new File(sharedFolderA, fileFromBAtB.getName());
-		waitTillSynchronized(fileFromBAtA);
+		waitTillSynchronized(fileFromBAtA, true);
 
 		logger.info("Move file 'file1FromB' at A into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFileFromAAtA = new File(subFolder1AtA, fileFromBAtA.getName());
@@ -179,7 +131,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'file1FromB' gets synchronized with B.");
 		File movedFileFromAAtB = new File(subFolder1AtB, fileFromBAtA.getName());
-		waitTillSynchronized(movedFileFromAAtB);
+		waitTillSynchronized(movedFileFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
 		checkIndex(fileFromBAtA, fileFromBAtB, movedFileFromAAtA, movedFileFromAAtB);
 	}
@@ -188,13 +140,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddFileFromBMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/file2FromB' from B.");
-		File fileFromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/file2FromB' gets synchronized with A.");
 		File fileFromBAtA = new File(sharedFolderB, fileFromBAtB.getName());
-		waitTillSynchronized(fileFromBAtA);
+		waitTillSynchronized(fileFromBAtA, true);
 
 		logger.info("Move file 'file2FromB' at B into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFileFromBAtB = new File(subFolder1AtB, fileFromBAtB.getName());
@@ -203,7 +155,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'fileFromB' gets synchronized with A.");
 		File movedFileFromBAtA = new File(subFolder1AtA, fileFromBAtA.getName());
-		waitTillSynchronized(movedFileFromBAtA);
+		waitTillSynchronized(movedFileFromBAtA, true);
 		compareFiles(movedFileFromBAtA, movedFileFromBAtB);
 		checkIndex(fileFromBAtA, fileFromBAtB, movedFileFromBAtA, movedFileFromBAtB);
 	}
@@ -218,7 +170,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder1FromA' gets synchronized with B.");
 		File folderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
-		waitTillSynchronized(folderFromAAtB);
+		waitTillSynchronized(folderFromAAtB, true);
 
 		logger.info("Move folder 'subfolder1FromA' at A into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFolderFromAAtA = new File(subFolder1AtA, folderFromAAtA.getName());
@@ -227,7 +179,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subfolder1FromA' gets synchronized with B.");
 		File movedFolderFromAAtB = new File(subFolder1AtB, folderFromAAtA.getName());
-		waitTillSynchronized(movedFolderFromAAtB);
+		waitTillSynchronized(movedFolderFromAAtB, true);
 		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
 		checkIndex(folderFromAAtA, folderFromAAtB, movedFolderFromAAtA, movedFolderFromAAtB);
 	}
@@ -242,7 +194,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder2FromA' gets synchronized with B.");
 		File folderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
-		waitTillSynchronized(folderFromAAtB);
+		waitTillSynchronized(folderFromAAtB, true);
 
 		logger.info("Move folder 'subfolder2FromA' at B into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFolderFromAAtB = new File(subFolder1AtB, folderFromAAtA.getName());
@@ -251,7 +203,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subfolder2FromA' gets synchronized with A.");
 		File movedFileFromAAtA = new File(subFolder1AtA, folderFromAAtB.getName());
-		waitTillSynchronized(movedFolderFromAAtB);
+		waitTillSynchronized(movedFolderFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFolderFromAAtB);
 		checkIndex(folderFromAAtA, folderFromAAtB, movedFileFromAAtA, movedFolderFromAAtB);
 	}
@@ -266,7 +218,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder1FromB' gets synchronized with A.");
 		File folderFromBAtA = new File(sharedFolderA, folderFromBAtB.getName());
-		waitTillSynchronized(folderFromBAtA);
+		waitTillSynchronized(folderFromBAtA, true);
 
 		logger.info("Move folder 'subfolder1FromB' at A into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFolderFromAAtA = new File(subFolder1AtA, folderFromBAtA.getName());
@@ -275,7 +227,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subfolder1FromB' gets synchronized with B.");
 		File movedFolderFromAAtB = new File(subFolder1AtB, folderFromBAtA.getName());
-		waitTillSynchronized(movedFolderFromAAtB);
+		waitTillSynchronized(movedFolderFromAAtB, true);
 		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
 		checkIndex(folderFromBAtA, folderFromBAtB, movedFolderFromAAtA, movedFolderFromAAtB);
 	}
@@ -290,7 +242,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder2FromB' gets synchronized with A.");
 		File folderFromBAtA = new File(sharedFolderB, folderFromBAtB.getName());
-		waitTillSynchronized(folderFromBAtA);
+		waitTillSynchronized(folderFromBAtA, true);
 
 		logger.info("Move folder 'subfolder2FromB' at B into shared subfolder 'sharedfolder/subfolder1'.");
 		File movedFolderFromBAtB = new File(subFolder1AtB, folderFromBAtB.getName());
@@ -299,7 +251,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subfolderFromB' gets synchronized with A.");
 		File movedFolderFromBAtA = new File(subFolder1AtA, folderFromBAtA.getName());
-		waitTillSynchronized(movedFolderFromBAtA);
+		waitTillSynchronized(movedFolderFromBAtA, true);
 		compareFiles(movedFolderFromBAtA, movedFolderFromBAtB);
 		checkIndex(folderFromBAtA, folderFromBAtB, movedFolderFromBAtA, movedFolderFromBAtB);
 	}
@@ -308,13 +260,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddSubfileFromAMoveToFolderAtA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile1FromA' from A.");
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
-				subFolder1AtA, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolder1AtA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile1FromA' gets synchronized with B.");
 		File fileFromAAtB = new File(subFolder1AtB, fileFromAAtA.getName());
-		waitTillSynchronized(fileFromAAtB);
+		waitTillSynchronized(fileFromAAtB, true);
 
 		logger.info("Move file 'subfileFromA' at A into shared folder 'sharedfolder'.");
 		File movedFileFromAAtA = new File(sharedFolderA, fileFromAAtA.getName());
@@ -323,7 +275,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'subfile1FromA' gets synchronized with B.");
 		File movedFileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
-		waitTillSynchronized(movedFileFromAAtB);
+		waitTillSynchronized(movedFileFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
 		checkIndex(fileFromAAtA, fileFromAAtB, movedFileFromAAtA, movedFileFromAAtB);
 	}
@@ -332,13 +284,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddSubfileFromAMoveToFolderAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile2FromA' from A.");
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
-				subFolder1AtA, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolder1AtA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile2FromA' gets synchronized with B.");
 		File fileFromAAtB = new File(subFolder1AtB, fileFromAAtA.getName());
-		waitTillSynchronized(fileFromAAtB);
+		waitTillSynchronized(fileFromAAtB, true);
 
 		logger.info("Move file 'subfile2FromA' at B into shared subfolder 'sharedfolder'.");
 		File movedFileFromAAtB = new File(sharedFolderB, fileFromAAtA.getName());
@@ -347,7 +299,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'subfile2FromA' gets synchronized with A.");
 		File movedFileFromAAtA = new File(sharedFolderA, fileFromAAtB.getName());
-		waitTillSynchronized(movedFileFromAAtB);
+		waitTillSynchronized(movedFileFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
 		checkIndex(fileFromAAtA, fileFromAAtB, movedFileFromAAtA, movedFileFromAAtB);
 	}
@@ -356,13 +308,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddSubfileFromBMoveToFolderAtA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile1FromB' from B.");
-		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile1FromB", new Random().nextInt(maxNumChunks) + 1,
-				subFolder1AtB, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile1FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolder1AtB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile1FromB' gets synchronized with A.");
 		File fileFromBAtA = new File(subFolder1AtA, fileFromBAtB.getName());
-		waitTillSynchronized(fileFromBAtA);
+		waitTillSynchronized(fileFromBAtA, true);
 
 		logger.info("Move file 'subfile1FromB' at A into shared subfolder 'sharedfolder'.");
 		File movedFileFromAAtA = new File(sharedFolderA, fileFromBAtA.getName());
@@ -371,7 +323,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'subfile1FromB' gets synchronized with B.");
 		File movedFileFromAAtB = new File(sharedFolderB, fileFromBAtA.getName());
-		waitTillSynchronized(movedFileFromAAtB);
+		waitTillSynchronized(movedFileFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
 		checkIndex(fileFromBAtA, fileFromBAtB, movedFileFromAAtA, movedFileFromAAtB);
 	}
@@ -380,13 +332,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddSubfileFromBMoveToFolderAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile2FromB' from B.");
-		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile2FromB", new Random().nextInt(maxNumChunks) + 1,
-				subFolder1AtB, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile2FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolder1AtB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile2FromB' gets synchronized with A.");
 		File fileFromBAtA = new File(subFolder1AtA, fileFromBAtB.getName());
-		waitTillSynchronized(fileFromBAtA);
+		waitTillSynchronized(fileFromBAtA, true);
 
 		logger.info("Move file 'subfile2FromB' at B into shared subfolder 'sharedfolder'.");
 		File movedFileFromBAtB = new File(sharedFolderB, fileFromBAtB.getName());
@@ -395,7 +347,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'subfileFromB' gets synchronized with A.");
 		File movedFileFromBAtA = new File(sharedFolderA, fileFromBAtA.getName());
-		waitTillSynchronized(movedFileFromBAtA);
+		waitTillSynchronized(movedFileFromBAtA, true);
 		compareFiles(movedFileFromBAtA, movedFileFromBAtB);
 		checkIndex(fileFromBAtA, fileFromBAtB, movedFileFromBAtA, movedFileFromBAtB);
 	}
@@ -410,7 +362,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder1/subsubfolder1FromA' gets synchronized with B.");
 		File folderFromAAtB = new File(subFolder1AtB, folderFromAAtA.getName());
-		waitTillSynchronized(folderFromAAtB);
+		waitTillSynchronized(folderFromAAtB, true);
 
 		logger.info("Move folder 'subsubfolder1FromA' at A into shared subfolder 'sharedfolder'.");
 		File movedFolderFromAAtA = new File(sharedFolderA, folderFromAAtA.getName());
@@ -419,7 +371,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subsubfolder1FromA' gets synchronized with B.");
 		File movedFolderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
-		waitTillSynchronized(movedFolderFromAAtB);
+		waitTillSynchronized(movedFolderFromAAtB, true);
 		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
 		checkIndex(folderFromAAtA, folderFromAAtB, movedFolderFromAAtA, movedFolderFromAAtB);
 	}
@@ -434,7 +386,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder1/subsubfolder2FromA' gets synchronized with B.");
 		File folderFromAAtB = new File(subFolder1AtB, folderFromAAtA.getName());
-		waitTillSynchronized(folderFromAAtB);
+		waitTillSynchronized(folderFromAAtB, true);
 
 		logger.info("Move folder 'subsubfolder2FromA' at B into shared subfolder 'sharedfolder'.");
 		File movedFolderFromAAtB = new File(sharedFolderB, folderFromAAtA.getName());
@@ -443,7 +395,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subsubfolder2FromA' gets synchronized with A.");
 		File movedFileFromAAtA = new File(sharedFolderA, folderFromAAtB.getName());
-		waitTillSynchronized(movedFolderFromAAtB);
+		waitTillSynchronized(movedFolderFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFolderFromAAtB);
 		checkIndex(folderFromAAtA, folderFromAAtB, movedFileFromAAtA, movedFolderFromAAtB);
 	}
@@ -458,7 +410,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder1/subsubfolder1FromB' gets synchronized with A.");
 		File folderFromBAtA = new File(subFolder1AtA, folderFromBAtB.getName());
-		waitTillSynchronized(folderFromBAtA);
+		waitTillSynchronized(folderFromBAtA, true);
 
 		logger.info("Move folder 'subsubfolder1FromB' at A into shared subfolder 'sharedfolder'.");
 		File movedFolderFromAAtA = new File(sharedFolderA, folderFromBAtA.getName());
@@ -467,7 +419,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subsubfolder1FromB' gets synchronized with B.");
 		File movedFolderFromAAtB = new File(sharedFolderB, folderFromBAtA.getName());
-		waitTillSynchronized(movedFolderFromAAtB);
+		waitTillSynchronized(movedFolderFromAAtB, true);
 		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
 		checkIndex(folderFromBAtA, folderFromBAtB, movedFolderFromAAtA, movedFolderFromAAtB);
 	}
@@ -482,7 +434,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder1/subsubfolder2FromB' gets synchronized with A.");
 		File folderFromBAtA = new File(subFolder1AtA, folderFromBAtB.getName());
-		waitTillSynchronized(folderFromBAtA);
+		waitTillSynchronized(folderFromBAtA, true);
 
 		logger.info("Move folder 'subsubfolder2FromB' at B into shared subfolder 'sharedfolder'.");
 		File movedFolderFromBAtB = new File(sharedFolderB, folderFromBAtB.getName());
@@ -491,7 +443,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subsubfolderFromB' gets synchronized with A.");
 		File movedFolderFromBAtA = new File(sharedFolderA, folderFromBAtA.getName());
-		waitTillSynchronized(movedFolderFromBAtA);
+		waitTillSynchronized(movedFolderFromBAtA, true);
 		compareFiles(movedFolderFromBAtA, movedFolderFromBAtB);
 		checkIndex(folderFromBAtA, folderFromBAtB, movedFolderFromBAtA, movedFolderFromBAtB);
 	}
@@ -500,13 +452,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddSubfileFromAMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile3FromA' from A.");
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile3FromA", new Random().nextInt(maxNumChunks) + 1,
-				subFolder1AtA, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile3FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolder1AtA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile3FromA' gets synchronized with B.");
 		File fileFromAAtB = new File(subFolder1AtB, fileFromAAtA.getName());
-		waitTillSynchronized(fileFromAAtB);
+		waitTillSynchronized(fileFromAAtB, true);
 
 		logger.info("Move file 'subfile3FromA' at A into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFileFromAAtA = new File(subFolder2AtA, fileFromAAtA.getName());
@@ -515,7 +467,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved file 'subfile3FromA' gets synchronized with B.");
 		File movedFileFromAAtB = new File(subFolder2AtB, fileFromAAtA.getName());
-		waitTillSynchronized(movedFileFromAAtB);
+		waitTillSynchronized(movedFileFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
 		checkIndex(fileFromAAtA, fileFromAAtB, movedFileFromAAtA, movedFileFromAAtB);
 	}
@@ -524,13 +476,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddSubfileFromAMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile4FromA' from A.");
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile4FromA", new Random().nextInt(maxNumChunks) + 1,
-				subFolder1AtA, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile4FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolder1AtA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile4FromA' gets synchronized with B.");
 		File fileFromAAtB = new File(subFolder1AtB, fileFromAAtA.getName());
-		waitTillSynchronized(fileFromAAtB);
+		waitTillSynchronized(fileFromAAtB, true);
 
 		logger.info("Move file 'subfile4FromA' at B into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFileFromAAtB = new File(subFolder2AtB, fileFromAAtA.getName());
@@ -539,7 +491,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'subfile4FromA' gets synchronized with A.");
 		File movedFileFromAAtA = new File(subFolder2AtA, fileFromAAtB.getName());
-		waitTillSynchronized(movedFileFromAAtB);
+		waitTillSynchronized(movedFileFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
 		checkIndex(fileFromAAtA, fileFromAAtB, movedFileFromAAtA, movedFileFromAAtB);
 	}
@@ -548,13 +500,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddSubfileFromBMoveToSubfolderAtA() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile3FromB' from B.");
-		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile3FromB", new Random().nextInt(maxNumChunks) + 1,
-				subFolder1AtB, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile3FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolder1AtB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile3FromB' gets synchronized with A.");
 		File fileFromBAtA = new File(subFolder1AtA, fileFromBAtB.getName());
-		waitTillSynchronized(fileFromBAtA);
+		waitTillSynchronized(fileFromBAtA, true);
 
 		logger.info("Move file 'subfile3FromB' at A into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFileFromAAtA = new File(subFolder2AtA, fileFromBAtA.getName());
@@ -563,7 +515,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'subfile3FromB' gets synchronized with B.");
 		File movedFileFromAAtB = new File(subFolder2AtB, fileFromBAtA.getName());
-		waitTillSynchronized(movedFileFromAAtB);
+		waitTillSynchronized(movedFileFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFileFromAAtB);
 		checkIndex(fileFromBAtA, fileFromBAtB, movedFileFromAAtA, movedFileFromAAtB);
 	}
@@ -572,13 +524,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 	public void testSynchronizeAddSubfileFromBMoveToSubfolderAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedfolder/subfolder1/subfile4FromB' from B.");
-		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile4FromB", new Random().nextInt(maxNumChunks) + 1,
-				subFolder1AtB, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromBAtB = FileTestUtil.createFileRandomContent("subfile4FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolder1AtB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder1/subfile4FromB' gets synchronized with A.");
 		File fileFromBAtA = new File(subFolder1AtA, fileFromBAtB.getName());
-		waitTillSynchronized(fileFromBAtA);
+		waitTillSynchronized(fileFromBAtA, true);
 
 		logger.info("Move file 'subfile4FromB' at B into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFileFromBAtB = new File(subFolder2AtB, fileFromBAtB.getName());
@@ -587,7 +539,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new moved file 'subfile4FromB' gets synchronized with A.");
 		File movedFileFromBAtA = new File(subFolder2AtA, fileFromBAtA.getName());
-		waitTillSynchronized(movedFileFromBAtA);
+		waitTillSynchronized(movedFileFromBAtA, true);
 		compareFiles(movedFileFromBAtA, movedFileFromBAtB);
 		checkIndex(fileFromBAtA, fileFromBAtB, movedFileFromBAtA, movedFileFromBAtB);
 	}
@@ -602,7 +554,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder1/subsubfolder3FromA' gets synchronized with B.");
 		File folderFromAAtB = new File(subFolder1AtB, folderFromAAtA.getName());
-		waitTillSynchronized(folderFromAAtB);
+		waitTillSynchronized(folderFromAAtB, true);
 
 		logger.info("Move folder 'subsubfolder3FromA' at A into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFolderFromAAtA = new File(subFolder2AtA, folderFromAAtA.getName());
@@ -611,7 +563,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subsubfolder3FromA' gets synchronized with B.");
 		File movedFolderFromAAtB = new File(subFolder2AtB, folderFromAAtA.getName());
-		waitTillSynchronized(movedFolderFromAAtB);
+		waitTillSynchronized(movedFolderFromAAtB, true);
 		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
 		checkIndex(folderFromAAtA, folderFromAAtB, movedFolderFromAAtA, movedFolderFromAAtB);
 	}
@@ -626,7 +578,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder1/subsubfolder4FromA' gets synchronized with B.");
 		File folderFromAAtB = new File(subFolder1AtB, folderFromAAtA.getName());
-		waitTillSynchronized(folderFromAAtB);
+		waitTillSynchronized(folderFromAAtB, true);
 
 		logger.info("Move folder 'subsubfolder4FromA' at B into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFolderFromAAtB = new File(subFolder2AtB, folderFromAAtA.getName());
@@ -635,7 +587,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subsubfolder4FromA' gets synchronized with A.");
 		File movedFileFromAAtA = new File(subFolder2AtA, folderFromAAtB.getName());
-		waitTillSynchronized(movedFolderFromAAtB);
+		waitTillSynchronized(movedFolderFromAAtB, true);
 		compareFiles(movedFileFromAAtA, movedFolderFromAAtB);
 		checkIndex(folderFromAAtA, folderFromAAtB, movedFileFromAAtA, movedFolderFromAAtB);
 	}
@@ -650,7 +602,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder1/subsubfolder3FromB' gets synchronized with A.");
 		File folderFromBAtA = new File(subFolder1AtA, folderFromBAtB.getName());
-		waitTillSynchronized(folderFromBAtA);
+		waitTillSynchronized(folderFromBAtA, true);
 
 		logger.info("Move folder 'subsubfolder3FromB' at A into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFolderFromAAtA = new File(subFolder2AtA, folderFromBAtA.getName());
@@ -659,7 +611,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subsubfolder3FromB' gets synchronized with B.");
 		File movedFolderFromAAtB = new File(subFolder2AtB, folderFromBAtA.getName());
-		waitTillSynchronized(movedFolderFromAAtB);
+		waitTillSynchronized(movedFolderFromAAtB, true);
 		compareFiles(movedFolderFromAAtA, movedFolderFromAAtB);
 		checkIndex(folderFromBAtA, folderFromBAtB, movedFolderFromAAtA, movedFolderFromAAtB);
 	}
@@ -674,7 +626,7 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till new folder 'sharedFolder/subfolder1/subsubfolder4FromB' gets synchronized with A.");
 		File folderFromBAtA = new File(subFolder1AtA, folderFromBAtB.getName());
-		waitTillSynchronized(folderFromBAtA);
+		waitTillSynchronized(folderFromBAtA, true);
 
 		logger.info("Move folder 'subsubfolder4FromB' at B into shared subfolder 'sharedfolder/subfolder2'.");
 		File movedFolderFromBAtB = new File(subFolder2AtB, folderFromBAtB.getName());
@@ -683,34 +635,13 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 
 		logger.info("Wait till moved folder 'subsubfolder4FromB' gets synchronized with A.");
 		File movedFolderFromBAtA = new File(subFolder2AtA, folderFromBAtA.getName());
-		waitTillSynchronized(movedFolderFromBAtA);
+		waitTillSynchronized(movedFolderFromBAtA, true);
 		compareFiles(movedFolderFromBAtA, movedFolderFromBAtB);
 		checkIndex(folderFromBAtA, folderFromBAtB, movedFolderFromBAtA, movedFolderFromBAtB);
 	}
 
-	/**
-	 * Waits a certain amount of time till a file appears.
-	 * 
-	 * @param synchronizingFile
-	 *            the file to synchronize
-	 */
-	private static void waitTillSynchronized(File synchronizingFile) {
-		H2HWaiter waiter = new H2HWaiter(40);
-		do {
-			waiter.tickASecond();
-		} while (!synchronizingFile.exists());
-	}
-
-	private static void compareFiles(File originalFile, File synchronizedFile) throws IOException {
-		Assert.assertEquals(originalFile.getName(), synchronizedFile.getName());
-		if (originalFile.isFile() || synchronizedFile.isFile()) {
-			Assert.assertTrue(FileUtils.contentEquals(originalFile, synchronizedFile));
-			Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(synchronizedFile));
-		}
-	}
-
-	private static void checkIndex(File oldFileAtA, File oldFileAtB, File newFileAtA, File newFileAtB)
-			throws GetFailedException, NoSessionException {
+	private void checkIndex(File oldFileAtA, File oldFileAtB, File newFileAtA, File newFileAtB) throws GetFailedException,
+			NoSessionException {
 		UserProfile userProfileA = network.get(0).getSession().getProfileManager().readUserProfile();
 		Index oldIndexAtA = userProfileA.getFileByPath(oldFileAtA, network.get(0).getSession().getRootFile());
 		Index newIndexAtA = userProfileA.getFileByPath(newFileAtA, network.get(0).getSession().getRootFile());
@@ -770,12 +701,16 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends H2HJUnitTes
 		}
 	}
 
-	@AfterClass
-	public static void endTest() throws IOException {
+	@After
+	public void cleanup() throws IOException {
 		FileUtils.deleteDirectory(rootA);
 		FileUtils.deleteDirectory(rootB);
 
 		NetworkTestUtil.shutdownNetwork(network);
+	}
+
+	@AfterClass
+	public static void afterTest() {
 		afterClass();
 	}
 

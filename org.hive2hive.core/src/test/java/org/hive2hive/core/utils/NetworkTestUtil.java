@@ -11,11 +11,10 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.H2HNode;
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
+import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
-import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
@@ -48,18 +47,19 @@ public class NetworkTestUtil {
 	 *            size of the network (has to be larger than one)
 	 * @return list containing all nodes where the first one is the bootstrapping node (initial)
 	 */
-	public static ArrayList<NetworkManager> createNetwork(int numberOfNodes) {
+	public static List<NetworkManager> createNetwork(int numberOfNodes) {
 		if (numberOfNodes < H2HConstants.REPLICATION_FACTOR) {
 			throw new IllegalArgumentException(String.format("Network size must be at least %s (replication factor).",
 					H2HConstants.REPLICATION_FACTOR));
 		}
 
-		ArrayList<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
+		IFileConfiguration fileConfig = new TestFileConfiguration();
+		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 
 		// create the first node (initial)
 		FSTSerializer serializer = new FSTSerializer();
-		NetworkManager initial = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
-				FileConfiguration.createDefault());
+		H2HDummyEncryption encryption = new H2HDummyEncryption();
+		NetworkManager initial = new NetworkManager(encryption, serializer, fileConfig);
 		INetworkConfiguration netConfig = NetworkConfiguration.createInitialLocalPeer("Node A");
 		initial.connect(netConfig);
 		nodes.add(initial);
@@ -67,8 +67,7 @@ public class NetworkTestUtil {
 		// create the other nodes and bootstrap them to the initial peer
 		char letter = 'A';
 		for (int i = 1; i < numberOfNodes; i++) {
-			NetworkManager node = new NetworkManager(new H2HDummyEncryption(), serializer, new EventBus(),
-					FileConfiguration.createDefault());
+			NetworkManager node = new NetworkManager(encryption, serializer, fileConfig);
 			INetworkConfiguration otherNetConfig = NetworkConfiguration.createLocalPeer(String.format("Node %s", ++letter),
 					initial.getConnection().getPeer().peer());
 			node.connect(otherNetConfig);
@@ -84,10 +83,11 @@ public class NetworkTestUtil {
 	 * @param network
 	 *            list containing all nodes which has to be disconnected.
 	 */
-	public static void shutdownNetwork(ArrayList<NetworkManager> network) {
-		if (!network.isEmpty()) {
-			// shutdown of master peer is enough
-			network.get(0).disconnect();
+	public static void shutdownNetwork(List<NetworkManager> network) {
+		if (network != null) {
+			for (NetworkManager networkManager : network) {
+				networkManager.disconnect(false);
+			}
 		}
 	}
 
@@ -108,7 +108,7 @@ public class NetworkTestUtil {
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeyPair,
 					node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					FileConfiguration.createDefault());
+					new TestFileConfiguration());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 
@@ -138,7 +138,7 @@ public class NetworkTestUtil {
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeys,
 					node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					FileConfiguration.createDefault());
+					new TestFileConfiguration());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 
@@ -168,7 +168,9 @@ public class NetworkTestUtil {
 
 		// create initial peer
 		FSTSerializer serializer = new FSTSerializer();
-		IH2HNode initial = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption(), serializer);
+		H2HDummyEncryption encryption = new H2HDummyEncryption();
+		IFileConfiguration fileConfig = new TestFileConfiguration();
+		IH2HNode initial = H2HNode.createNode(fileConfig, encryption, serializer);
 		initial.connect(NetworkConfiguration.createInitial("initial"));
 
 		nodes.add(initial);
@@ -176,7 +178,7 @@ public class NetworkTestUtil {
 		try {
 			InetAddress bootstrapAddress = InetAddress.getLocalHost();
 			for (int i = 1; i < numberOfNodes; i++) {
-				IH2HNode node = H2HNode.createNode(FileConfiguration.createDefault(), new H2HDummyEncryption(), serializer);
+				IH2HNode node = H2HNode.createNode(fileConfig, encryption, serializer);
 				node.connect(NetworkConfiguration.create("node " + i, bootstrapAddress));
 				nodes.add(node);
 			}

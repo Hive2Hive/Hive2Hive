@@ -18,8 +18,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Use this future adapter when sending a {@link BaseDirectMessage}. Attach this listener to the future which
  * gets
- * returned at {@link MessageManager#send(BaseMessage)} to enable a appropriate failure handling. Use the
- * {@link FutureRoutedListener#await()} method to wait blocking until the message is sent (or
+ * returned at {@link MessageManager#sendDirect(BaseDirectMessage, PublicKey)} to enable a appropriate
+ * failure handling. Use the {@link FutureRoutedListener#await()} method to wait blocking until the message is
+ * sent (or
  * not).</br></br>
  * <b>Failure Handling</b></br>
  * Sending a direct message can fail when the future object failed, when the future object contains wrong data
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * message fails the message gets re-send as long as
  * {@link BaseDirectMessage#handleSendingFailure(AcceptanceReply)} of the sent message recommends to re-send.
  * Depending on the {@link BaseDirectMessage#needsRedirectedSend()} flag a possible fall back is to use the
- * routing mechanism of {@link MessageManager#send(BaseMessage)}. For that another adapter
+ * routing mechanism of {@link MessageManager#send(BaseMessage, PublicKey)}. For that another adapter
  * (see {@link FutureDirectListener}) is attached.
  * 
  * @author Seppi, Nico
@@ -57,8 +58,8 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	 *            message which has been sent (needed for re-sending)
 	 * @param receiverPublicKey
 	 *            the receivers public key which was used for encryption
-	 * @param networkManager
-	 *            reference needed for re-sending)
+	 * @param messageManager
+	 *            reference needed for re-sending
 	 */
 	public FutureDirectListener(BaseDirectMessage message, PublicKey receiverPublicKey, MessageManager messageManager) {
 		this.message = message;

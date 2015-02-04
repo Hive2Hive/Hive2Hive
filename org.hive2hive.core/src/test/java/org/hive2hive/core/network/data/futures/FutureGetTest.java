@@ -24,7 +24,7 @@ import org.junit.Test;
  */
 public class FutureGetTest extends H2HJUnitTest {
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
 
 	@BeforeClass

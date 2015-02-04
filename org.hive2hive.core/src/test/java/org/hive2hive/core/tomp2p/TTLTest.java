@@ -24,7 +24,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * A test which test the content protection mechanisms of <code>TomP2P</code>. Tests should be completely
+ * A test which test the TTL cleanup mechanism of <code>TomP2P</code>. Tests should be completely
  * independent of <code>Hive2Hive</code>.
  * 
  * @author Seppi
@@ -63,7 +63,7 @@ public class TTLTest extends H2HJUnitTest {
 		int ttl = 3;
 
 		String testData = "data";
-		Data data = new Data(testData).protectEntry();
+		Data data = new Data(testData).protectEntry(keyPair1);
 		data.ttlSeconds(ttl).addBasedOn(bKey);
 
 		// initial put
@@ -122,17 +122,17 @@ public class TTLTest extends H2HJUnitTest {
 		Number160 cKey = Number160.createHash("content");
 
 		// put first version
-		FuturePut futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version1").protectEntry())
+		FuturePut futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version1").protectEntry(keyPair1))
 				.versionKey(new Number160(0)).keyPair(keyPair1).start();
 		futurePut.awaitUninterruptibly();
 		Assert.assertTrue(futurePut.isSuccess());
 		// put second version
-		futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version2").protectEntry())
+		futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version2").protectEntry(keyPair1))
 				.versionKey(new Number160(1)).keyPair(keyPair1).start();
 		futurePut.awaitUninterruptibly();
 		Assert.assertTrue(futurePut.isSuccess());
 		// put third version
-		futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version3").protectEntry())
+		futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version3").protectEntry(keyPair1))
 				.versionKey(new Number160(2)).keyPair(keyPair1).start();
 		futurePut.awaitUninterruptibly();
 		Assert.assertTrue(futurePut.isSuccess());

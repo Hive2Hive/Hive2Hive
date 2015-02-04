@@ -68,7 +68,7 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	/**
 	 * Returns a list of chunks that are not downloaded yed
 	 * 
-	 * @return
+	 * @return a list of chunks which still need to be downloaded
 	 */
 	public List<MetaChunk> getOpenChunks() {
 		List<MetaChunk> openChunks = new ArrayList<MetaChunk>();
@@ -127,8 +127,8 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	/**
 	 * Mark the given chunk as downloaded
 	 * 
-	 * @param chunk
-	 * @param filePart
+	 * @param chunkIndex the index of the chunk (unique number)
+	 * @param filePart the file holding the content of the chunk
 	 */
 	public synchronized void setDownloaded(int chunkIndex, File filePart) {
 		logger.debug("Successfully downloaded chunk {} of file {}", chunkIndex, getDestinationName());

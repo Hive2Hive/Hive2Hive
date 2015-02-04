@@ -2,7 +2,7 @@ package org.hive2hive.core.processes.common.base;
 
 import static org.junit.Assert.assertNull;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -27,7 +27,7 @@ import org.junit.Test;
  */
 public class BaseRemoveProcessStepTest extends H2HJUnitTest {
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
 
 	@BeforeClass

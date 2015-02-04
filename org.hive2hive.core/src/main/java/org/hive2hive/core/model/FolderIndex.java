@@ -28,7 +28,6 @@ public class FolderIndex extends Index {
 	 * Constructor for the root folder.
 	 * 
 	 * @param keyPair
-	 * @param name
 	 */
 	public FolderIndex(KeyPair keyPair) {
 		super(keyPair);
@@ -40,9 +39,7 @@ public class FolderIndex extends Index {
 	 * @param parent
 	 * @param keyPair
 	 * @param name
-	 * @param isFolder
 	 */
-	// TODO keypair can be generated here, no need to hand over as parameter
 	public FolderIndex(FolderIndex parent, KeyPair keyPair, String name) {
 		super(keyPair, name, parent);
 	}
@@ -71,7 +68,7 @@ public class FolderIndex extends Index {
 	/**
 	 * Returns whether this index is the root
 	 * 
-	 * @return
+	 * @return <code>true</code> in case this indes is the root folder (and therefore has no parent)
 	 */
 	public boolean isRoot() {
 		return parent == null;
@@ -114,12 +111,11 @@ public class FolderIndex extends Index {
 	 * Finds a child with a name. If the child does not exist, null is returned
 	 * 
 	 * @param name
-	 * @return
+	 * @return the child with the given name or <code>null</code> if none was found with that name
 	 */
-	// TODO get child by full path??
 	public Index getChildByName(String name) {
 		if (name != null) {
-			String withoutSeparator = name.replaceAll(FileUtil.getFileSep(), "");
+			String withoutSeparator = name.replace(FileUtil.getFileSep(), "");
 			for (Index child : children) {
 				if (child.getName().equalsIgnoreCase(withoutSeparator)) {
 					return child;
@@ -195,7 +191,7 @@ public class FolderIndex extends Index {
 	 * Returns a list of the permissions of this node together with the inherited permissions from the parent
 	 * nodes.
 	 * 
-	 * @return
+	 * @return the set of user permissions (inherited from parent folder)
 	 */
 	public Set<UserPermission> getCalculatedUserPermissions() {
 		// if there is a parent and no user permissions, ask parent
@@ -238,7 +234,7 @@ public class FolderIndex extends Index {
 	 * Returns whether a specific user can write to this folder.
 	 * 
 	 * @param userId
-	 * @return
+	 * @return <code>true</code> if the user has write permissions to this folder
 	 */
 	public boolean canWrite(String userId) {
 		for (UserPermission permission : getCalculatedUserPermissions()) {
@@ -297,7 +293,7 @@ public class FolderIndex extends Index {
 	 * Returns the flag whether this node is shared (this is only set at the top shared folder, not at all
 	 * sub-children). This call should be used with care.
 	 * 
-	 * @return
+	 * @return <code>true</code> if this folder is the root of a share
 	 */
 	public boolean getSharedFlag() {
 		return isShared;

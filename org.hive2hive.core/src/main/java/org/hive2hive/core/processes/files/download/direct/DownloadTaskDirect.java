@@ -68,7 +68,7 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 	/**
 	 * Returns a copy of the locations
 	 * 
-	 * @return
+	 * @return a list of all available locations
 	 */
 	public List<Locations> consumeLocationsBlocking() {
 		try {

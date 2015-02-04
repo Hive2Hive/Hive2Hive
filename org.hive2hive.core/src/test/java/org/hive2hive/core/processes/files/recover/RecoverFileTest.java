@@ -2,7 +2,6 @@ package org.hive2hive.core.processes.files.recover;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -36,7 +35,7 @@ import org.junit.Test;
 public class RecoverFileTest extends H2HJUnitTest {
 
 	private static final int networkSize = 6;
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 
 	private NetworkManager client;
 	private UserCredentials userCredentials;

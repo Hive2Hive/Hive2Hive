@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.security.PublicKey;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -32,7 +32,7 @@ import org.junit.Test;
  */
 public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
 
 	@BeforeClass
@@ -51,8 +51,8 @@ public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 		// generate a random content key
 		String contentKey = randomString();
 		// create a message with target node B
-		TestDirectMessageWithReply message = new TestDirectMessageWithReply(
-				nodeB.getConnection().getPeer().peerAddress(), contentKey);
+		TestDirectMessageWithReply message = new TestDirectMessageWithReply(nodeB.getConnection().getPeer().peerAddress(),
+				contentKey);
 		// create and add a callback handler
 		TestCallBackHandler callBackHandler = message.new TestCallBackHandler(nodeA);
 		message.setCallBackHandler(callBackHandler);

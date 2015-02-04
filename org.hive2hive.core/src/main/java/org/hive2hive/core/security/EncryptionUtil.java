@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -32,7 +33,6 @@ import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +51,8 @@ public final class EncryptionUtil {
 
 	private static final String SECURITY_PROVIDER = "BC";
 	private static final String SINGATURE_ALGORITHM = "SHA1withRSA";
+	// Fermat F4, largest known fermat prime
+	private static final BigInteger RSA_PUBLIC_EXP = new BigInteger("10001", 16);
 	private static final int IV_LENGTH = 16;
 
 	public enum AES_KEYLENGTH {
@@ -133,16 +135,14 @@ public final class EncryptionUtil {
 	 * @return An asymmetric RSA key pair of the specified length.
 	 */
 	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
-		int strength = keyLength.value();
-		// Fermat F4, largest known fermat prime
-		BigInteger publicExp = new BigInteger("10001", 16);
+		installBCProvider();
 
 		try {
-			JDKKeyPairGenerator gen = new JDKKeyPairGenerator.RSA();
-			RSAKeyGenParameterSpec params = new RSAKeyGenParameterSpec(strength, publicExp);
+			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "BC");
+			RSAKeyGenParameterSpec params = new RSAKeyGenParameterSpec(keyLength.value(), RSA_PUBLIC_EXP);
 			gen.initialize(params, new SecureRandom());
 			return gen.generateKeyPair();
-		} catch (InvalidAlgorithmParameterException e) {
+		} catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchProviderException e) {
 			logger.error("Exception while generation of RSA key pair of length {}:", keyLength, e);
 		}
 		return null;
@@ -203,7 +203,7 @@ public final class EncryptionUtil {
 	 * content, a private RSA key has to be provided.
 	 * 
 	 * @param data The data to be decrypted.
-	 * @param publicKey The asymmetric private key with which the data shall be decrypted.
+	 * @param privateKey The asymmetric private key with which the data shall be decrypted.
 	 * @return Returns the decrypted data.
 	 * @throws InvalidKeyException
 	 * @throws BadPaddingException

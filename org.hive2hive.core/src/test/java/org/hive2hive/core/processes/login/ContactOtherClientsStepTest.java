@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -38,7 +39,7 @@ import org.junit.Test;
 public class ContactOtherClientsStepTest extends H2HJUnitTest {
 
 	private static final int networkSize = 6;
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static String userId = "user id";
 
 	@BeforeClass
@@ -74,8 +75,6 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 		fakedLocations.addPeerAddress(network.get(1).getConnection().getPeer().peerAddress());
 		fakedLocations.addPeerAddress(network.get(2).getConnection().getPeer().peerAddress());
 		fakedLocations.addPeerAddress(network.get(3).getConnection().getPeer().peerAddress());
-		
-		
 
 		Locations result = runProcessStep(fakedLocations,
 				isInitialClient(fakedLocations, network.get(0).getConnection().getPeer().peerAddress()));

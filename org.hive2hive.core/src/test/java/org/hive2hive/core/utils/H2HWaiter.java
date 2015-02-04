@@ -2,6 +2,8 @@ package org.hive2hive.core.utils;
 
 import static org.junit.Assert.fail;
 
+import org.junit.Assert;
+
 /**
  * A helper class for testing. Initialize the waiter with a certain amount of seconds. Use
  * {@link H2HWaiter#tickASecond()} method to sleep for a second. This method calls {@link Assert#fail()} after

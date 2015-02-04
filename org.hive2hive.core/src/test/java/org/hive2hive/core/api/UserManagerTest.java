@@ -19,6 +19,7 @@ import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -93,7 +94,12 @@ public class UserManagerTest extends H2HJUnitTest {
 		IProcessComponent<Void> loginProcess;
 		for (int i = 0; i < network.size(); i++) {
 			loginProcess = network.get(i).getUserManager().createLoginProcess(userCredentials, fileAgent);
-			loginProcess.execute();
+			try {
+				loginProcess.execute();
+				Assert.fail("Should fail to login when user is not registered");
+			} catch (ProcessExecutionException e) {
+				// expected
+			}
 			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
 			assertFalse(isLoggedIn);
 		}

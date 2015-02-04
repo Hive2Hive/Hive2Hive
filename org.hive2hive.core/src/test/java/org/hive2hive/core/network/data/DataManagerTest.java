@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.SignatureException;
-import java.util.ArrayList;
+import java.util.List;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
@@ -29,7 +29,7 @@ import org.junit.Test;
  */
 public class DataManagerTest extends H2HJUnitTest {
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
 
 	@BeforeClass

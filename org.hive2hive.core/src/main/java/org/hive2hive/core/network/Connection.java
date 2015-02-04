@@ -58,17 +58,18 @@ public class Connection implements IPeerHolder {
 	/**
 	 * Creates a peer and connects it to the network.
 	 * 
-	 * @param nodeId the id of the network node (should be unique among the network)
+	 * @param nodeID the id of the network node (should be unique among the network)
+	 * @param port the port to bind to (or negative to bind automatically a default port)
 	 * @return <code>true</code>, if the peer creation and connection was successful, otherwise
 	 *         <code>false</code>
 	 */
-	public boolean connect(String nodeID) {
+	public boolean connect(String nodeID, int port) {
 		if (isConnected()) {
 			logger.warn("Peer is already connected.");
 			return false;
 		}
 
-		return createPeer(nodeID);
+		return createPeer(nodeID, port);
 	}
 
 	/**
@@ -112,7 +113,7 @@ public class Connection implements IPeerHolder {
 		}
 
 		FutureDiscover futureDiscover = peerDHT.peer().discover().inetAddress(bootstrapAddress).ports(port).start();
-		futureDiscover.awaitUninterruptibly();
+		futureDiscover.awaitUninterruptibly(H2HConstants.DISCOVERY_TIMEOUT_MS);
 
 		if (futureDiscover.isSuccess()) {
 			logger.debug("Discovery successful. Outside address is '{}'.", futureDiscover.peerAddress().inetAddress());
@@ -121,14 +122,14 @@ public class Connection implements IPeerHolder {
 		}
 
 		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().inetAddress(bootstrapAddress).ports(port).start();
-		futureBootstrap.awaitUninterruptibly();
+		futureBootstrap.awaitUninterruptibly(H2HConstants.BOOTSTRAPPING_TIMEOUT_MS);
 
 		if (futureBootstrap.isSuccess()) {
 			logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", bootstrapAddress.getHostAddress());
 			return true;
 		} else {
 			logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
-			peerDHT.shutdown().awaitUninterruptibly();
+			peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 			return false;
 		}
 	}
@@ -142,7 +143,7 @@ public class Connection implements IPeerHolder {
 		boolean isDisconnected = true;
 		if (isConnected()) {
 			// notify neighbors about shutdown
-			peerDHT.peer().announceShutdown().start().awaitUninterruptibly();
+			peerDHT.peer().announceShutdown().start().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 			// shutdown the peer, giving a certain timeout
 			isDisconnected = peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 
@@ -174,7 +175,7 @@ public class Connection implements IPeerHolder {
 	 *            create a new network.
 	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
 	 */
-	public boolean connectInternal(String nodeId, Peer masterPeer) {
+	public boolean connectInternal(String nodeId, int port, Peer masterPeer) {
 		// disable peer verification (faster mutual acceptance)
 		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(Number160.createHash(nodeId));
 		peerMapConfiguration.peerVerification(false);
@@ -187,7 +188,7 @@ public class Connection implements IPeerHolder {
 
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId).masterPeer(masterPeer).peerMap(peerMap).start())
+			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId, port).masterPeer(masterPeer).peerMap(peerMap).start())
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 		} catch (IOException e) {
@@ -204,14 +205,14 @@ public class Connection implements IPeerHolder {
 		if (masterPeer != null) {
 			// bootstrap to master peer
 			FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().peerAddress(masterPeer.peerAddress()).start();
-			futureBootstrap.awaitUninterruptibly();
+			futureBootstrap.awaitUninterruptibly(H2HConstants.BOOTSTRAPPING_TIMEOUT_MS);
 
 			if (futureBootstrap.isSuccess()) {
 				logger.debug("Bootstrapping successful. Bootstrapped to '{}'.", masterPeer.peerAddress());
 				return true;
 			} else {
 				logger.warn("Bootstrapping failed: {}.", futureBootstrap.failedReason());
-				peerDHT.shutdown().awaitUninterruptibly();
+				peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
 				return false;
 			}
 		} else {
@@ -228,26 +229,26 @@ public class Connection implements IPeerHolder {
 		return peerDHT;
 	}
 
-	private PeerBuilder preparePeerBuilder(String nodeID) {
-		int port = searchFreePort();
+	private PeerBuilder preparePeerBuilder(String nodeID, int port) {
+		int bindPort = port < 0 ? searchFreePort() : port;
 
 		// configure the thread handling internally, callback can be blocking
-		eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
+		// eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
 
 		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
 		clientConfig.signatureFactory(new H2HSignatureFactory());
-		clientConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
+		// clientConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
 
 		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(new H2HSignatureFactory());
-		serverConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
-		serverConfig.ports(new Ports(port, port));
+		// serverConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
+		serverConfig.ports(new Ports(bindPort, bindPort));
 
 		// listen on any interfaces (see https://github.com/Hive2Hive/Hive2Hive/issues/117)
 		Bindings bindings = new Bindings();
 		bindings.listenAny();
 
-		return new PeerBuilder(Number160.createHash(nodeID)).ports(port).bindings(bindings)
+		return new PeerBuilder(Number160.createHash(nodeID)).ports(bindPort).bindings(bindings)
 				.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig);
 	}
 
@@ -267,10 +268,10 @@ public class Connection implements IPeerHolder {
 		replication.start();
 	}
 
-	private boolean createPeer(String nodeId) {
+	private boolean createPeer(String nodeId, int port) {
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId).start())
+			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId, port).start())
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 		} catch (IOException e) {

@@ -13,11 +13,12 @@ import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.IH2HSerialize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetworkManager {
 
-	// TODO this class needs heavy refactoring! many man-in-the-middle delegations and methods that do not
-	// belong here
+	private static final Logger logger = LoggerFactory.getLogger(NetworkManager.class);
 
 	private final Connection connection;
 	private final DataManager dataManager;
@@ -25,13 +26,10 @@ public class NetworkManager {
 	private String nodeID;
 	private H2HSession session;
 
-	private final EventBus eventBus;
+	private EventBus eventBus;
 	private final DownloadManager downloadManager;
 
-	public NetworkManager(IH2HEncryption encryption, IH2HSerialize serializer, EventBus eventBus,
-			IFileConfiguration fileConfig) {
-		this.eventBus = eventBus;
-
+	public NetworkManager(IH2HEncryption encryption, IH2HSerialize serializer, IFileConfiguration fileConfig) {
 		connection = new Connection(this, encryption, serializer);
 		dataManager = new DataManager(connection, encryption, serializer);
 		messageManager = new MessageManager(this, encryption, serializer);
@@ -44,12 +42,14 @@ public class NetworkManager {
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
 	public boolean connect(INetworkConfiguration networkConfiguration) {
+		this.eventBus = new EventBus();
 		this.nodeID = networkConfiguration.getNodeID();
 
 		if (networkConfiguration.isLocal()) {
-			return connection.connectInternal(networkConfiguration.getNodeID(), networkConfiguration.getBootstapPeer());
+			return connection.connectInternal(networkConfiguration.getNodeID(), networkConfiguration.getPort(),
+					networkConfiguration.getBootstapPeer());
 		} else {
-			boolean success = connection.connect(networkConfiguration.getNodeID());
+			boolean success = connection.connect(networkConfiguration.getNodeID(), networkConfiguration.getPort());
 			// bootstrap if not initial peer
 			if (success && !networkConfiguration.isInitialPeer()) {
 				success = connection.bootstrap(networkConfiguration.getBootstrapAddress(),
@@ -64,6 +64,7 @@ public class NetworkManager {
 	 * Uses an existing peer for DHT interaction
 	 */
 	public boolean connect(PeerDHT peer, boolean startReplication) {
+		this.eventBus = new EventBus();
 		this.nodeID = peer.peerID().toString();
 		return connection.connect(peer, startReplication);
 	}
@@ -71,12 +72,22 @@ public class NetworkManager {
 	/**
 	 * Disconnects from the network.
 	 * 
+	 * @param keepSession <code>false</code> if the session should also be wiped.
+	 * 
 	 * @return <code>true</code> if the disconnection was successful, <code>false</code> otherwise
 	 */
-	public boolean disconnect() {
-		if (session != null && session.getProfileManager() != null) {
-			session.getProfileManager().stopQueueWorker();
+	public boolean disconnect(boolean keepSession) {
+		if (session != null && !keepSession) {
+			if (session.getProfileManager() != null) {
+				session.getProfileManager().stopQueueWorker();
+			}
+			if (session.getDownloadManager() != null) {
+				session.getDownloadManager().stopBackgroundProcesses();
+			}
 		}
+
+		eventBus.shutdown();
+		logger.debug("Eventbus stopped");
 
 		return connection.disconnect();
 	}

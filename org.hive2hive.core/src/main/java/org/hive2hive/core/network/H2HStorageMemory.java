@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Allows to deny data and/or return manipulated data. <b>Important:</b> This features are used only for
  * testing purposes.
- * 
+ *
  * @author Seppi, Nico
  */
 public class H2HStorageMemory extends StorageLayer {
@@ -26,7 +26,7 @@ public class H2HStorageMemory extends StorageLayer {
 		/** the normal behavior, where each 'put' is checked for version conflicts */
 		STANDARD,
 
-		/** Every request to store will fail and returns a {@link PutStatus#FAILED} */
+		/** Every request to store will fail and returns a {@link net.tomp2p.dht.StorageLayer.PutStatus#FAILED} */
 		DENY_ALL
 	}
 
@@ -64,10 +64,11 @@ public class H2HStorageMemory extends StorageLayer {
 	}
 
 	@Override
-	public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent, boolean domainProtection) {
+	public Enum<?> put(Number640 key, Data newData, PublicKey publicKey, boolean putIfAbsent, boolean domainProtection,
+			boolean sendSelf) {
 		switch (putMode) {
 			case STANDARD: {
-				return super.put(key, newData, publicKey, putIfAbsent, domainProtection);
+				return super.put(key, newData, publicKey, putIfAbsent, domainProtection, sendSelf);
 			}
 			case DENY_ALL: {
 				// logger.warn("Memory mode is denying the put request.");

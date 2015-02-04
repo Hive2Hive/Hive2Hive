@@ -8,6 +8,7 @@ import java.util.Scanner;
  * An abstract console menu.
  * 
  * @author Christian
+ * @author Nico
  * 
  */
 public abstract class ConsoleMenu {

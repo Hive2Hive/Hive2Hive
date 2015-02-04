@@ -100,10 +100,10 @@ public final class PasswordUtil {
 	/**
 	 * Generates a symmetric AES key of the specified size and based on the provided UserPassword.
 	 * 
-	 * @param upw The UserPassword from which the AES key is derivated.
+	 * @param password The UserPassword from which the AES key is derivated.
+	 * @param pin The pin of the user (used for salting)
 	 * @param keyLength The desired key lengt<h of the resulting AES key.
 	 * @return Returns the derived symmetric AES key of desired size.
-	 * @throws InvalidKeySpecException
 	 */
 	public static SecretKey generateAESKeyFromPassword(String password, String pin, AES_KEYLENGTH keyLength) {
 

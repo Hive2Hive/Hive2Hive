@@ -3,6 +3,7 @@ package org.hive2hive.core.network.data.vdht;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -41,7 +42,7 @@ import org.junit.Test;
  */
 public class EncryptedVersionManagerTest extends H2HJUnitTest {
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
 
 	// can be reused

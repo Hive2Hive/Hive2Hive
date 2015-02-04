@@ -80,10 +80,12 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 				try {
 					// notify own other clients about
 					notifyOtherClients(new AddNotificationMessageFactory(sharedFile, null));
-					logger.debug("Notified other client that new (shared) files are available for download.");
+					logger.debug("Notified other client(s) that new (shared) file '{}' are available for download.",
+							sharedFile.getFullPath());
 				} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
 						| NoSessionException e) {
-					logger.error("Could not notify other clients of me about the shared file.", e);
+					logger.error("Could not notify other client(s) of me about the shared file '{}'.",
+							sharedFile.getFullPath(), e);
 				}
 			}
 		}

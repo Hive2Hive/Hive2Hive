@@ -50,7 +50,7 @@ import org.junit.Test;
  */
 public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static TestFileAgent fileAgent;
 	private static final int networkSize = 10;
 

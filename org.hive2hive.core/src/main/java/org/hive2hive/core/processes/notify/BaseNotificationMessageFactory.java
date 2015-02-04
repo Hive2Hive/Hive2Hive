@@ -19,14 +19,14 @@ public abstract class BaseNotificationMessageFactory {
 	 * Create a private message to notify clients of the same user.
 	 * 
 	 * @param receiver
-	 * @return
+	 * @return the message for notifying own clients
 	 */
 	public abstract BaseDirectMessage createPrivateNotificationMessage(PeerAddress receiver);
 
 	/**
 	 * Create a user profile task to put it into the queue of other users.
 	 * 
-	 * @return
+	 * @return the user profile task or <code>null</code> if none is required
 	 */
 	public abstract UserProfileTask createUserProfileTask(String sender);
 
@@ -36,7 +36,7 @@ public abstract class BaseNotificationMessageFactory {
 	 * 
 	 * @param receiver
 	 * @param userId
-	 * @return
+	 * @return the message to other users clients (master node)
 	 */
 	public BaseDirectMessage createHintNotificationMessage(PeerAddress receiver, String userId) {
 		return new UserProfileTaskNotificationMessage(receiver, userId);

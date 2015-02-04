@@ -44,8 +44,9 @@ public class DownloadManager {
 		this.dataManager = dataManager;
 		this.messageManager = messageManager;
 		this.fileConfig = fileConfig;
-		this.executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);
 		this.openTasks = Collections.newSetFromMap(new ConcurrentHashMap<BaseDownloadTask, Boolean>());
+
+		startBackgroundProcess();
 	}
 
 	/**
@@ -92,15 +93,13 @@ public class DownloadManager {
 	 */
 	public void stopBackgroundProcesses() {
 		executor.shutdownNow();
-		while (!executor.isTerminated()) {
-			logger.debug("Waiting for executor to shutdown...");
-		}
+		logger.debug("All downloads stopped");
 	}
 
 	/**
-	 * Continue with the downloads
+	 * Start / continue the downloads
 	 */
-	public void continueBackgroundProcess() {
+	public void startBackgroundProcess() {
 		executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);
 		for (BaseDownloadTask task : openTasks) {
 			schedule(task);

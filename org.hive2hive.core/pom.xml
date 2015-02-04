@@ -16,24 +16,23 @@
 	<description>The core project of the Hive2Hive library.</description>
 
 	<dependencies>
-
 		<dependency>
 			<!-- Hive2Hive Process Framework -->
 			<groupId>org.hive2hive</groupId>
 			<artifactId>org.hive2hive.processframework</artifactId>
-			<version>1.0-Beta3</version>
+			<version>1.0</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-dht</artifactId>
-			<version>5.0-Beta2-SNAPSHOT</version>
+			<version>5.0-Beta3-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-replication</artifactId>
-			<version>5.0-Beta2-SNAPSHOT</version>
+			<version>5.0-Beta3-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -44,14 +43,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk16</artifactId>
-			<version>1.45</version>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.51</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>de.ruedigermoeller</groupId>
 			<artifactId>fst</artifactId>
-			<version>1.58</version>
+			<version>2.21</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

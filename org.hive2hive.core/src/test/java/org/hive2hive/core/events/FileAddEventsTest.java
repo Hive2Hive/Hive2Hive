@@ -8,13 +8,12 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileEvent;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.utils.FileTestUtil;
+import org.hive2hive.core.utils.TestFileConfiguration;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.Test;
 
@@ -46,10 +45,10 @@ public class FileAddEventsTest extends FileEventsTest {
 	@Test
 	public void testBigFileAddEvent() throws NoPeerConnectionException, IOException, NoSessionException {
 		// upload a big file from machine A
-		BigInteger maxFileSize = FileConfiguration.createDefault().getMaxFileSize();
-		int minChunks = (int) maxFileSize.longValue() / H2HConstants.DEFAULT_CHUNK_SIZE;
+		BigInteger maxFileSize = new TestFileConfiguration().getMaxFileSize();
+		int minChunks = (int) maxFileSize.longValue() / TestFileConfiguration.CHUNK_SIZE;
 		String fileName = randomString();
-		File file = FileTestUtil.createFileRandomContent(fileName, minChunks + 1, rootA, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file = FileTestUtil.createFileRandomContent(fileName, minChunks + 1, rootA);
 		UseCaseTestUtil.uploadNewFile(clientA, file);
 
 		// wait for the event

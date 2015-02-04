@@ -3,7 +3,7 @@ package org.hive2hive.core.processes.files.download;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
@@ -41,7 +41,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 6;
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static NetworkManager uploader;
 	private static NetworkManager downloader;
 	private static UserCredentials userCredentials;
@@ -77,12 +77,11 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 	@Before
 	public void uploadFile() throws IOException, NoSessionException, NoPeerConnectionException, GetFailedException {
 		// upload a small file
-		String fileName = randomString();
-		uploadedFile = FileTestUtil.createFileRandomContent(fileName, 10, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
+		uploadedFile = FileTestUtil.createFileRandomContent(3, uploaderRoot);
 		testContent = FileUtils.readFileToString(uploadedFile);
 		UseCaseTestUtil.uploadNewFile(uploader, uploadedFile);
 		UserProfile up = UseCaseTestUtil.getUserProfile(network.get(0), userCredentials);
-		fileNode = up.getRoot().getChildByName(fileName);
+		fileNode = up.getRoot().getChildByName(uploadedFile.getName());
 	}
 
 	@Test

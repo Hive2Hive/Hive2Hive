@@ -1,29 +1,30 @@
 package org.hive2hive.core.processes.logout;
 
-import org.hive2hive.core.network.data.download.DownloadManager;
+import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 
-public class StopDownloadsStep extends ProcessStep<Void> {
+public class StopUserQueueWorkerStep extends ProcessStep<Void> {
 
-	private final DownloadManager downloadManager;
+	private final UserProfileManager userProfileManager;
 
-	public StopDownloadsStep(DownloadManager downloadManager) {
-		this.downloadManager = downloadManager;
+	public StopUserQueueWorkerStep(UserProfileManager userProfileManager) {
+		this.userProfileManager = userProfileManager;
 		this.setName(getClass().getName());
 	}
 
 	@Override
 	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		downloadManager.stopBackgroundProcesses();
+		userProfileManager.stopQueueWorker();
 		setRequiresRollback(true);
 		return null;
 	}
 
 	@Override
 	protected Void doRollback() throws InvalidProcessStateException {
-		downloadManager.startBackgroundProcess();
+		// restart the queue worker
+		userProfileManager.startQueueWorker();
 		setRequiresRollback(false);
 		return null;
 	}

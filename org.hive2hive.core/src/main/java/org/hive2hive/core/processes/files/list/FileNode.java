@@ -25,7 +25,7 @@ public class FileNode {
 	private final byte[] md5;
 	private final Set<UserPermission> userPermissions;
 
-	FileNode(FileNode parent, File file, String path, byte[] md5, Set<UserPermission> userPermissions) {
+	public FileNode(FileNode parent, File file, String path, byte[] md5, Set<UserPermission> userPermissions) {
 		this.parent = parent;
 		this.file = file;
 		this.path = path;
@@ -37,7 +37,7 @@ public class FileNode {
 	/**
 	 * Get the parent node or <code>null</code> if this node is the root folder
 	 * 
-	 * @return
+	 * @return the parent of this node (can be null in case of the root folder)
 	 */
 	public FileNode getParent() {
 		return parent;
@@ -67,7 +67,7 @@ public class FileNode {
 	/**
 	 * Returns the relative path of the file to the root
 	 * 
-	 * @return
+	 * @return the full path of the file
 	 */
 	public String getPath() {
 		return path;

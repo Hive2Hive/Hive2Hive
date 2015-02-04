@@ -3,71 +3,33 @@ package org.hive2hive.core.security;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
-import java.util.Arrays;
 
-import net.tomp2p.message.SignatureCodec;
+import net.tomp2p.message.RSASignatureCodec;
 
 import org.hive2hive.core.H2HConstants;
 
 /**
- * An ASN.1 encoder and decoder for the signature.
+ * A RSA encoder and decoder for the signature.
  * 
- * @author Thomas, Seppi
+ * @author Thomas
+ * @author Seppi
+ * @author Nico
  */
-public class H2HSignatureCodec implements SignatureCodec {
+public class H2HSignatureCodec extends RSASignatureCodec {
 
-	private byte[] encodedData;
+	// get the default byte count
+	public static final int SIGNATURE_SIZE = H2HConstants.KEYLENGTH_PROTECTION.value() / 8;
 
-	@Override
-	public SignatureCodec decode(byte[] encodedData) throws IOException {
-		// no decoding necessary
-		if (encodedData.length != signatureSize()) {
-			throw new IOException("RSA signature has size " + signatureSize() + " received: " + encodedData.length);
-		}
-		this.encodedData = encodedData;
-		return this;
+	public H2HSignatureCodec(byte[] encodedData) throws IOException {
+		super(encodedData);
 	}
 
-	@Override
-	public byte[] encode() throws IOException {
-		// no encoding necessary
-		return encodedData;
-	}
-
-	@Override
-	public SignatureCodec write(ByteBuf buf) {
-		buf.writeBytes(encodedData);
-		return this;
-	}
-
-	@Override
-	public SignatureCodec read(ByteBuf buf) {
-		encodedData = new byte[signatureSize()];
-		buf.readBytes(encodedData);
-		return this;
+	public H2HSignatureCodec(ByteBuf buf) {
+		super(buf);
 	}
 
 	@Override
 	public int signatureSize() {
-		// get the default byte count
-		return H2HConstants.KEYLENGTH_PROTECTION.value() / 8;
+		return SIGNATURE_SIZE;
 	}
-
-	@Override
-	public int hashCode() {
-		return Arrays.hashCode(encodedData);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof H2HSignatureCodec)) {
-			return false;
-		}
-		if (obj == this) {
-			return true;
-		}
-		H2HSignatureCodec s = (H2HSignatureCodec) obj;
-		return Arrays.equals(s.encodedData, encodedData);
-	}
-
 }

@@ -10,8 +10,12 @@ import org.hive2hive.core.security.IH2HSerialize;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WritePersistentStep extends ProcessStep<Void> {
+
+	private static final Logger logger = LoggerFactory.getLogger(WritePersistentStep.class);
 
 	private final IFileAgent fileAgent;
 	private final PublicKeyManager keyManager;
@@ -29,11 +33,12 @@ public class WritePersistentStep extends ProcessStep<Void> {
 
 	@Override
 	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		// write the current state to a meta file
 		try {
+			// write the current state to a meta file
 			FileUtil.writePersistentMetaData(fileAgent, keyManager, downloadManager, serializer);
 		} catch (IOException ex) {
-			throw new ProcessExecutionException(this, ex, "Meta data could not be persisted.");
+			// it's not mandatory, but recommended. Thus we don't rollback the logout process here
+			logger.error("Meta data could not be persisted.", ex);
 		}
 		return null;
 	}

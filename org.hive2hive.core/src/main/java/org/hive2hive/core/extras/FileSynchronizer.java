@@ -62,7 +62,7 @@ public class FileSynchronizer {
 	/**
 	 * Returns a list of files that have been deleted from the disc during this client was offline
 	 * 
-	 * @return
+	 * @return a list of files that has been deleted locally
 	 */
 	public List<Index> getDeletedLocally() {
 		List<Index> deletedLocally = new ArrayList<Index>();
@@ -102,7 +102,7 @@ public class FileSynchronizer {
 	/**
 	 * Returns a list of files that have been deleted by another client during the absence of this client.
 	 * 
-	 * @return
+	 * @return a list of files that has been deleted remotely
 	 */
 	public List<File> getDeletedRemotely() {
 		List<File> deletedRemotely = new ArrayList<File>();
@@ -126,7 +126,7 @@ public class FileSynchronizer {
 	 * Returns the missing files that exist on disk but not in the file tree in the user profile. The list is
 	 * in pre-order
 	 * 
-	 * @return
+	 * @return a list of files that has been added locally
 	 */
 	public List<File> getAddedLocally() {
 		List<File> addedLocally = new ArrayList<File>();
@@ -150,7 +150,7 @@ public class FileSynchronizer {
 	/**
 	 * Returns a list of files that are in the user profile but not on the local disk yet.
 	 * 
-	 * @return
+	 * @return a list of files that has been added remotely
 	 */
 	public List<Index> getAddedRemotely() {
 		List<Index> addedRemotely = new ArrayList<Index>();
@@ -177,7 +177,7 @@ public class FileSynchronizer {
 	/**
 	 * Returns a list of files that already existed but have been modified by the client while he was offline.
 	 * 
-	 * @return
+	 * @return a list of files that has been updated locally
 	 */
 	public List<File> getUpdatedLocally() {
 		List<File> updatedLocally = new ArrayList<File>();
@@ -219,7 +219,7 @@ public class FileSynchronizer {
 	/**
 	 * Returns files that have been remotely modified while the client was offline
 	 * 
-	 * @return
+	 * @return a list of files that has been updated remotely
 	 */
 	public List<FileIndex> getUpdatedRemotely() {
 		List<FileIndex> updatedRemotely = new ArrayList<FileIndex>();

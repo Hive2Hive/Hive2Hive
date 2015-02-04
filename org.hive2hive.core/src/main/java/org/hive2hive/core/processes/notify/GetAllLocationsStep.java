@@ -53,7 +53,7 @@ public class GetAllLocationsStep extends BaseGetProcessStep {
 		}
 
 		// done with all locations
-		logger.debug("Sending notifications to {} users.", allLocations.size());
+		logger.debug("Sending notifications to {} users: ", allLocations.size(), allLocations.keySet().toArray());
 		context.setAllLocations(allLocations);
 
 		return null;

@@ -8,7 +8,10 @@ import java.util.concurrent.TimeUnit;
 
 import net.tomp2p.nat.PeerBuilderNAT;
 import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.relay.android.MessageBufferConfiguration;
+import net.tomp2p.relay.RelayType;
+import net.tomp2p.relay.android.AndroidRelayServerConfig;
+import net.tomp2p.relay.buffer.MessageBufferConfiguration;
+import net.tomp2p.relay.tcp.buffered.BufferedTCPRelayServerConfig;
 
 import org.hive2hive.client.ConsoleClient;
 import org.hive2hive.client.console.H2HConsoleMenu;
@@ -21,7 +24,6 @@ import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
-import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.IH2HSerialize;
@@ -64,18 +66,19 @@ public final class NodeMenu extends H2HConsoleMenu {
 				print("Specify Bootstrap Address:");
 				InetAddress bootstrapAddress = InetAddress.getByName(awaitStringParameter());
 
-				String port = "default";
+				String bootstrapPort = "default";
 				if (isExpertMode) {
 					print("Specify Bootstrap Port or enter 'default':");
-					port = awaitStringParameter();
+					bootstrapPort = awaitStringParameter();
 				}
 
 				buildNode();
-				if ("default".equalsIgnoreCase(port)) {
-					connectNode(NetworkConfiguration.create(nodeID, bootstrapAddress));
-				} else {
-					connectNode(NetworkConfiguration.create(nodeID, bootstrapAddress, Integer.parseInt(port)));
+				NetworkConfiguration config = NetworkConfiguration.create(nodeID, bootstrapAddress);
+				if (!"default".equalsIgnoreCase(bootstrapPort)) {
+					config.setBootstrapPort(Integer.parseInt(bootstrapPort));
 				}
+
+				connectNode(config);
 			}
 		};
 	}
@@ -156,13 +159,24 @@ public final class NodeMenu extends H2HConsoleMenu {
 		}
 
 		node = H2HNode.createNode(fileConfig, new H2HDefaultEncryption(serializer), serializer);
-		node.getFileManager().subscribeFileEvents(new FileEventListener(node.getFileManager()));
 	}
 
-	private void connectNode(INetworkConfiguration networkConfig) {
+	private void connectNode(NetworkConfiguration networkConfig) {
+		String bindPort = "auto";
+		if (isExpertMode) {
+			print("Specify Port to bind this new peer or enter 'auto':");
+			bindPort = awaitStringParameter();
+		}
+
+		if (!"auto".equalsIgnoreCase(bindPort)) {
+			networkConfig.setPort(Integer.parseInt(bindPort));
+		}
+
 		if (node.connect(networkConfig)) {
 
 			print("Network connection successfully established.");
+			// connect the event bus
+			node.getFileManager().subscribeFileEvents(new FileEventListener(node.getFileManager()));
 
 			String address = config.getString("InetAddress");
 			if (!"auto".equalsIgnoreCase(address)) {
@@ -180,8 +194,14 @@ public final class NodeMenu extends H2HConsoleMenu {
 				print("Starting relay functionality");
 				String authenticationKey = config.getString("Relay.GCM.api-key");
 				long bufferAge = config.getDuration("Relay.GCM.buffer-age-limit", TimeUnit.MILLISECONDS);
-				new PeerBuilderNAT(node.getPeer().peer()).gcmAuthenticationKey(authenticationKey)
-						.bufferConfiguration(new MessageBufferConfiguration().bufferAgeLimit(bufferAge)).start();
+
+				MessageBufferConfiguration bufferConfiguration = new MessageBufferConfiguration().bufferAgeLimit(bufferAge);
+				AndroidRelayServerConfig androidServer = new AndroidRelayServerConfig(authenticationKey, 5,
+						bufferConfiguration);
+				BufferedTCPRelayServerConfig tcpServer = new BufferedTCPRelayServerConfig(bufferConfiguration);
+
+				new PeerBuilderNAT(node.getPeer().peer()).addRelayServerConfiguration(RelayType.ANDROID, androidServer)
+						.addRelayServerConfiguration(RelayType.BUFFERED_OPENTCP, tcpServer).start();
 			}
 			exit();
 		} else {

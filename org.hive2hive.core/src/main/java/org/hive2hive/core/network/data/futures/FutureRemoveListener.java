@@ -67,12 +67,9 @@ public class FutureRemoveListener extends BaseFutureAdapter<FutureRemove> {
 				if (future.digest() == null) {
 					retryRemove();
 				} else if (versionRemove) {
-					if (future
-							.digest()
-							.keyDigest()
-							.containsKey(
-									new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
-											parameters.getVersionKey()))) {
+					Number640 key = new Number640(parameters.getLKey(), parameters.getDKey(), parameters.getCKey(),
+							parameters.getVersionKey());
+					if (future.digest().keyDigest().containsKey(key)) {
 						retryRemove();
 					} else {
 						logger.trace("Verification for remove completed. '{}'", parameters.toString());

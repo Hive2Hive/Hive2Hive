@@ -25,6 +25,10 @@ public interface H2HConstants {
 	// standard port for the Hive2Hive network
 	public static final int H2H_PORT = 4622;
 
+	// standard timeout for discovery
+	public static final long DISCOVERY_TIMEOUT_MS = 10000;
+	// standard timeout for bootstrapping
+	public static final long BOOTSTRAPPING_TIMEOUT_MS = 10000;
 	// standard timeout for peer disconnection
 	public static final long DISCONNECT_TIMEOUT_MS = 10000;
 

@@ -132,7 +132,7 @@ public class FileRecursionUtil {
 	 * 
 	 * @param files
 	 * @param networkManager
-	 * @return
+	 * @return the process component
 	 * @throws NoSessionException
 	 * @throws NoPeerConnectionException
 	 */
@@ -240,7 +240,7 @@ public class FileRecursionUtil {
 	 * preorder
 	 * 
 	 * @param root
-	 * @return
+	 * @return a flat list of all files in preorder
 	 */
 	public static List<File> getPreorderList(File root) {
 		List<File> allFiles = new ArrayList<File>();

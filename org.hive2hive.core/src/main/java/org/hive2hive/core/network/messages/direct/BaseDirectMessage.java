@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * </ul>
  * 
  * Direct messages are sent by the {@link MessageManager}. For more details please have
- * a look at {@link MessageManager#sendDirect(BaseDirectMessage)}.</br></br>
+ * a look at {@link MessageManager#sendDirect(BaseDirectMessage, java.security.PublicKey)}.</br></br>
  * 
  * @author Nendor, Seppi, Nico
  */
@@ -93,7 +93,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	/**
 	 * A flag which indicates if a the direct message wants to be re-send, using the normal routing mechanism
-	 * of {@link MessageManager#send(BaseMessage)}.
+	 * of {@link MessageManager#send(BaseMessage, java.security.PublicKey)}.
 	 * 
 	 * @return <code>true</code> if rerouted sending is wished, <code>false</code> if not
 	 */

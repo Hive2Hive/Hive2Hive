@@ -42,6 +42,15 @@ public interface IH2HNode {
 	boolean disconnect();
 
 	/**
+	 * Disconnect the node from the network but keeps the session of the currently logged in user in order to
+	 * reconnect without login again. If not logging in again, use {@link #disconnect()}. When reconnecting,
+	 * re-attach your listeners to the event bus.
+	 * 
+	 * @return <code>true</code> if the disconnection was successful, <code>false</code> otherwise
+	 */
+	boolean disconnectKeepSession();
+
+	/**
 	 * Checks whether this {@link IH2HNode} is connected.
 	 * 
 	 * @return <code>true</code> if connected, <code>false</code> otherwise

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
  * The signature is done with SHA1withRSA.
  * 
  * @author Seppi
+ * @author Nico
  */
 public class H2HSignatureFactory implements SignatureFactory {
 
@@ -104,14 +105,13 @@ public class H2HSignatureFactory implements SignatureFactory {
 		logger.debug("Sign: Data: {}", buf);
 		logger.debug("Sign: Signature: {}", Arrays.toString(signatureData));
 
-		SignatureCodec decodedSignature = new H2HSignatureCodec();
-		decodedSignature.decode(signatureData);
+		SignatureCodec decodedSignature = new H2HSignatureCodec(signatureData);
 		return decodedSignature;
 	}
 
 	@Override
 	public boolean verify(PublicKey publicKey, ByteBuf buf, SignatureCodec signatureEncoded) throws SignatureException,
-			InvalidKeyException, IOException {
+			InvalidKeyException {
 		Signature signature = signatureInstance();
 		signature.initVerify(publicKey);
 		ByteBuffer[] byteBuffers = buf.nioBuffers();
@@ -139,7 +139,12 @@ public class H2HSignatureFactory implements SignatureFactory {
 	}
 
 	@Override
-	public SignatureCodec signatureCodec() {
-		return new H2HSignatureCodec();
+	public SignatureCodec signatureCodec(ByteBuf buf) {
+		return new H2HSignatureCodec(buf);
+	}
+
+	@Override
+	public int signatureSize() {
+		return H2HSignatureCodec.SIGNATURE_SIZE;
 	}
 }

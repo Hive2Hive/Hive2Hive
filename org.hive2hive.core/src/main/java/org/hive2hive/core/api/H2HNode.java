@@ -7,7 +7,6 @@ import org.hive2hive.core.api.interfaces.IFileManager;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
-import org.hive2hive.core.events.EventBus;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDefaultEncryption;
@@ -22,19 +21,15 @@ import org.hive2hive.core.security.IH2HSerialize;
  */
 public class H2HNode implements IH2HNode {
 
-	// TODO remove manager singletons
-	// TODO atm, this class is just a wrapper for the NetworkManager
 	private final IFileConfiguration fileConfiguration;
 	private final NetworkManager networkManager;
-	private final EventBus eventBus;
 
 	private IUserManager userManager;
 	private IFileManager fileManager;
 
 	private H2HNode(IFileConfiguration fileConfiguration, IH2HEncryption encryption, IH2HSerialize serializer) {
 		this.fileConfiguration = fileConfiguration;
-		this.eventBus = new EventBus();
-		this.networkManager = new NetworkManager(encryption, serializer, eventBus, fileConfiguration);
+		this.networkManager = new NetworkManager(encryption, serializer, fileConfiguration);
 	}
 
 	/**
@@ -76,7 +71,12 @@ public class H2HNode implements IH2HNode {
 
 	@Override
 	public boolean disconnect() {
-		return networkManager.disconnect();
+		return networkManager.disconnect(false);
+	}
+
+	@Override
+	public boolean disconnectKeepSession() {
+		return networkManager.disconnect(true);
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public IUserManager getUserManager() {
 		if (userManager == null) {
-			userManager = new H2HUserManager(networkManager, eventBus);
+			userManager = new H2HUserManager(networkManager);
 		}
 		return userManager;
 	}
@@ -95,7 +95,7 @@ public class H2HNode implements IH2HNode {
 	@Override
 	public IFileManager getFileManager() {
 		if (fileManager == null) {
-			fileManager = new H2HFileManager(networkManager, fileConfiguration, eventBus);
+			fileManager = new H2HFileManager(networkManager, fileConfiguration);
 		}
 		return fileManager;
 	}

@@ -4,7 +4,6 @@ import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -77,7 +76,7 @@ public class UseCaseTestUtil {
 
 	public static void uploadNewFile(NetworkManager networkManager, File file) throws NoSessionException,
 			NoPeerConnectionException {
-		uploadNewFile(networkManager, file, FileConfiguration.createDefault());
+		uploadNewFile(networkManager, file, new TestFileConfiguration());
 	}
 
 	public static void uploadNewFile(NetworkManager networkManager, File file, IFileConfiguration fileConfig)
@@ -88,7 +87,7 @@ public class UseCaseTestUtil {
 
 	public static void uploadNewVersion(NetworkManager networkManager, File file) throws NoSessionException,
 			IllegalArgumentException, NoPeerConnectionException {
-		uploadNewVersion(networkManager, file, FileConfiguration.createDefault());
+		uploadNewVersion(networkManager, file, new TestFileConfiguration());
 	}
 
 	public static void uploadNewVersion(NetworkManager networkManager, File file, IFileConfiguration fileConfig)

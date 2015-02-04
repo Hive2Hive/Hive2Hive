@@ -2,14 +2,9 @@ package org.hive2hive.core.processes.share.read;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.H2HJUnitTest;
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -19,17 +14,14 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.processes.share.BaseShareReadWriteTest;
 import org.hive2hive.core.utils.FileTestUtil;
-import org.hive2hive.core.utils.H2HWaiter;
-import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
-import org.hive2hive.core.utils.TestFileEventListener;
+import org.hive2hive.core.utils.TestFileConfiguration;
 import org.hive2hive.core.utils.UseCaseTestUtil;
-import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,70 +32,22 @@ import org.junit.Test;
  * @author Seppi
  * @author Nico
  */
-public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
+public class SharedFolderWithReadPermissionDeleteTest extends BaseShareReadWriteTest {
 
-	private static final int maxNumChunks = 2;
+	private File subFolderA;
+	private File subFolderB;
 
-	private static ArrayList<NetworkManager> network;
-	private static NetworkManager nodeA;
-	private static NetworkManager nodeB;
+	private IFileConfiguration fileConfig;
 
-	private static File rootA;
-	private static File rootB;
-	private static TestFileEventListener eventsAtB;
-	private static TestFileEventListener eventsAtA;
-	private static File sharedFolderA;
-	private static File sharedFolderB;
-	private static File subFolderA;
-	private static File subFolderB;
-
-	private static UserCredentials userA;
-	private static UserCredentials userB;
-
-	private static IFileConfiguration fileConfig;
-
-	/**
-	 * Setup network. Setup two users with each one client, log them in.
-	 * 
-	 * @throws Exception
-	 */
 	@BeforeClass
-	public static void initTest() throws Exception {
+	public static void printIdentifier() throws Exception {
 		testClass = SharedFolderWithReadPermissionDeleteTest.class;
 		beforeClass();
+	}
 
-		logger.info("Setup network.");
-		network = NetworkTestUtil.createNetwork(6);
-		nodeA = network.get(0);
-		nodeB = network.get(1);
-
-		logger.info("Create user A.");
-		rootA = FileTestUtil.getTempDirectory();
-		userA = generateRandomCredentials();
-		logger.info("Register and login user A.");
-		UseCaseTestUtil.registerAndLogin(userA, nodeA, rootA);
-
-		eventsAtA = new TestFileEventListener(nodeA);
-		nodeA.getEventBus().subscribe(eventsAtA);
-
-		logger.info("Create user B.");
-		rootB = FileTestUtil.getTempDirectory();
-		userB = generateRandomCredentials();
-		logger.info("Register and login user B.");
-		UseCaseTestUtil.registerAndLogin(userB, nodeB, rootB);
-
-		eventsAtB = new TestFileEventListener(nodeB);
-		nodeB.getEventBus().subscribe(eventsAtB);
-
-		sharedFolderA = new File(rootA, "sharedfolder");
-		sharedFolderA.mkdirs();
-		logger.info("Upload folder '{}' from A.", sharedFolderA.getName());
-		UseCaseTestUtil.uploadNewFile(network.get(0), sharedFolderA);
-
-		logger.info("Share folder '{}' with user B giving read permission.", sharedFolderA.getName());
-		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderA, userB.getUserId(), PermissionType.READ);
-		sharedFolderB = new File(rootB, sharedFolderA.getName());
-		waitTillSynchronized(sharedFolderB, true);
+	@Before
+	public void initTest() throws Exception {
+		setupNetworkAndShares(PermissionType.READ);
 
 		subFolderA = new File(sharedFolderA, "subfolder");
 		subFolderA.mkdir();
@@ -112,14 +56,14 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 		subFolderB = new File(sharedFolderB, subFolderA.getName());
 		waitTillSynchronized(subFolderB, true);
 
-		fileConfig = FileConfiguration.createDefault();
+		fileConfig = new TestFileConfiguration();
 	}
 
 	@Test
 	public void testSynchronizeAddFileAtADeleteAtA() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderA);
 
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
@@ -140,9 +84,9 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderA);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -159,9 +103,9 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeTryToAddFileAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
-		File fileAtB = FileTestUtil.createFileRandomContent("fileFromB", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
+		File fileAtB = FileTestUtil.createFileRandomContent("fileFromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderB);
 		logger.info("Try to upload a new file '{}' from B.", fileAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance()
 				.createAddFileProcess(fileAtB, nodeB, fileConfig));
@@ -210,7 +154,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeTryToAddFolderAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File folderAtB = new File(sharedFolderB, "folderFromB");
 		folderAtB.mkdir();
 		logger.info("Try to upload a new folder '{}' from B.", folderAtB.toString());
@@ -220,9 +164,9 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddSubfileAtADeleteAtA() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(maxNumChunks) + 1,
-				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolderA);
 		logger.info("Upload a new file '{}' at A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -243,8 +187,8 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 	@Test
 	public void testSynchronizeAddSubfileAtATryToDeleteAtB() throws NoSessionException, NoPeerConnectionException,
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
-		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(maxNumChunks) + 1,
-				subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File fileFromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolderA);
 		logger.info("Upload a new file '{}' from A.", fileFromAAtA.toString());
 		UseCaseTestUtil.uploadNewFile(nodeA, fileFromAAtA);
 
@@ -261,9 +205,9 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeTryToAddSubfileAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
-		File fileAtB = FileTestUtil.createFileRandomContent("subfileFromB", new Random().nextInt(maxNumChunks) + 1,
-				subFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
+		File fileAtB = FileTestUtil.createFileRandomContent("subfileFromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				subFolderB);
 		logger.info("Try to upload a new file '{}' from B.", fileAtB.toString());
 		TestExecutionUtil.executeProcessTillFailed(ProcessFactory.instance()
 				.createAddFileProcess(fileAtB, nodeB, fileConfig));
@@ -312,7 +256,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeTryToAddSubfolderAtB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		File folderAtB = new File(subFolderB, "subfolderFromB");
 		folderAtB.mkdir();
 		logger.info("Try to upload a new folder '{}' from B.", folderAtB.toString());
@@ -320,33 +264,7 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 				fileConfig));
 	}
 
-	/**
-	 * Waits a certain amount of time until a file event appears (add) or disappears (delete).
-	 * 
-	 * @param synchronizingFile the file to synchronize
-	 * @param appearing <code>true</code> if file should appear, <code>false</code> if file should disappear
-	 */
-	private static void waitTillSynchronized(File synchronizingFile, boolean appearing) {
-		H2HWaiter waiter = new H2HWaiter(40);
-		if (appearing) {
-			do {
-				waiter.tickASecond();
-			} while (!synchronizingFile.exists());
-		} else {
-			do {
-				waiter.tickASecond();
-			} while (synchronizingFile.exists());
-		}
-	}
-
-	private static void compareFiles(File originalFile, File synchronizedFile) throws IOException {
-		Assert.assertEquals(originalFile.getName(), synchronizedFile.getName());
-		if (originalFile.isFile() || synchronizedFile.isFile()) {
-			Assert.assertTrue(FileUtils.contentEquals(originalFile, synchronizedFile));
-		}
-	}
-
-	private static void checkIndex(File fileA, File fileB, boolean deleted) throws GetFailedException, NoSessionException {
+	private void checkIndex(File fileA, File fileB, boolean deleted) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = nodeA.getSession().getProfileManager().readUserProfile();
 		Index indexA = userProfileA.getFileByPath(fileA, nodeA.getSession().getRootFile());
 
@@ -408,14 +326,4 @@ public class SharedFolderWithReadPermissionDeleteTest extends H2HJUnitTest {
 			Assert.assertTrue(permissions.contains(new UserPermission(userB.getUserId(), PermissionType.READ)));
 		}
 	}
-
-	@AfterClass
-	public static void endTest() throws IOException {
-		FileUtils.deleteDirectory(rootA);
-		FileUtils.deleteDirectory(rootB);
-
-		NetworkTestUtil.shutdownNetwork(network);
-		afterClass();
-	}
-
 }

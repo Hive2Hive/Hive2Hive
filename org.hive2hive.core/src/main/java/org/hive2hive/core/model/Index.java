@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.file.FileUtil;
+import org.hive2hive.core.model.versioned.MetaFileLarge;
+import org.hive2hive.core.model.versioned.MetaFileSmall;
 
 public abstract class Index implements Comparable<Index>, Serializable {
 
@@ -21,7 +23,6 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	 * Constructor for root node.
 	 * 
 	 * @param fileKeys
-	 * @param name
 	 */
 	public Index(KeyPair fileKeys) {
 		this(fileKeys, null, null);
@@ -40,9 +41,9 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	}
 
 	/**
-	 * The {@link MetaDocument} is encrypted with this keypair.
+	 * The {@link MetaFileSmall} or {@link MetaFileLarge} is encrypted with this keypair.
 	 * 
-	 * @return
+	 * @return the keypair
 	 */
 	public KeyPair getFileKeys() {
 		return fileKeys;
@@ -51,7 +52,7 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	/**
 	 * Convenience method that returns the public key of the file keys
 	 * 
-	 * @return
+	 * @return the public key
 	 */
 	public PublicKey getFilePublicKey() {
 		return fileKeys.getPublic();
@@ -101,9 +102,9 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	}
 
 	/**
-	 * Returns the folder that is shared (can be this node or a parent / grand-parent / ... of this node
+	 * Returns the folder that is shared (can be this node or a parent / grand-parent / ... of this node)
 	 * 
-	 * @return
+	 * @return the top folder of the share
 	 */
 	public FolderIndex getSharedTopFolder() {
 		if (this instanceof FileIndex) {
@@ -159,7 +160,7 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	/**
 	 * Returns the full path string (starting at the root) of this node
 	 * 
-	 * @return
+	 * @return the full path, whereas names are separated with the operating systems file separator
 	 */
 	public String getFullPath() {
 		if (parent == null) {
@@ -197,13 +198,13 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	/**
 	 * Returns a list of users that can at least read the file
 	 * 
-	 * @return
+	 * @return the set of users that have access to this folder (read or write)
 	 */
 	public abstract Set<String> getCalculatedUserList();
 
 	/**
-	 * Returns the responsible protection keys (depends of the shared state). The {@link MetaDocument} and all
-	 * {@link Chunk}s are protected with this key.
+	 * Returns the responsible protection keys (depends of the shared state). The {@link MetaFileSmall} or
+	 * {@link MetaFileLarge} and all {@link Chunk}s are protected with this key.
 	 * 
 	 * @return the protection keys (or the default protection keys, set to the root). The result should never
 	 *         be null.
@@ -213,21 +214,23 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	/**
 	 * Convenience method to ask whether the index is a folder
 	 * 
-	 * @return
+	 * @return <code>true</code> if this is an instance of a {@link FolderIndex}. Otherwise, it must be an
+	 *         instance of {@link FileIndex}.
 	 */
 	public abstract boolean isFolder();
 
 	/**
 	 * Returns whether the user can write and upload a file / sub-folder to this directory
 	 * 
-	 * @return
+	 * @return <code>true</code> if this user is allowed to write to this folder
 	 */
 	public abstract boolean canWrite();
 
 	/**
 	 * Convenience method to ask whether the index is a file
 	 * 
-	 * @return
+	 * @return <code>true</code> if this is an instance of a {@link FileIndex}. Otherwise, it must be an
+	 *         instance of {@link FolderIndex}.
 	 */
 	public boolean isFile() {
 		return !isFolder();

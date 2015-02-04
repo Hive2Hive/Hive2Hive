@@ -21,6 +21,14 @@ public interface INetworkConfiguration {
 	String getNodeID();
 
 	/**
+	 * The port this peer binds. It both binds UDP and TCP to the same port. If the port is smaller than 0,
+	 * the port will automatically be assigned (starting from {@link H2HConstants#H2H_PORT}).
+	 * 
+	 * @return the port or a negative value to automatically detect the port
+	 */
+	int getPort();
+
+	/**
 	 * Returns whether this peer is initial. When a peer is initial, it is the first one in the network and
 	 * does
 	 * not try to bootstrap anywhere. In each network, only one initial peer needs to exist. When other peers

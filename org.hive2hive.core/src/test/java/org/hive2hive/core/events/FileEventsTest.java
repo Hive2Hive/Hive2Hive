@@ -11,7 +11,6 @@ import java.util.List;
 import net.engio.mbassy.listener.Handler;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
 import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
@@ -38,7 +37,7 @@ import org.junit.Test;
 public class FileEventsTest extends H2HJUnitTest {
 
 	protected static final int networkSize = 6;
-	protected static ArrayList<NetworkManager> network;
+	protected static List<NetworkManager> network;
 	protected static UserCredentials userCredentials;
 	protected static File rootA;
 	protected static File rootB;
@@ -121,15 +120,15 @@ public class FileEventsTest extends H2HJUnitTest {
 	 * @param absB absolute path (client B)
 	 */
 	protected void assertEqualsRelativePaths(File absA, File absB) {
-		String relativeA = absA.getAbsolutePath().replaceFirst(rootA.getAbsolutePath(), "");
-		String relativeB = absB.getAbsolutePath().replaceFirst(rootB.getAbsolutePath(), "");
+		String relativeA = absA.getAbsolutePath().replace(rootA.getAbsolutePath(), "");
+		String relativeB = absB.getAbsolutePath().replace(rootB.getAbsolutePath(), "");
 		logger.debug("Path comparison: '{}' vs '{}'", relativeA, relativeB);
 		assertTrue(relativeA.equals(relativeB));
 	}
 
 	protected File createAndAddFile(File root, NetworkManager client) throws IOException, NoSessionException,
 			NoPeerConnectionException {
-		File file = FileTestUtil.createFileRandomContent(3, root, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file = FileTestUtil.createFileRandomContent(3, root);
 		UseCaseTestUtil.uploadNewFile(client, file);
 		return file;
 	}

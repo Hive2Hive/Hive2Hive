@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyPair;
-import java.util.ArrayList;
+import java.util.List;
 
 import net.tomp2p.dht.FutureGet;
 
@@ -40,7 +40,7 @@ import org.junit.Test;
 public class DeleteFileTest extends H2HJUnitTest {
 
 	private static final int networkSize = 6;
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static UserCredentials userCredentials;
 	private static File root;
 	private static NetworkManager client;
@@ -63,7 +63,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 	@Test
 	public void testDeleteFile() throws IOException, IllegalArgumentException, GetFailedException, InterruptedException,
 			NoPeerConnectionException, NoSessionException, InvalidProcessStateException, ProcessExecutionException {
-		File file = FileTestUtil.createFileRandomContent(3, root, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file = FileTestUtil.createFileRandomContent(3, root);
 		UseCaseTestUtil.uploadNewFile(client, file);
 
 		// store the keys of the meta file to verify them later
@@ -116,8 +116,9 @@ public class DeleteFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDeleteFileInFolder() throws IOException, IllegalArgumentException, GetFailedException, InterruptedException,
-			NoSessionException, NoPeerConnectionException, InvalidProcessStateException, ProcessExecutionException {
+	public void testDeleteFileInFolder() throws IOException, IllegalArgumentException, GetFailedException,
+			InterruptedException, NoSessionException, NoPeerConnectionException, InvalidProcessStateException,
+			ProcessExecutionException {
 		// add a folder to the network
 		File folder = new File(root, randomString());
 		folder.mkdir();

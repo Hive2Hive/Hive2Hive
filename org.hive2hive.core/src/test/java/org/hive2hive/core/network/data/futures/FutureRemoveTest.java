@@ -22,7 +22,7 @@ import org.junit.Test;
  */
 public class FutureRemoveTest extends H2HJUnitTest {
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
 
 	@BeforeClass
@@ -38,8 +38,8 @@ public class FutureRemoveTest extends H2HJUnitTest {
 		NetworkManager nodeB = NetworkTestUtil.getRandomNode(network);
 
 		H2HTestData data = new H2HTestData(randomString());
-		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(randomString()).setNetworkContent(data);
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(randomString())
+				.setNetworkContent(data);
 
 		nodeA.getDataManager().put(parameters);
 
@@ -54,8 +54,8 @@ public class FutureRemoveTest extends H2HJUnitTest {
 
 		H2HTestData data = new H2HTestData(randomString());
 		data.generateVersionKey();
-		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId())
-				.setContentKey(randomString()).setVersionKey(data.getVersionKey()).setNetworkContent(data);
+		Parameters parameters = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(randomString())
+				.setVersionKey(data.getVersionKey()).setNetworkContent(data);
 
 		nodeA.getDataManager().put(parameters);
 

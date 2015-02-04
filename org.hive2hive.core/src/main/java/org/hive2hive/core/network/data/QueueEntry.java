@@ -1,7 +1,9 @@
 package org.hive2hive.core.network.data;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.model.versioned.UserProfile;
 
@@ -13,39 +15,36 @@ class QueueEntry {
 	private UserProfile userProfile;
 	private GetFailedException getFailedException;
 
-	public void notifyGet() {
+	public void setGetError(GetFailedException error) {
+		this.getFailedException = error;
 		getWaiter.countDown();
 	}
 
-	public void waitForGet() throws GetFailedException {
+	/**
+	 * Returns the user profile (blocking) as soon as it's ready
+	 * 
+	 * @return the user profile
+	 */
+	public UserProfile getUserProfile() throws GetFailedException {
 		if (getFailedException != null) {
+			// exception already here, don't even wait
 			throw getFailedException;
 		}
 
 		try {
-			getWaiter.await();
+			boolean success = getWaiter.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS, TimeUnit.MILLISECONDS);
+			if (!success) {
+				throw new GetFailedException("Could not wait for getting the user profile");
+			}
 		} catch (InterruptedException e) {
-			getFailedException = new GetFailedException("Could not wait for getting the user profile.");
+			throw new GetFailedException("Could not wait for getting the user profile.");
 		}
 
-		if (getFailedException != null) {
-			throw getFailedException;
-		}
-	}
-
-	public void setGetError(GetFailedException error) {
-		this.getFailedException = error;
-	}
-
-	public GetFailedException getGetError() {
-		return getFailedException;
-	}
-
-	public UserProfile getUserProfile() {
 		return userProfile;
 	}
 
 	public void setUserProfile(UserProfile userProfile) {
 		this.userProfile = userProfile;
+		getWaiter.countDown();
 	}
 }

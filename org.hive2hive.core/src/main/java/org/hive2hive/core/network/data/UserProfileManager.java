@@ -35,31 +35,49 @@ public class UserProfileManager {
 	private final UserCredentials credentials;
 
 	private final Object queueWaiter = new Object();
-	private final QueueWorker worker = new QueueWorker();
 	private final Queue<QueueEntry> readOnlyQueue = new ConcurrentLinkedQueue<QueueEntry>();
 	private final Queue<PutQueueEntry> modifyQueue = new ConcurrentLinkedQueue<PutQueueEntry>();
+	private final AtomicBoolean running = new AtomicBoolean(false);
 
 	private volatile PutQueueEntry modifying;
 
-	private final AtomicBoolean running;
 	private KeyPair protectionKeys = null;
+	private Thread workerThread;
 
 	public UserProfileManager(DataManager dataManager, UserCredentials credentials) {
 		this.credentials = credentials;
 		this.versionManager = new EncryptedVersionManager<UserProfile>(dataManager, PasswordUtil.generateAESKeyFromPassword(
 				credentials.getPassword(), credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE),
 				credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
-		this.running = new AtomicBoolean(true);
-
-		Thread thread = new Thread(worker);
-		thread.setName("UP queue");
-		thread.start();
+		startQueueWorker();
 	}
 
 	public void stopQueueWorker() {
+		if (!running.get()) {
+			logger.warn("The user profile manager has already been shutdown");
+			return;
+		}
+
 		running.set(false);
-		synchronized (queueWaiter) {
-			queueWaiter.notify();
+
+		try {
+			// interrupt the thread such that blocking 'wait' calls throw an exception and the thread can
+			// shutdown gracefully
+			workerThread.checkAccess();
+			workerThread.interrupt();
+		} catch (SecurityException e) {
+			logger.warn("Cannot stop the user profile thread", e);
+		}
+	}
+
+	public void startQueueWorker() {
+		if (running.get()) {
+			logger.warn("Queue worker is already running");
+		} else {
+			running.set(true);
+			workerThread = new Thread(new QueueWorker());
+			workerThread.setName("UP queue");
+			workerThread.start();
 		}
 	}
 
@@ -70,7 +88,6 @@ public class UserProfileManager {
 	/**
 	 * Gets the user profile (read-only). The call blocks until the most recent profile is here.
 	 * 
-	 * @param pid the process identifier
 	 * @return the user profile
 	 * @throws GetFailedException if the profile cannot be fetched
 	 */
@@ -80,13 +97,6 @@ public class UserProfileManager {
 
 		synchronized (queueWaiter) {
 			queueWaiter.notify();
-		}
-
-		try {
-			entry.waitForGet();
-		} catch (GetFailedException e) {
-			// just stop the modification if an error occurs.
-			throw e;
 		}
 
 		UserProfile profile = entry.getUserProfile();
@@ -116,7 +126,6 @@ public class UserProfileManager {
 
 		UserProfile profile;
 		try {
-			entry.waitForGet();
 			profile = entry.getUserProfile();
 			if (profile == null) {
 				throw new GetFailedException("User Profile not found");
@@ -183,7 +192,8 @@ public class UserProfileManager {
 						try {
 							queueWaiter.wait();
 						} catch (InterruptedException e) {
-							// ignore
+							// interrupted, go to next iteration, probably the thread was stopped
+							continue;
 						}
 					}
 				} else if (modifyQueue.isEmpty()) {
@@ -196,7 +206,6 @@ public class UserProfileManager {
 						while (!readOnlyQueue.isEmpty()) {
 							QueueEntry readOnly = readOnlyQueue.poll();
 							readOnly.setUserProfile(userProfile);
-							readOnly.notifyGet();
 						}
 					} catch (GetFailedException e) {
 						logger.warn("Notifying {} processes that getting latest user profile version failed. reason = '{}'",
@@ -204,7 +213,6 @@ public class UserProfileManager {
 						while (!readOnlyQueue.isEmpty()) {
 							QueueEntry readOnly = readOnlyQueue.poll();
 							readOnly.setGetError(e);
-							readOnly.notifyGet();
 						}
 					}
 				} else {
@@ -213,13 +221,15 @@ public class UserProfileManager {
 
 					logger.trace("Process {} is waiting to make profile modifications.", modifying.getPid());
 
+					UserProfile userProfile;
 					try {
 						logger.trace("Loading latest version of user profile for process {} to modify.", modifying.getPid());
-						modifying.setUserProfile(versionManager.get());
+						userProfile = versionManager.get();
+						modifying.setUserProfile(userProfile);
 					} catch (GetFailedException e) {
 						modifying.setGetError(e);
+						continue;
 					}
-					modifying.notifyGet();
 
 					int counter = 0;
 					long sleepTime = MAX_MODIFICATION_TIME / 10;
@@ -237,14 +247,13 @@ public class UserProfileManager {
 						logger.trace("Process {} made modifcations and uploads them now.", modifying.getPid());
 						try {
 							// put updated user profile version into network
-							versionManager.put(modifying.getUserProfile(), protectionKeys);
+							versionManager.put(userProfile, protectionKeys);
 							modifying.notifyPut();
 
 							// notify all read only processes with newest version
 							while (!readOnlyQueue.isEmpty()) {
 								QueueEntry readOnly = readOnlyQueue.poll();
-								readOnly.setUserProfile(modifying.getUserProfile());
-								readOnly.notifyGet();
+								readOnly.setUserProfile(userProfile);
 							}
 						} catch (PutFailedException e) {
 							modifying.setPutError(e);

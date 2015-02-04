@@ -3,13 +3,11 @@ package org.hive2hive.core.processes.files.update;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HSession;
-import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -26,6 +24,7 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
+import org.hive2hive.core.utils.TestFileConfiguration;
 import org.hive2hive.core.utils.TestProcessComponentListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.core.utils.helper.DenyingMessageReplyHandler;
@@ -46,7 +45,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 6;
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static UserCredentials userCredentials;
 	private static File uploaderRoot;
 	private static File file;
@@ -78,7 +77,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCredentials, downloader, rootDownloader);
 
 		// create a file
-		file = FileTestUtil.createFileRandomContent(3, uploaderRoot, H2HConstants.DEFAULT_CHUNK_SIZE);
+		file = FileTestUtil.createFileRandomContent(3, uploaderRoot);
 		UseCaseTestUtil.uploadNewFile(uploader, file);
 	}
 
@@ -105,11 +104,11 @@ public class UpdateFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testUploadSameVersion() throws IllegalArgumentException, GetFailedException, IOException, NoSessionException,
-			InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
+	public void testUploadSameVersion() throws IllegalArgumentException, GetFailedException, IOException,
+			NoSessionException, InvalidProcessStateException, IllegalArgumentException, NoPeerConnectionException {
 		// upload the same content again
 		IProcessComponent<Void> process = ProcessFactory.instance().createUpdateFileProcess(file, uploader,
-				FileConfiguration.createDefault());
+				new TestFileConfiguration());
 		TestProcessComponentListener listener = new TestProcessComponentListener();
 		process.attachListener(listener);
 
@@ -153,7 +152,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 			@Override
 			public int getChunkSize() {
-				return H2HConstants.DEFAULT_CHUNK_SIZE;
+				return TestFileConfiguration.CHUNK_SIZE;
 			}
 		};
 
@@ -201,7 +200,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 
 			@Override
 			public int getChunkSize() {
-				return H2HConstants.DEFAULT_CHUNK_SIZE;
+				return TestFileConfiguration.CHUNK_SIZE;
 			}
 		};
 

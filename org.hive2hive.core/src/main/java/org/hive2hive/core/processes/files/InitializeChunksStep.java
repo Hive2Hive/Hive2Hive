@@ -3,8 +3,6 @@ package org.hive2hive.core.processes.files;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.hive2hive.core.H2HConstants;
@@ -75,9 +73,7 @@ public class InitializeChunksStep extends ProcessStep<Void> {
 			PutSingleChunkStep putChunkStep = new PutSingleChunkStep(context, i, chunkId, dataManager);
 
 			// insert just after this step
-			List<IProcessComponent<?>> parentComponents = new ArrayList<IProcessComponent<?>>(getParent().getComponents());
-			int index = parentComponents.indexOf(prev) + 1;
-			getParent().add(index, putChunkStep);
+			getParent().insertAfter(putChunkStep, prev);
 			prev = putChunkStep;
 		}
 	}
@@ -89,7 +85,7 @@ public class InitializeChunksStep extends ProcessStep<Void> {
 		logger.trace(String.format("%s chunks for large file '%s'.", Integer.toString(chunks), file.getName()));
 
 		// TODO Hashing is slow --> do this in multiple threads to speedup the initialization.
-		
+
 		// process chunk for chunk, hash it and add the meta information to the context
 		for (int i = 0; i < chunks; i++) {
 			String chunkId = UUID.randomUUID().toString();

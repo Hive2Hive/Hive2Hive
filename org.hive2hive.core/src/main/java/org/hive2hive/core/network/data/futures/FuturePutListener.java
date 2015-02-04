@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * <b>Failure Handling</b></br>
  * Putting can fail when the future object failed, when the future object contains wrong data or the
  * responding node detected a failure. See {@link PutStatus} for possible failures. If putting fails the
- * adapter retries it to a certain threshold (see {@link H2HConstants.PUT_RETRIES}). All puts are
+ * adapter retries it to a certain threshold (see {@link H2HConstants#PUT_RETRIES}). All puts are
  * asynchronous. That's why the future listener attaches himself to the new future objects so that the adapter
  * can finally notify his/her listener about a success or failure.
  * 
@@ -90,17 +90,17 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 				fail.add(peeradress);
 			} else {
 				for (Number640 key : map.keySet()) {
-					byte status = map.get(key);
-					if (status == -1) {
-						logger.warn("Got an invalid status: {}", status);
+					byte putStatus = map.get(key);
+					if (putStatus == -1) {
+						logger.warn("Got an invalid status: {}", putStatus);
 						fail.add(peeradress);
 					} else {
-						switch (PutStatus.values()[status]) {
+						switch (PutStatus.values()[putStatus]) {
 							case OK:
 								break;
 							case FAILED:
 							case FAILED_SECURITY:
-								logger.warn("A node denied putting data. reason = '{}'. '{}'", PutStatus.values()[status],
+								logger.warn("A node denied putting data. reason = '{}'. '{}'", PutStatus.values()[putStatus],
 										parameters.toString());
 								fail.add(peeradress);
 								break;
@@ -109,7 +109,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 								versionFork.add(peeradress);
 								break;
 							default:
-								logger.warn("Got an unknown status: {}", PutStatus.values()[status]);
+								logger.warn("Got an unknown status: {}", PutStatus.values()[putStatus]);
 						}
 					}
 				}
@@ -148,19 +148,19 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 									fail.add(peeradress);
 								} else {
 									for (Number640 key : future.rawResult().get(peeradress).keySet()) {
-										byte status = future.rawResult().get(peeradress).get(key);
-										switch (PutStatus.values()[status]) {
+										byte putStatus = future.rawResult().get(peeradress).get(key);
+										switch (PutStatus.values()[putStatus]) {
 											case OK:
 												break;
 											case FAILED:
 											case FAILED_SECURITY:
 											case NOT_FOUND:
 												logger.warn("A node could not confirm data. Reason = '{}'. {}",
-														PutStatus.values()[status], parameters.toString());
+														PutStatus.values()[putStatus], parameters.toString());
 												fail.add(peeradress);
 												break;
 											default:
-												logger.warn("Got an unknown status = '{}' {}", PutStatus.values()[status],
+												logger.warn("Got an unknown status = '{}' {}", PutStatus.values()[putStatus],
 														parameters.toString());
 										}
 									}

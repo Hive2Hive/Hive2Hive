@@ -2,13 +2,10 @@ package org.hive2hive.core.processes.share.write;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.hive2hive.core.H2HConstants;
-import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -17,15 +14,11 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.processes.share.BaseShareReadWriteTest;
 import org.hive2hive.core.utils.FileTestUtil;
-import org.hive2hive.core.utils.H2HWaiter;
-import org.hive2hive.core.utils.NetworkTestUtil;
-import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
-import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -34,66 +27,22 @@ import org.junit.Test;
  * shared folder.
  * 
  * @author Seppi
+ * @author Nico
  */
-public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
+public class SharedFolderWithWritePermissionMoveOutTest extends BaseShareReadWriteTest {
 
-	private static final int networkSize = 6;
-	private static final int maxNumChunks = 2;
-	private static ArrayList<NetworkManager> network;
+	private File subFolderA;
+	private File subFolderB;
 
-	private static File rootA;
-	private static File rootB;
-	private static File sharedFolderA;
-	private static File sharedFolderB;
-	private static File subFolderA;
-	private static File subFolderB;
-
-	private static UserCredentials userA;
-	private static UserCredentials userB;
-
-	private static TestFileEventListener eventsAtA;
-	private static TestFileEventListener eventsAtB;
-
-	/**
-	 * Setup network. Setup two users with each one client, log them in.
-	 * 
-	 * @throws Exception
-	 */
 	@BeforeClass
-	public static void initTest() throws Exception {
+	public static void printIdentifier() throws Exception {
 		testClass = SharedFolderWithWritePermissionMoveOutTest.class;
 		beforeClass();
+	}
 
-		logger.info("Setup network.");
-		network = NetworkTestUtil.createNetwork(networkSize);
-
-		logger.info("Create user A.");
-		rootA = FileTestUtil.getTempDirectory();
-		userA = generateRandomCredentials();
-		logger.info("Register and login user A.");
-		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
-
-		eventsAtA = new TestFileEventListener(network.get(0));
-		network.get(0).getEventBus().subscribe(eventsAtA);
-
-		logger.info("Create user B.");
-		rootB = FileTestUtil.getTempDirectory();
-		userB = generateRandomCredentials();
-		logger.info("Register and login user B.");
-		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
-
-		eventsAtB = new TestFileEventListener(network.get(1));
-		network.get(1).getEventBus().subscribe(eventsAtB);
-
-		logger.info("Upload folder 'sharedfolder' from A.");
-		sharedFolderA = new File(rootA, "sharedfolder");
-		sharedFolderA.mkdirs();
-		UseCaseTestUtil.uploadNewFile(network.get(0), sharedFolderA);
-
-		logger.info("Share folder 'sharedfolder' with user B giving write permission.");
-		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderA, userB.getUserId(), PermissionType.WRITE);
-		sharedFolderB = new File(rootB, sharedFolderA.getName());
-		waitTillSynchronized(sharedFolderB, true);
+	@Before
+	public void initTest() throws Exception {
+		setupNetworkAndShares(PermissionType.WRITE);
 
 		logger.info("Upload a new subfolder 'sharedfolder/subfolder'.");
 		subFolderA = new File(sharedFolderA, "subfolder");
@@ -105,10 +54,10 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromAMoveOutFromA() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedFolder/file1FromA' from A.");
-		File file1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file1FromAAtA = FileTestUtil.createFileRandomContent("file1FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file1FromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/file1FromA' gets synchronized with B.");
@@ -127,10 +76,10 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromAMoveOutFromB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedFolder/file2FromA' from A.");
-		File file2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file2FromAAtA = FileTestUtil.createFileRandomContent("file2FromA", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), file2FromAAtA);
 
 		logger.info("Wait till new file 'sharedFolder/file2FromA' gets synchronized with B.");
@@ -149,10 +98,10 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromBMoveOutFromA() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedFolder/file1FromB' from B.");
-		File file1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file1FromBAtB = FileTestUtil.createFileRandomContent("file1FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file1FromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/file1FromB' gets synchronized with A.");
@@ -171,10 +120,10 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 	@Test
 	public void testSynchronizeAddFileFromBMoveOutFromB() throws NoSessionException, NoPeerConnectionException, IOException,
-	IllegalArgumentException, IllegalArgumentException, GetFailedException {
+			IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedFolder/file2FromB' from B.");
-		File file2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(maxNumChunks) + 1,
-				sharedFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+		File file2FromBAtB = FileTestUtil.createFileRandomContent("file2FromB", new Random().nextInt(MAX_NUM_CHUNKS) + 1,
+				sharedFolderB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), file2FromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/file2FromB' gets synchronized with A.");
@@ -196,7 +145,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new subfile 'sharedFolder/subfolder/subfile1FromA' from A.");
 		File subFile1FromAAtA = FileTestUtil.createFileRandomContent("subfile1FromA",
-				new Random().nextInt(maxNumChunks) + 1, subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				new Random().nextInt(MAX_NUM_CHUNKS) + 1, subFolderA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), subFile1FromAAtA);
 
 		logger.info("Wait till new subfile 'sharedFolder/subfolder/subfile1FromA' gets synchronized with B.");
@@ -218,7 +167,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new subfile 'sharedFolder/subfolder/subfile2FromA' from A.");
 		File subfile2FromAAtA = FileTestUtil.createFileRandomContent("subfile2FromA",
-				new Random().nextInt(maxNumChunks) + 1, subFolderA, H2HConstants.DEFAULT_CHUNK_SIZE);
+				new Random().nextInt(MAX_NUM_CHUNKS) + 1, subFolderA);
 		UseCaseTestUtil.uploadNewFile(network.get(0), subfile2FromAAtA);
 
 		logger.info("Wait till new subfile 'sharedFolder/subfolder/subfile2FromA' gets synchronized with B.");
@@ -240,7 +189,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedFolder/subfolder/subfile1FromB' from B.");
 		File subfile1FromBAtB = FileTestUtil.createFileRandomContent("subfile1FromB",
-				new Random().nextInt(maxNumChunks) + 1, subFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				new Random().nextInt(MAX_NUM_CHUNKS) + 1, subFolderB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), subfile1FromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder/subfile1FromB' gets synchronized with A.");
@@ -262,7 +211,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 			IOException, IllegalArgumentException, IllegalArgumentException, GetFailedException {
 		logger.info("Upload a new file 'sharedFolder/subfolder/subfile2FromB' from B.");
 		File subfile2FromBAtB = FileTestUtil.createFileRandomContent("subfile2FromB",
-				new Random().nextInt(maxNumChunks) + 1, subFolderB, H2HConstants.DEFAULT_CHUNK_SIZE);
+				new Random().nextInt(MAX_NUM_CHUNKS) + 1, subFolderB);
 		UseCaseTestUtil.uploadNewFile(network.get(1), subfile2FromBAtB);
 
 		logger.info("Wait till new file 'sharedFolder/subfolder/subfile2FromB' gets synchronized with A.");
@@ -367,28 +316,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 		checkIndexes(subFolder2FromAAtA, subfolder2FromBAtB, movedFolder1FromAAtB, false);
 	}
 
-	/**
-	 * Waits a certain amount of time till a file appears (add) or disappears (delete).
-	 * 
-	 * @param synchronizingFile
-	 *            the file to synchronize
-	 * @param appearing
-	 *            <code>true</code> if file should appear, <code>false</code> if file should disappear
-	 */
-	private static void waitTillSynchronized(File synchronizingFile, boolean appearing) {
-		H2HWaiter waiter = new H2HWaiter(40);
-		if (appearing) {
-			do {
-				waiter.tickASecond();
-			} while (!synchronizingFile.exists());
-		} else {
-			do {
-				waiter.tickASecond();
-			} while (synchronizingFile.exists());
-		}
-	}
-
-	private static void checkIndexes(File fileAtA, File fileAtB, File movedFile, boolean userA) throws GetFailedException,
+	private void checkIndexes(File fileAtA, File fileAtB, File movedFile, boolean userA) throws GetFailedException,
 			NoSessionException {
 		UserProfile userProfileA = network.get(0).getSession().getProfileManager().readUserProfile();
 		Index indexA = userProfileA.getFileByPath(fileAtA, network.get(0).getSession().getRootFile());
@@ -408,7 +336,7 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 
 	}
 
-	private static void checkMovedIndex(File movedFile, File root, UserProfile userProfile) throws GetFailedException,
+	private void checkMovedIndex(File movedFile, File root, UserProfile userProfile) throws GetFailedException,
 			NoSessionException {
 		Index index = userProfile.getFileByPath(movedFile, root);
 
@@ -439,14 +367,4 @@ public class SharedFolderWithWritePermissionMoveOutTest extends H2HJUnitTest {
 			Assert.assertTrue(index.isFile());
 		}
 	}
-
-	@AfterClass
-	public static void endTest() throws IOException {
-		FileUtils.deleteDirectory(rootA);
-		FileUtils.deleteDirectory(rootB);
-
-		NetworkTestUtil.shutdownNetwork(network);
-		afterClass();
-	}
-
 }

@@ -2,7 +2,7 @@ package org.hive2hive.core.processes.files.move;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
@@ -30,7 +30,7 @@ public class MoveFileTest extends H2HJUnitTest {
 
 	private final static int networkSize = 6;
 
-	private static ArrayList<NetworkManager> network;
+	private static List<NetworkManager> network;
 	private static NetworkManager client;
 	private static UserCredentials userCredentials;
 	private static File root;
@@ -54,8 +54,8 @@ public class MoveFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testRootToDirectory() throws IOException, IllegalArgumentException, GetFailedException, InterruptedException,
-			NoSessionException, NoPeerConnectionException {
+	public void testRootToDirectory() throws IOException, IllegalArgumentException, GetFailedException,
+			InterruptedException, NoSessionException, NoPeerConnectionException {
 		// add a file to the root
 		File file = new File(root, "test-file-from-root-to-folder");
 		FileUtils.write(file, randomString());
@@ -79,8 +79,8 @@ public class MoveFileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testDirectoryToRoot() throws IOException, IllegalArgumentException, GetFailedException, InterruptedException,
-			NoSessionException, NoPeerConnectionException {
+	public void testDirectoryToRoot() throws IOException, IllegalArgumentException, GetFailedException,
+			InterruptedException, NoSessionException, NoPeerConnectionException {
 		// add the source folder
 		File folder = new File(root, "from-source-folder-to-root");
 		folder.mkdir();
