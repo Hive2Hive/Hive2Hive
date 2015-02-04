@@ -46,9 +46,10 @@ public class NetworkManager {
 		this.nodeID = networkConfiguration.getNodeID();
 
 		if (networkConfiguration.isLocal()) {
-			return connection.connectInternal(networkConfiguration.getNodeID(), networkConfiguration.getBootstapPeer());
+			return connection.connectInternal(networkConfiguration.getNodeID(), networkConfiguration.getPort(),
+					networkConfiguration.getBootstapPeer());
 		} else {
-			boolean success = connection.connect(networkConfiguration.getNodeID());
+			boolean success = connection.connect(networkConfiguration.getNodeID(), networkConfiguration.getPort());
 			// bootstrap if not initial peer
 			if (success && !networkConfiguration.isInitialPeer()) {
 				success = connection.bootstrap(networkConfiguration.getBootstrapAddress(),

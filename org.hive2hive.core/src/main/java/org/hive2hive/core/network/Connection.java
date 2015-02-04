@@ -59,16 +59,17 @@ public class Connection implements IPeerHolder {
 	 * Creates a peer and connects it to the network.
 	 * 
 	 * @param nodeID the id of the network node (should be unique among the network)
+	 * @param port the port to bind to (or negative to bind automatically a default port)
 	 * @return <code>true</code>, if the peer creation and connection was successful, otherwise
 	 *         <code>false</code>
 	 */
-	public boolean connect(String nodeID) {
+	public boolean connect(String nodeID, int port) {
 		if (isConnected()) {
 			logger.warn("Peer is already connected.");
 			return false;
 		}
 
-		return createPeer(nodeID);
+		return createPeer(nodeID, port);
 	}
 
 	/**
@@ -174,7 +175,7 @@ public class Connection implements IPeerHolder {
 	 *            create a new network.
 	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
 	 */
-	public boolean connectInternal(String nodeId, Peer masterPeer) {
+	public boolean connectInternal(String nodeId, int port, Peer masterPeer) {
 		// disable peer verification (faster mutual acceptance)
 		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(Number160.createHash(nodeId));
 		peerMapConfiguration.peerVerification(false);
@@ -187,7 +188,7 @@ public class Connection implements IPeerHolder {
 
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId).masterPeer(masterPeer).peerMap(peerMap).start())
+			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId, port).masterPeer(masterPeer).peerMap(peerMap).start())
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 		} catch (IOException e) {
@@ -228,8 +229,8 @@ public class Connection implements IPeerHolder {
 		return peerDHT;
 	}
 
-	private PeerBuilder preparePeerBuilder(String nodeID) {
-		int port = searchFreePort();
+	private PeerBuilder preparePeerBuilder(String nodeID, int port) {
+		int bindPort = port < 0 ? searchFreePort() : port;
 
 		// configure the thread handling internally, callback can be blocking
 		// eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
@@ -241,13 +242,13 @@ public class Connection implements IPeerHolder {
 		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(new H2HSignatureFactory());
 		// serverConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
-		serverConfig.ports(new Ports(port, port));
+		serverConfig.ports(new Ports(bindPort, bindPort));
 
 		// listen on any interfaces (see https://github.com/Hive2Hive/Hive2Hive/issues/117)
 		Bindings bindings = new Bindings();
 		bindings.listenAny();
 
-		return new PeerBuilder(Number160.createHash(nodeID)).ports(port).bindings(bindings)
+		return new PeerBuilder(Number160.createHash(nodeID)).ports(bindPort).bindings(bindings)
 				.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig);
 	}
 
@@ -267,10 +268,10 @@ public class Connection implements IPeerHolder {
 		replication.start();
 	}
 
-	private boolean createPeer(String nodeId) {
+	private boolean createPeer(String nodeId, int port) {
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId).start())
+			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId, port).start())
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 		} catch (IOException e) {

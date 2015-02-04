@@ -10,36 +10,97 @@ import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 
 /**
  * Configures the network settings of the peer.
+ * Works with the builder pattern style.
  * 
- * @author Nico, Chris, Seppi
+ * @author Nico
+ * @author Chris
+ * @author Seppi
  */
 public class NetworkConfiguration implements INetworkConfiguration {
 
-	private String nodeID;
-	private boolean isInitialPeer;
-	private InetAddress bootstrapAddress;
-	private boolean isLocal;
-	private Peer bootstrapPeer;
-	private int bootstrapPort;
+	private static final int AUTO_PORT = -1;
+
+	private String nodeID = UUID.randomUUID().toString();
+	private int port = AUTO_PORT;
+	private boolean isInitialPeer = true;
+	private InetAddress bootstrapAddress = null;
+	private boolean isLocal = false;
+	private Peer bootstrapPeer = null;
+	private int bootstrapPort = H2HConstants.H2H_PORT;
 
 	/**
-	 * Create network configuration
-	 * 
 	 * @param nodeID defines the location of the peer in the DHT. Should not be null
-	 * @param isInitialPeer true when the peer is the first one in the network
-	 * @param bootstrapAddress the address to bootstrap to
-	 * @param isLocal true if peer will run only locally
-	 * @param bootstrapPort the port to bootstrap and to listen to
-	 * @param initialPeer the local peer to bootstrap
+	 * @return this instance
 	 */
-	private NetworkConfiguration(String nodeID, boolean isInitialPeer, InetAddress bootstrapAddress, int bootstrapPort,
-			boolean isLocal, Peer initialPeer) {
+	public NetworkConfiguration setNodeId(String nodeID) {
 		this.nodeID = nodeID;
-		this.isInitialPeer = isInitialPeer;
-		this.bootstrapAddress = bootstrapAddress;
-		this.isLocal = isLocal;
+		return this;
+	}
+
+	/**
+	 * @param port defines the port to bind. Should be free or negative (autodetect)
+	 * @return this instance
+	 */
+	public NetworkConfiguration setPort(int port) {
+		this.port = port;
+		return this;
+	}
+
+	/**
+	 * Set when the peer is the first one in the network
+	 * 
+	 * @return this instance
+	 */
+	public NetworkConfiguration setInitial() {
+		this.isInitialPeer = true;
+		this.bootstrapAddress = null;
+		return this;
+	}
+
+	/**
+	 * @param bootstrapAddress the address to bootstrap to
+	 * @return this instance
+	 */
+	public NetworkConfiguration setBootstrap(InetAddress bootstrapAddress) {
+		return setBootstrap(bootstrapAddress, H2HConstants.H2H_PORT);
+	}
+
+	/**
+	 * @param bootstrapPort the port to bootstrap to
+	 * @return this instance
+	 */
+	public NetworkConfiguration setBootstrapPort(int bootstrapPort) {
 		this.bootstrapPort = bootstrapPort;
-		this.bootstrapPeer = initialPeer;
+		return this;
+	}
+
+	/**
+	 * 
+	 * @param bootstrapAddress the address to bootstrap to
+	 * @param bootstrapPort the port to bootstrap to
+	 * @return this instance
+	 */
+	public NetworkConfiguration setBootstrap(InetAddress bootstrapAddress, int bootstrapPort) {
+		this.bootstrapAddress = bootstrapAddress;
+		this.bootstrapPort = bootstrapPort;
+		return this;
+	}
+
+	/**
+	 * @param bootstrapPeer the initial local peer to bootstrap to. Note: this is just for testings
+	 * @return this instance
+	 */
+	public NetworkConfiguration setBootstrapLocal(Peer bootstrapPeer) {
+		this.bootstrapPeer = bootstrapPeer;
+		return setLocal();
+	}
+
+	/**
+	 * Set the peer to only connect locally
+	 */
+	public NetworkConfiguration setLocal() {
+		this.isLocal = true;
+		return this;
 	}
 
 	/**
@@ -47,7 +108,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * 
 	 * @return the network configuration
 	 */
-	public static INetworkConfiguration createInitial() {
+	public static NetworkConfiguration createInitial() {
 		return createInitial(UUID.randomUUID().toString());
 	}
 
@@ -57,12 +118,12 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @param nodeID defines the location of the peer in the DHT
 	 * @return the network configuration
 	 */
-	public static INetworkConfiguration createInitial(String nodeID) {
-		return new NetworkConfiguration(nodeID, true, null, H2HConstants.H2H_PORT, false, null);
+	public static NetworkConfiguration createInitial(String nodeID) {
+		return new NetworkConfiguration().setNodeId(nodeID).setInitial().setPort(AUTO_PORT);
 	}
 
 	/**
-	 * Create network configuration for 'normal' peer. The connection happens at the default port
+	 * Create network configuration for 'normal' peer. The bootstrapping happens at the default port
 	 * {@link H2HConstants#H2H_PORT}.
 	 * 
 	 * @param nodeID defines the location of the peer in the DHT. Should not be null
@@ -70,21 +131,23 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 *            other peer connected to the DHT.
 	 * @return the network configuration
 	 */
-	public static INetworkConfiguration create(String nodeID, InetAddress bootstrapAddress) {
-		return create(nodeID, bootstrapAddress, H2HConstants.H2H_PORT);
+	public static NetworkConfiguration create(String nodeID, InetAddress bootstrapAddress) {
+		return new NetworkConfiguration().setNodeId(nodeID).setPort(AUTO_PORT)
+				.setBootstrap(bootstrapAddress, H2HConstants.H2H_PORT);
 	}
 
 	/**
-	 * Create network configuration for 'normal' peer and a manually given port.
+	 * Create network configuration for 'normal' peer. The bootstrapping happens to the specified address and
+	 * port
 	 * 
 	 * @param nodeID defines the location of the peer in the DHT. Should not be null
 	 * @param bootstrapAddress the address to bootstrap to. This can be address of the initial peer or any
 	 *            other peer connected to the DHT.
-	 * @param bootstrapPort the port the peer should bootstrap and then later listen to.
+	 * @param bootstrapPort the port to bootstrap
 	 * @return the network configuration
 	 */
-	public static INetworkConfiguration create(String nodeID, InetAddress bootstrapAddress, int bootstrapPort) {
-		return new NetworkConfiguration(nodeID, false, bootstrapAddress, bootstrapPort, false, null);
+	public static NetworkConfiguration create(String nodeID, InetAddress bootstrapAddress, int bootstrapPort) {
+		return new NetworkConfiguration().setNodeId(nodeID).setPort(AUTO_PORT).setBootstrap(bootstrapAddress, bootstrapPort);
 	}
 
 	/**
@@ -94,8 +157,8 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @param initialPeer the peer to bootstrap to
 	 * @return the network configuration for local peers
 	 */
-	public static INetworkConfiguration createLocalPeer(String nodeID, Peer initialPeer) {
-		return new NetworkConfiguration(nodeID, false, null, H2HConstants.H2H_PORT, true, initialPeer);
+	public static NetworkConfiguration createLocalPeer(String nodeID, Peer initialPeer) {
+		return new NetworkConfiguration().setNodeId(nodeID).setPort(AUTO_PORT).setBootstrapLocal(initialPeer);
 	}
 
 	/**
@@ -105,8 +168,8 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @param nodeID the id of the initial peer
 	 * @return the network configuration for local peers (initial)
 	 */
-	public static INetworkConfiguration createInitialLocalPeer(String nodeID) {
-		return new NetworkConfiguration(nodeID, false, null, H2HConstants.H2H_PORT, true, null);
+	public static NetworkConfiguration createInitialLocalPeer(String nodeID) {
+		return new NetworkConfiguration().setNodeId(nodeID).setPort(AUTO_PORT).setInitial().setLocal();
 	}
 
 	@Override
@@ -137,6 +200,11 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	@Override
 	public boolean isLocal() {
 		return isLocal;
+	}
+
+	@Override
+	public int getPort() {
+		return port;
 	}
 
 }
