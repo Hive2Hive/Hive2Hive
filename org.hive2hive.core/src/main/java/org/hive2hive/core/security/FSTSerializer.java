@@ -112,7 +112,6 @@ public final class FSTSerializer implements IH2HSerialize {
 	 *
 	 */
 	@SuppressWarnings("rawtypes")
-
 	private class FSTKeyPairSerializer extends FSTBasicObjectSerializer {
 
 		@Override
@@ -129,7 +128,7 @@ public final class FSTSerializer implements IH2HSerialize {
 		@Override
 		public void readObject(FSTObjectInput in, Object toRead, FSTClazzInfo clzInfo, FSTFieldInfo referencedBy)
 				throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-
+			// do nothing
 		}
 
 		@Override
@@ -147,8 +146,7 @@ public final class FSTSerializer implements IH2HSerialize {
 				PublicKey publicKey = gen.generatePublic(new X509EncodedKeySpec(buffer));
 				return new KeyPair(publicKey, privateKey);
 			} catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to decode a keypair using a custom FST serializer", e);
 				return super.instantiate(objectClass, in, serializationInfo, referencee, streamPositioin);
 			}
 		}
