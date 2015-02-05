@@ -1,9 +1,8 @@
 package org.hive2hive.core.processes.register;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
@@ -36,7 +35,7 @@ public class PutUserProfileStep extends BasePutProcessStep {
 					context.consumeUserProfileProtectionKeys());
 		} catch (PutFailedException ex) {
 			throw new ProcessExecutionException(this, ex);
-		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException ex) {
+		} catch (GeneralSecurityException | IllegalStateException | IOException ex) {
 			throw new ProcessExecutionException(this, ex, String.format("Cannot encrypt the user profile."));
 		}
 		return null;

@@ -2,13 +2,8 @@ package org.hive2hive.core.processes.files;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.PutFailedException;
@@ -55,7 +50,8 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 		try {
 			chunk = FileChunkUtil.getChunk(file, config.getChunkSize(), index, chunkId);
 		} catch (IOException ex) {
-			throw new ProcessExecutionException(this, ex, String.format("File '%s': Could not read the file.", file.getAbsolutePath()));
+			throw new ProcessExecutionException(this, ex, String.format("File '%s': Could not read the file.",
+					file.getAbsolutePath()));
 		}
 
 		if (chunk != null) {
@@ -76,12 +72,11 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 
 				// store the hash in the index of the meta file
 				context.getMetaChunks().add(new MetaChunk(chunkId, parameters.getHash(), index));
-			} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
-					| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException | PutFailedException ex) {
+			} catch (IOException | IllegalStateException | GeneralSecurityException | PutFailedException ex) {
 				throw new ProcessExecutionException(this, ex, "Could not encrypt and put the chunk.");
 			}
 		}
-		
+
 		return null;
 	}
 }

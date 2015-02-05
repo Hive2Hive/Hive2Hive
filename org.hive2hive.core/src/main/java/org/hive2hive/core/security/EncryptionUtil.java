@@ -1,6 +1,7 @@
 package org.hive2hive.core.security;
 
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -21,16 +22,9 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,9 +146,18 @@ public final class EncryptionUtil {
 	 * @param secretKey The symmetric key with which the data shall be encrypted.
 	 * @param initVector The initialization vector (IV) with which the data shall be encrypted.
 	 * @return Returns the encrypted data.
+	 * @throws GeneralSecurityException in case something goes wrong
 	 */
-	public static byte[] encryptAES(byte[] data, SecretKey secretKey, byte[] initVector) throws InvalidCipherTextException {
-		return processAESCiphering(true, data, secretKey, initVector);
+	public static byte[] encryptAES(byte[] data, SecretKey secretKey, byte[] initVector, String securityProvider,
+			IStrongAESEncryption strongAES) throws GeneralSecurityException {
+		int keySize = secretKey.getEncoded().length * 8;
+		if (Cipher.getMaxAllowedKeyLength("AES") >= keySize) {
+			return processAESCiphering(true, data, secretKey, initVector, securityProvider);
+		} else {
+			logger.trace("Using strong AES encryptor because key has {} bits. Max allowed are {} bits", keySize,
+					Cipher.getMaxAllowedKeyLength("AES"));
+			return strongAES.encryptStrongAES(data, secretKey, initVector);
+		}
 	}
 
 	/**
@@ -163,10 +166,20 @@ public final class EncryptionUtil {
 	 * @param data The data to be decrypted.
 	 * @param secretKey The symmetric key with which the data shall be decrypted.
 	 * @param initVector The initialization vector (IV) with which the data shall be decrypted.
+	 * @param strongAES
 	 * @return Returns the decrypted data.
+	 * @throws GeneralSecurityException in case something goes wrong
 	 */
-	public static byte[] decryptAES(byte[] data, SecretKey secretKey, byte[] initVector) throws InvalidCipherTextException {
-		return processAESCiphering(false, data, secretKey, initVector);
+	public static byte[] decryptAES(byte[] data, SecretKey secretKey, byte[] initVector, String securityProvider,
+			IStrongAESEncryption strongAES) throws GeneralSecurityException {
+		int keySize = secretKey.getEncoded().length * 8;
+		if (Cipher.getMaxAllowedKeyLength("AES") >= keySize) {
+			return processAESCiphering(false, data, secretKey, initVector, securityProvider);
+		} else {
+			logger.trace("Using strong AES decryptor because key has {} bits. Max allowed are {} bits", keySize,
+					Cipher.getMaxAllowedKeyLength("AES"));
+			return strongAES.decryptStrongAES(data, secretKey, initVector);
+		}
 	}
 
 	/**
@@ -229,16 +242,10 @@ public final class EncryptionUtil {
 	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return Returns a {@link HybridEncryptedContent} object containing the RSA encrypted parameters and the
 	 *         AES encrypted content.
-	 * @throws DataLengthException
-	 * @throws IllegalStateException
-	 * @throws InvalidCipherTextException
-	 * @throws InvalidKeyException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
+	 * @throws GeneralSecurityException in case something goes wrong
 	 */
 	public static HybridEncryptedContent encryptHybrid(byte[] data, PublicKey publicKey, AES_KEYLENGTH aesKeyLength,
-			String securityProvider) throws InvalidCipherTextException, InvalidKeyException, IllegalBlockSizeException,
-			BadPaddingException {
+			String securityProvider, IStrongAESEncryption strongAES) throws GeneralSecurityException {
 
 		// generate AES key
 		SecretKey aesKey = generateAESKey(aesKeyLength, securityProvider);
@@ -254,7 +261,7 @@ public final class EncryptionUtil {
 		System.arraycopy(encodedAesKey, 0, params, initVector.length, encodedAesKey.length);
 
 		// encrypt data symmetrically
-		byte[] aesEncryptedData = encryptAES(data, aesKey, initVector);
+		byte[] aesEncryptedData = encryptAES(data, aesKey, initVector, securityProvider, strongAES);
 
 		// encrypt parameters asymmetrically
 		byte[] rsaEncryptedParams = encryptRSA(params, publicKey, securityProvider);
@@ -271,15 +278,10 @@ public final class EncryptionUtil {
 	 * @param privateKey The RSA private key with which the data shall be decrypted.
 	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return Returns the decrypted data.
-	 * @throws InvalidKeyException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 * @throws DataLengthException
-	 * @throws IllegalStateException
-	 * @throws InvalidCipherTextException
+	 * @throws GeneralSecurityException in case something goes wrong
 	 */
-	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey, String securityProvider)
-			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException {
+	public static byte[] decryptHybrid(HybridEncryptedContent data, PrivateKey privateKey, String securityProvider,
+			IStrongAESEncryption strongAES) throws GeneralSecurityException {
 
 		// decrypt parameters asymmetrically
 		byte[] params = decryptRSA(data.getEncryptedParameters(), privateKey, securityProvider);
@@ -290,7 +292,7 @@ public final class EncryptionUtil {
 
 		// decrypt data symmetrically
 		SecretKey aesKey = new SecretKeySpec(encodedAesKey, 0, encodedAesKey.length, "AES");
-		return decryptAES(data.getEncryptedData(), aesKey, initVector);
+		return decryptAES(data.getEncryptedData(), aesKey, initVector, securityProvider, strongAES);
 	}
 
 	/**
@@ -342,27 +344,28 @@ public final class EncryptionUtil {
 		return false;
 	}
 
-	private static byte[] processAESCiphering(boolean forEncrypting, byte[] data, SecretKey key, byte[] initVector)
-			throws InvalidCipherTextException {
-
-		// set up engine, block cipher mode and padding
-		AESEngine aesEngine = new AESEngine();
-		CBCBlockCipher cbc = new CBCBlockCipher(aesEngine);
-		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(cbc);
-
-		// apply parameters
-		CipherParameters parameters = new ParametersWithIV(new KeyParameter(key.getEncoded()), initVector);
-		cipher.init(forEncrypting, parameters);
+	/**
+	 * Encrypts or decrypts using AES. Note that this method uses the native method and has an upper limit for
+	 * the key size. If the size is too large, use {@link IStrongAESEncryption} instead.
+	 */
+	private static byte[] processAESCiphering(boolean forEncrypting, byte[] data, SecretKey key, byte[] initVector,
+			String securityProvider) throws GeneralSecurityException {
+		IvParameterSpec ivSpec = new IvParameterSpec(initVector);
+		SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
+		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", securityProvider);
+		int encryptMode = forEncrypting ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
+		cipher.init(encryptMode, keySpec, ivSpec);
 
 		// process ciphering
 		byte[] output = new byte[cipher.getOutputSize(data.length)];
 
-		int bytesProcessed1 = cipher.processBytes(data, 0, data.length, output, 0);
+		int bytesProcessed1 = cipher.update(data, 0, data.length, output, 0);
 		int bytesProcessed2 = cipher.doFinal(output, bytesProcessed1);
 
 		byte[] result = new byte[bytesProcessed1 + bytesProcessed2];
 		System.arraycopy(output, 0, result, 0, result.length);
 		return result;
+
 	}
 
 	/**

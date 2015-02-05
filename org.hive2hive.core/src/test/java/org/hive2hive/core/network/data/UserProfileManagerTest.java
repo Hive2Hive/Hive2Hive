@@ -2,6 +2,7 @@ package org.hive2hive.core.network.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 
 import org.apache.commons.io.FileUtils;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.AbortModifyException;
@@ -79,7 +79,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void setup() throws NoPeerConnectionException, InvalidCipherTextException, IOException {
+	public void setup() throws NoPeerConnectionException, IOException, GeneralSecurityException {
 		userCredentials = generateRandomCredentials();
 		client = NetworkTestUtil.getRandomNode(network);
 		root = FileTestUtil.getTempDirectory();

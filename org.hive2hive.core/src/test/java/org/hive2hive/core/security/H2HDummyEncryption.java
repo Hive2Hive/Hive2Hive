@@ -1,16 +1,12 @@
 package org.hive2hive.core.security;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
@@ -43,40 +39,35 @@ public class H2HDummyEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey)
-			throws InvalidCipherTextException, IOException {
+	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey) throws IOException {
 		return new EncryptedNetworkContent(serializer.serialize(content), new byte[] {});
 	}
 
 	@Override
-	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey)
-			throws InvalidCipherTextException, ClassNotFoundException, IOException {
+	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws IOException,
+			ClassNotFoundException {
 		return (BaseNetworkContent) serializer.deserialize(content.getCipherContent());
 	}
 
 	@Override
-	public HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws InvalidKeyException,
-			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException {
+	public HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws IOException {
 		return new HybridEncryptedContent(new byte[] {}, serializer.serialize(content));
 	}
 
 	@Override
-	public HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) throws InvalidKeyException,
-			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException {
+	public HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) {
 		return new HybridEncryptedContent(new byte[] {}, content);
 	}
 
 	@Override
-	public BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey)
-			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException,
-			ClassNotFoundException, IOException {
+	public BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws IOException,
+			ClassNotFoundException {
 		return (BaseNetworkContent) serializer.deserialize(content.getEncryptedData());
 	}
 
 	@Override
-	public byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
+	public byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws ClassNotFoundException,
+			IOException {
 		return content.getEncryptedData();
 	}
-
 }

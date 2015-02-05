@@ -1,14 +1,9 @@
 package org.hive2hive.core.processes.common.userprofiletask;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.BaseNetworkContent;
@@ -76,8 +71,7 @@ public class GetUserProfileTaskStep extends ProcessStep<Void> {
 			BaseNetworkContent decrypted = null;
 			try {
 				decrypted = dataManager.getEncryption().decryptHybrid(encrypted, key);
-			} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
-					| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException ex) {
+			} catch (GeneralSecurityException | ClassNotFoundException | IOException ex) {
 				throw new ProcessExecutionException(this, ex, "Could not decrypt user profile task.");
 			}
 			context.provideUserProfileTask((UserProfileTask) decrypted);

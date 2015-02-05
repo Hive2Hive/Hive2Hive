@@ -1,13 +1,8 @@
 package org.hive2hive.core.processes.common.userprofiletask;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -90,8 +85,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep<Void> {
 		HybridEncryptedContent encrypted;
 		try {
 			encrypted = dataManager.getEncryption().encryptHybrid(upTask, session.getKeyPair().getPublic());
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException | InvalidCipherTextException
-				| IllegalBlockSizeException | BadPaddingException | IOException ex) {
+		} catch (GeneralSecurityException | IOException ex) {
 			throw new ProcessRollbackException(this, ex, "Could not encrypt the user profile task while rollback.");
 		}
 

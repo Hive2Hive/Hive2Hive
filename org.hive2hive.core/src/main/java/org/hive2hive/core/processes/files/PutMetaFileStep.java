@@ -1,14 +1,9 @@
 package org.hive2hive.core.processes.files;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
@@ -66,8 +61,7 @@ public class PutMetaFileStep extends BasePutProcessStep {
 			context.provideMetaFileHash(parameters.getHash());
 			setRequiresRollback(true);
 
-		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
-				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException ex) {
+		} catch (IOException | GeneralSecurityException | IllegalStateException ex) {
 			throw new ProcessExecutionException(this, ex, "Meta file could not be encrypted.");
 		} catch (PutFailedException ex) {
 			throw new ProcessExecutionException(this, ex);

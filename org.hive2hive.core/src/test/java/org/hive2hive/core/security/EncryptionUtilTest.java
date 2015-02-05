@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -45,6 +46,7 @@ import org.junit.Test;
 public class EncryptionUtilTest extends H2HJUnitTest {
 
 	private static String SECURITY_PROVIDER = "BC";
+	private static IStrongAESEncryption STRONG_AES = new BCStrongAESEncryption();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -54,6 +56,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		if (Security.getProvider(SECURITY_PROVIDER) == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}
+
 	}
 
 	@Test
@@ -125,8 +128,8 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			// encrypt data
 			byte[] encryptedData = null;
 			try {
-				encryptedData = EncryptionUtil.encryptAES(data, aesKey, initVector);
-			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+				encryptedData = EncryptionUtil.encryptAES(data, aesKey, initVector, SECURITY_PROVIDER, STRONG_AES);
+			} catch (IllegalStateException | GeneralSecurityException e) {
 				logger.error("Exception while testing AES encryption:", e);
 				e.printStackTrace();
 			}
@@ -137,8 +140,8 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			// decrypt data
 			byte[] decryptedData = null;
 			try {
-				decryptedData = EncryptionUtil.decryptAES(encryptedData, aesKey, initVector);
-			} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+				decryptedData = EncryptionUtil.decryptAES(encryptedData, aesKey, initVector, SECURITY_PROVIDER, STRONG_AES);
+			} catch (IllegalStateException | GeneralSecurityException e) {
 				logger.error("Exception while testing AES decryption:", e);
 				e.printStackTrace();
 			}
@@ -232,11 +235,10 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				try {
 					start = System.currentTimeMillis();
 					encryptedData = EncryptionUtil.encryptHybrid(data, rsaKeyPair.getPublic(), aesSizes[s2],
-							SECURITY_PROVIDER);
+							SECURITY_PROVIDER, STRONG_AES);
 					stop = System.currentTimeMillis();
 					logger.debug("Hybrid Encryption Time: {} ms.", stop - start);
-				} catch (DataLengthException | InvalidKeyException | IllegalStateException | InvalidCipherTextException
-						| IllegalBlockSizeException | BadPaddingException e) {
+				} catch (GeneralSecurityException e) {
 					logger.error("Exception while testing hybrid encryption:", e);
 					e.printStackTrace();
 				}
@@ -250,11 +252,11 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				byte[] decryptedData = null;
 				try {
 					start = System.currentTimeMillis();
-					decryptedData = EncryptionUtil.decryptHybrid(encryptedData, rsaKeyPair.getPrivate(), SECURITY_PROVIDER);
+					decryptedData = EncryptionUtil.decryptHybrid(encryptedData, rsaKeyPair.getPrivate(), SECURITY_PROVIDER,
+							STRONG_AES);
 					stop = System.currentTimeMillis();
 					logger.debug("Hybrid Decryption Time: {} ms.", stop - start);
-				} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
-						| IllegalStateException | InvalidCipherTextException e) {
+				} catch (GeneralSecurityException e) {
 					logger.error("Exception while testing hybrid decryption:", e);
 					e.printStackTrace();
 				}

@@ -1,16 +1,12 @@
 package org.hive2hive.core.security;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
@@ -31,13 +27,11 @@ public interface IH2HEncryption {
 	 * @param aesKey The symmetric key with which the content will be encrypted.
 	 * @return EncryptedContent which contains the encrypted byte[] content as well as the AES initialization
 	 *         vector (IV).
-	 * @throws InvalidCipherTextException
-	 * @throws IllegalStateException
-	 * @throws DataLengthException
 	 * @throws IOException
+	 * @throws GeneralSecurityException
 	 */
-	EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
-			IOException;
+	EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey) throws IOException,
+			GeneralSecurityException;
 
 	/**
 	 * Symmetrically decrypts a prior content inheriting from {@link BaseNetworkContent} by means of the AES
@@ -46,14 +40,12 @@ public interface IH2HEncryption {
 	 * @param content The EncryptedContent to be decrypted.
 	 * @param aesKey The symmetric key with which the content will be decrypted.
 	 * @return decrypted object
-	 * @throws InvalidCipherTextException
-	 * @throws IllegalStateException
-	 * @throws DataLengthException
 	 * @throws IOException
 	 * @throws ClassNotFoundException
+	 * @throws GeneralSecurityException
 	 */
-	BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws InvalidCipherTextException,
-			ClassNotFoundException, IOException;
+	BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws ClassNotFoundException,
+			IOException, GeneralSecurityException;
 
 	/**
 	 * Asymmetrically encrypts content inheriting from {@link BaseNetworkContent}. A default key length will
@@ -62,16 +54,11 @@ public interface IH2HEncryption {
 	 * @param content the content to be encrypted.
 	 * @param publicKey The asymmetric public key with which the content will be encrypted
 	 * @return the encrypted content
-	 * @throws DataLengthException
-	 * @throws InvalidKeyException
-	 * @throws IllegalStateException
-	 * @throws InvalidCipherTextException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
 	 * @throws IOException
+	 * @throws GeneralSecurityException
 	 */
-	HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws InvalidKeyException,
-			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException;
+	HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws IOException,
+			GeneralSecurityException;
 
 	/**
 	 * Asymmetrically encrypts any content that is already serialized. A default key length will be
@@ -80,15 +67,9 @@ public interface IH2HEncryption {
 	 * @param content the content to be encrypted.
 	 * @param publicKey The asymmetric public key with which the content will be encrypted
 	 * @return the encrypted content
-	 * @throws DataLengthException
-	 * @throws InvalidKeyException
-	 * @throws IllegalStateException
-	 * @throws InvalidCipherTextException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
+	 * @throws GeneralSecurityException
 	 */
-	HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) throws InvalidKeyException,
-			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException;
+	HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) throws GeneralSecurityException;
 
 	/**
 	 * Asymmetrically decrypts a prior content inheriting from {@link BaseNetworkContent}.
@@ -96,17 +77,12 @@ public interface IH2HEncryption {
 	 * @param content the encrypted content to be decrypted
 	 * @param privateKey the asymmetric private key that matches the public key at encryption
 	 * @return decrypted object
-	 * @throws InvalidKeyException
-	 * @throws DataLengthException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 * @throws IllegalStateException
-	 * @throws InvalidCipherTextException
 	 * @throws IOException
 	 * @throws ClassNotFoundException
+	 * @throws GeneralSecurityException
 	 */
-	BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException;
+	BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey) throws ClassNotFoundException,
+			IOException, GeneralSecurityException;
 
 	/**
 	 * Asymmetrically decrypts any content
@@ -114,16 +90,11 @@ public interface IH2HEncryption {
 	 * @param content the encrypted content to be decrypted
 	 * @param privateKey the asymmetric private key that matches the public key at encryption
 	 * @return decrypted object in the raw format
-	 * @throws InvalidKeyException
-	 * @throws DataLengthException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 * @throws IllegalStateException
-	 * @throws InvalidCipherTextException
 	 * @throws IOException
 	 * @throws ClassNotFoundException
+	 * @throws GeneralSecurityException
 	 */
-	byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException;
+	byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws ClassNotFoundException,
+			IOException, GeneralSecurityException;
 
 }

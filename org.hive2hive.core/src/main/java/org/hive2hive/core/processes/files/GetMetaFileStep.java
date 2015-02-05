@@ -1,14 +1,9 @@
 package org.hive2hive.core.processes.files;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
@@ -57,8 +52,7 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 		BaseNetworkContent decryptedContent = null;
 		try {
 			decryptedContent = dataManager.getEncryption().decryptHybrid(encryptedContent, keyPair.getPrivate());
-		} catch (InvalidKeyException | DataLengthException | IllegalBlockSizeException | BadPaddingException
-				| IllegalStateException | InvalidCipherTextException | ClassNotFoundException | IOException ex) {
+		} catch (GeneralSecurityException | IllegalStateException | ClassNotFoundException | IOException ex) {
 			throw new ProcessExecutionException(this, ex, "Meta file could not be decrypted.");
 		}
 
@@ -71,7 +65,7 @@ public class GetMetaFileStep extends BaseGetProcessStep {
 		setRequiresRollback(true);
 
 		logger.debug("Got and decrypted the meta file.");
-		
+
 		return null;
 	}
 

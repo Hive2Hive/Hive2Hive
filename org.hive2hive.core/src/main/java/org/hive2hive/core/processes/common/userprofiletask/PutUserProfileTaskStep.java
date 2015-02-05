@@ -1,17 +1,12 @@
 package org.hive2hive.core.processes.common.userprofiletask;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
 import net.tomp2p.peers.Number160;
 
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
@@ -74,8 +69,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep<Void> {
 			}
 			setRequiresRollback(true);
 
-		} catch (IOException | DataLengthException | InvalidKeyException | IllegalStateException
-				| InvalidCipherTextException | IllegalBlockSizeException | BadPaddingException ex) {
+		} catch (IOException | GeneralSecurityException ex) {
 			throw new PutFailedException(String.format("Meta document could not be encrypted. Reason: %s.", ex.getMessage()));
 		} catch (NoPeerConnectionException ex) {
 			throw new PutFailedException(ex.getMessage());
@@ -89,7 +83,8 @@ public abstract class PutUserProfileTaskStep extends ProcessStep<Void> {
 		try {
 			dataManager = networkManager.getDataManager();
 		} catch (NoPeerConnectionException ex) {
-			throw new ProcessRollbackException(this, ex, String.format("Rollback of UserProfileTask put failed. No connection. User = '%s', Content Key = '%s'.", userId,
+			throw new ProcessRollbackException(this, ex, String.format(
+					"Rollback of UserProfileTask put failed. No connection. User = '%s', Content Key = '%s'.", userId,
 					contentKey));
 		}
 
@@ -98,10 +93,11 @@ public abstract class PutUserProfileTaskStep extends ProcessStep<Void> {
 			logger.debug("Rollback of user profile task put succeeded. User = '{}', Content Key = '{}'.", userId, contentKey);
 			setRequiresRollback(false);
 		} else {
-			throw new ProcessRollbackException(this, String.format("Rollback of user profile put failed. Remove failed. User = '{}', Content Key = '{}'.", userId,
+			throw new ProcessRollbackException(this, String.format(
+					"Rollback of user profile put failed. Remove failed. User = '{}', Content Key = '{}'.", userId,
 					contentKey));
 		}
-		
+
 		return null;
 	}
 }

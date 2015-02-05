@@ -155,7 +155,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 		if ("java".equalsIgnoreCase(config.getString("Serializer.mode"))) {
 			serializer = new JavaSerializer();
 		} else {
-			serializer = new FSTSerializer(config.getBoolean("Serializer.FST.unsafe"));
+			serializer = new FSTSerializer(config.getBoolean("Serializer.FST.unsafe"), "BC");
 		}
 
 		node = H2HNode.createNode(fileConfig, new H2HDefaultEncryption(serializer), serializer);

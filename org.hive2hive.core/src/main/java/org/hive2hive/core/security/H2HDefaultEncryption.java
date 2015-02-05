@@ -1,35 +1,33 @@
 package org.hive2hive.core.security;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 
-public final class H2HDefaultEncryption implements IH2HEncryption {
+public class H2HDefaultEncryption implements IH2HEncryption {
 
 	private final IH2HSerialize serializer;
 	private final String securityProvider;
+	private final IStrongAESEncryption strongAES;
 
 	/**
 	 * Create a default encryption using bouncy castle as the security provider
 	 */
 	public H2HDefaultEncryption(IH2HSerialize serializer) {
-		this(serializer, "BC");
+		this(serializer, BouncyCastleProvider.PROVIDER_NAME, new BCStrongAESEncryption());
 
-		if (Security.getProvider("BC") == null) {
+		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}
 	}
@@ -40,10 +38,12 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	 * @param serializer the serializer to encode / decode objects
 	 * @param securityProvider the security provider identifier. Note that the provider must be installed
 	 *            separately.
+	 * @param strongAES the fallback if the AES encryption / decryption has a too long key
 	 */
-	public H2HDefaultEncryption(IH2HSerialize serializer, String securityProvider) {
+	public H2HDefaultEncryption(IH2HSerialize serializer, String securityProvider, IStrongAESEncryption strongAES) {
 		this.serializer = serializer;
 		this.securityProvider = securityProvider;
+		this.strongAES = strongAES;
 	}
 
 	@Override
@@ -52,11 +52,11 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey)
-			throws InvalidCipherTextException, IOException {
+	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey) throws IOException,
+			GeneralSecurityException {
 		byte[] serialized = serializer.serialize(content);
 		byte[] initVector = EncryptionUtil.generateIV();
-		byte[] encryptedContent = EncryptionUtil.encryptAES(serialized, aesKey, initVector);
+		byte[] encryptedContent = EncryptionUtil.encryptAES(serialized, aesKey, initVector, securityProvider, strongAES);
 
 		EncryptedNetworkContent encryptedNetworkContent = new EncryptedNetworkContent(encryptedContent, initVector);
 		encryptedNetworkContent.setTimeToLive(content.getTimeToLive());
@@ -64,15 +64,16 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey)
-			throws InvalidCipherTextException, ClassNotFoundException, IOException {
-		byte[] decrypted = EncryptionUtil.decryptAES(content.getCipherContent(), aesKey, content.getInitVector());
+	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws ClassNotFoundException,
+			IOException, GeneralSecurityException {
+		byte[] decrypted = EncryptionUtil.decryptAES(content.getCipherContent(), aesKey, content.getInitVector(),
+				securityProvider, strongAES);
 		return (BaseNetworkContent) serializer.deserialize(decrypted);
 	}
 
 	@Override
-	public HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws InvalidKeyException,
-			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException, IOException {
+	public HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws IOException,
+			GeneralSecurityException {
 		byte[] serialized = serializer.serialize(content);
 
 		HybridEncryptedContent encryptHybrid = encryptHybrid(serialized, publicKey);
@@ -81,22 +82,21 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) throws InvalidKeyException,
-			InvalidCipherTextException, IllegalBlockSizeException, BadPaddingException {
-		return EncryptionUtil.encryptHybrid(content, publicKey, H2HConstants.KEYLENGTH_HYBRID_AES, securityProvider);
+	public HybridEncryptedContent encryptHybrid(byte[] content, PublicKey publicKey) throws GeneralSecurityException {
+		return EncryptionUtil.encryptHybrid(content, publicKey, H2HConstants.KEYLENGTH_HYBRID_AES, securityProvider,
+				strongAES);
 	}
 
 	@Override
 	public BaseNetworkContent decryptHybrid(HybridEncryptedContent content, PrivateKey privateKey)
-			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException,
-			ClassNotFoundException, IOException {
+			throws ClassNotFoundException, IOException, GeneralSecurityException {
 		return (BaseNetworkContent) serializer.deserialize(decryptHybridRaw(content, privateKey));
 	}
 
 	@Override
-	public byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException, InvalidCipherTextException, ClassNotFoundException, IOException {
-		return EncryptionUtil.decryptHybrid(content, privateKey, securityProvider);
+	public byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws ClassNotFoundException,
+			IOException, GeneralSecurityException {
+		return EncryptionUtil.decryptHybrid(content, privateKey, securityProvider, strongAES);
 	}
 
 	/**
@@ -110,7 +110,7 @@ public final class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	/**
-	 * Compares two keypairs (either one can be null)
+	 * Compares two key pairs (either one can be null)
 	 * 
 	 * @param keypair1
 	 * @param keypair2

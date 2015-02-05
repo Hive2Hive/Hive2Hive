@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.data.vdht;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,8 +21,6 @@ import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.DigestResult;
 import net.tomp2p.storage.Data;
 
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
@@ -183,7 +182,7 @@ public class EncryptedVersionManager<T extends BaseVersionedNetworkContent> {
 							contentCache.put(encrypted.getVersionKey(), decrypted);
 
 							return decrypted;
-						} catch (DataLengthException | IllegalStateException | InvalidCipherTextException e) {
+						} catch (GeneralSecurityException e) {
 							logger.error("Cannot decrypt the version.");
 							throw new GetFailedException("Cannot decrypt the version.");
 						} catch (Exception e) {
@@ -234,7 +233,7 @@ public class EncryptedVersionManager<T extends BaseVersionedNetworkContent> {
 				// cache encrypted network content
 				encryptedContentCache.put(parameters.getVersionKey(), encrypted);
 			}
-		} catch (DataLengthException | IllegalStateException | InvalidCipherTextException | IOException e) {
+		} catch (GeneralSecurityException | IOException e) {
 			logger.error("Cannot encrypt the user profile. reason = '{}'", e.getMessage());
 			throw new PutFailedException(String.format("Cannot encrypt the user profile. reason = '%s'", e.getMessage()));
 		}

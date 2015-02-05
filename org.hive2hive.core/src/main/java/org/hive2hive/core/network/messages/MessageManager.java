@@ -1,22 +1,18 @@
 package org.hive2hive.core.network.messages;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
 import net.tomp2p.dht.FutureSend;
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
 
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.extras.AndroidAddressFixer;
@@ -206,8 +202,7 @@ public final class MessageManager implements IMessageManager {
 			// asymmetrically encrypt message
 			messageBytes = serializer.serialize(message);
 			encryptedMessage = encryption.encryptHybrid(messageBytes, targetPublicKey);
-		} catch (DataLengthException | InvalidKeyException | IllegalStateException | InvalidCipherTextException
-				| IllegalBlockSizeException | BadPaddingException | IOException e) {
+		} catch (GeneralSecurityException | IOException e) {
 			logger.error("An exception occured while encrypting the message. The message will not be sent.", e);
 			return null;
 		}

@@ -2,14 +2,9 @@ package org.hive2hive.core.processes.files.download.dht;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
+import java.security.GeneralSecurityException;
 
 import org.apache.commons.io.FileUtils;
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.Chunk;
@@ -70,9 +65,7 @@ public class DownloadChunkRunnableDHT implements Runnable {
 		try {
 			BaseNetworkContent decrypted = dataManager.getEncryption().decryptHybrid(encrypted, task.getDecryptionKey());
 			chunk = (Chunk) decrypted;
-		} catch (ClassNotFoundException | InvalidKeyException | DataLengthException | IllegalBlockSizeException
-				| BadPaddingException | IllegalStateException | InvalidCipherTextException | IllegalArgumentException
-				| IOException e) {
+		} catch (GeneralSecurityException | IllegalArgumentException | IOException | ClassNotFoundException e) {
 			task.abortDownload(String.format("Decryption of the chunk failed. reason = '%s'", e.getMessage()));
 			return;
 		}
