@@ -126,14 +126,8 @@ public final class FSTSerializer implements IH2HSerialize {
 		}
 
 		@Override
-		public void readObject(FSTObjectInput in, Object toRead, FSTClazzInfo clzInfo, FSTFieldInfo referencedBy)
-				throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-			// do nothing
-		}
-
-		@Override
 		public Object instantiate(Class objectClass, FSTObjectInput in, FSTClazzInfo serializationInfo,
-				FSTFieldInfo referencee, int streamPositioin) throws IOException, ClassNotFoundException,
+				FSTFieldInfo referencee, int streamPosition) throws IOException, ClassNotFoundException,
 				InstantiationException, IllegalAccessException {
 			try {
 				byte[] buffer = new byte[in.readInt()];
@@ -144,10 +138,13 @@ public final class FSTSerializer implements IH2HSerialize {
 				buffer = new byte[in.readInt()];
 				in.read(buffer);
 				PublicKey publicKey = gen.generatePublic(new X509EncodedKeySpec(buffer));
-				return new KeyPair(publicKey, privateKey);
+
+				KeyPair result = new KeyPair(publicKey, privateKey);
+				in.registerObject(result, streamPosition, serializationInfo, referencee);
+				return result;
 			} catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
 				logger.error("Failed to decode a keypair using a custom FST serializer", e);
-				return super.instantiate(objectClass, in, serializationInfo, referencee, streamPositioin);
+				return super.instantiate(objectClass, in, serializationInfo, referencee, streamPosition);
 			}
 		}
 	}
