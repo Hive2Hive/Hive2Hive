@@ -8,7 +8,7 @@
 	</appender>
 	
 	<!-- Loggers -->
-	<logger name="net.tomp2p.relay" level="INFO" /> <!-- mute tomp2p library -->
+	<logger name="net.tomp2p.relay" level="DEBUG" /> <!-- mute tomp2p library -->
 	<logger name="net.tomp2p" level="WARN" /> <!-- mute tomp2p library -->
 	<logger name="io.netty" level="OFF" /> <!-- mute netty library -->
 	
