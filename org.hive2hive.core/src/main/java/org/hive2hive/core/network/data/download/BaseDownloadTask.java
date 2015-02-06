@@ -166,7 +166,7 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 				// release the lock
 				finishedLatch.countDown();
 			} catch (IOException e) {
-				abortDownload("Cannot reassembly the file parts because '{}'" + e.getMessage());
+				abortDownload(String.format("Cannot reassembly the file parts. Reason: %s.", reason + e.getMessage()));
 			}
 		}
 	}
