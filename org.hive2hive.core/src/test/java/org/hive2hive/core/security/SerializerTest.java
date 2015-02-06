@@ -6,10 +6,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
+import java.security.KeyPair;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -66,6 +70,20 @@ public class SerializerTest extends H2HJUnitTest {
 
 		// however, deseriazlizing null is not allowed
 		assertNull(serializer.deserialize(null));
+	}
+
+	@Test
+	public void testKeyPair() throws IOException, ClassNotFoundException {
+		// install the provider anyway because probably key pairs need to be generated
+		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+			Security.addProvider(new BouncyCastleProvider());
+		}
+
+		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
+		byte[] encoded = serializer.serialize(keyPair);
+		KeyPair decoded = (KeyPair) serializer.deserialize(encoded);
+		assertEquals(keyPair.getPrivate(), decoded.getPrivate());
+		assertEquals(keyPair.getPublic(), decoded.getPublic());
 	}
 
 	@AfterClass

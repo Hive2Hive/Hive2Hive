@@ -52,6 +52,12 @@
 			<version>1.2.1</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.madgag.spongycastle</groupId>
+			<artifactId>prov</artifactId>
+			<version>1.51.0.0</version>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>

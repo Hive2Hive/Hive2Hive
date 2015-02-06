@@ -2,13 +2,12 @@ package org.hive2hive.core.security;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -46,7 +45,8 @@ public final class FSTSerializer implements IH2HSerialize {
 	private final String securityProvider;
 
 	/**
-	 * Crate a default serializer with the default security provider (BC)
+	 * Crate a default serializer with the default security provider (BC). The provider needs to be installed
+	 * separately.
 	 */
 	public FSTSerializer() {
 		this(true, "BC");
@@ -75,8 +75,11 @@ public final class FSTSerializer implements IH2HSerialize {
 		fst.registerClass(UserProfile.class, Locations.class, UserPublicKey.class, MetaFileSmall.class, MetaFileLarge.class,
 				Chunk.class, ContactPeerMessage.class, ResponseMessage.class);
 
-		// add custom serializer for all keypairs for full compatibility
-		fst.registerSerializer(KeyPair.class, new FSTKeyPairSerializer(), true);
+		// add custom serializer for all public / private keys for full compatibility
+		FSTKeyPairSerializer keySerializer = new FSTKeyPairSerializer();
+		fst.registerSerializer(KeyPair.class, keySerializer, true);
+		fst.registerSerializer(PublicKey.class, keySerializer, true);
+		fst.registerSerializer(PrivateKey.class, keySerializer, true);
 	}
 
 	@Override
@@ -111,41 +114,77 @@ public final class FSTSerializer implements IH2HSerialize {
 	 * @author Nico
 	 *
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private class FSTKeyPairSerializer extends FSTBasicObjectSerializer {
 
 		@Override
 		public void writeObject(FSTObjectOutput out, Object toWrite, FSTClazzInfo clzInfo, FSTFieldInfo referencedBy,
 				int streamPosition) throws IOException {
-			KeyPair keyPair = (KeyPair) toWrite;
-			out.writeInt(keyPair.getPrivate().getEncoded().length);
-			out.write(keyPair.getPrivate().getEncoded());
+			if (toWrite instanceof KeyPair) {
+				KeyPair keyPair = (KeyPair) toWrite;
+				encodeKey(keyPair.getPrivate(), out);
+				encodeKey(keyPair.getPublic(), out);
+			} else if (toWrite instanceof Key) {
+				encodeKey((Key) toWrite, out);
+			} else {
+				logger.warn("Object to encode is not key or keypair. It is of class {}", toWrite.getClass().getName());
+			}
+		}
 
-			out.writeInt(keyPair.getPublic().getEncoded().length);
-			out.write(keyPair.getPublic().getEncoded());
+		private void encodeKey(Key key, FSTObjectOutput out) throws IOException {
+			out.writeInt(key.getEncoded().length);
+			out.write(key.getEncoded());
 		}
 
 		@Override
 		public Object instantiate(Class objectClass, FSTObjectInput in, FSTClazzInfo serializationInfo,
 				FSTFieldInfo referencee, int streamPosition) throws IOException, ClassNotFoundException,
 				InstantiationException, IllegalAccessException {
-			try {
-				byte[] buffer = new byte[in.readInt()];
-				in.read(buffer);
-				KeyFactory gen = KeyFactory.getInstance("RSA", securityProvider);
-				PrivateKey privateKey = gen.generatePrivate(new PKCS8EncodedKeySpec(buffer));
-
-				buffer = new byte[in.readInt()];
-				in.read(buffer);
-				PublicKey publicKey = gen.generatePublic(new X509EncodedKeySpec(buffer));
-
-				KeyPair result = new KeyPair(publicKey, privateKey);
-				in.registerObject(result, streamPosition, serializationInfo, referencee);
-				return result;
-			} catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
-				logger.error("Failed to decode a keypair using a custom FST serializer", e);
-				return super.instantiate(objectClass, in, serializationInfo, referencee, streamPosition);
+			if (objectClass.isAssignableFrom(KeyPair.class)) {
+				try {
+					PrivateKey privateKey = decodePrivateKey(in);
+					PublicKey publicKey = decodePublicKey(in);
+					KeyPair keyPair = new KeyPair(publicKey, privateKey);
+					in.registerObject(keyPair, streamPosition, serializationInfo, referencee);
+					return keyPair;
+				} catch (GeneralSecurityException e) {
+					logger.error("Failed to decode a key pair using a custom FST serializer", e);
+				}
+			} else if (objectClass.isAssignableFrom(PublicKey.class)) {
+				try {
+					PublicKey publicKey = decodePublicKey(in);
+					in.registerObject(publicKey, streamPosition, serializationInfo, referencee);
+					return publicKey;
+				} catch (GeneralSecurityException e) {
+					logger.error("Failed to decode a public key using a custom FST serializer", e);
+				}
+			} else if (objectClass.isAssignableFrom(PrivateKey.class)) {
+				try {
+					PrivateKey privateKey = decodePrivateKey(in);
+					in.registerObject(privateKey, streamPosition, serializationInfo, referencee);
+					return privateKey;
+				} catch (GeneralSecurityException e) {
+					logger.error("Failed to decode a private key using a custom FST serializer", e);
+				}
+			} else {
+				logger.warn("Failed to identify class {} as a keypair, a public or a private key");
 			}
+
+			return super.instantiate(objectClass, in, serializationInfo, referencee, streamPosition);
+		}
+
+		private PublicKey decodePublicKey(FSTObjectInput in) throws IOException, GeneralSecurityException {
+			byte[] buffer = new byte[in.readInt()];
+			in.read(buffer);
+			KeyFactory gen = KeyFactory.getInstance("RSA", securityProvider);
+			return gen.generatePublic(new X509EncodedKeySpec(buffer));
+		}
+
+		private PrivateKey decodePrivateKey(FSTObjectInput in) throws IOException, GeneralSecurityException {
+			byte[] buffer = new byte[in.readInt()];
+			in.read(buffer);
+			KeyFactory gen = KeyFactory.getInstance("RSA", securityProvider);
+			return gen.generatePrivate(new PKCS8EncodedKeySpec(buffer));
 		}
 	}
 }
