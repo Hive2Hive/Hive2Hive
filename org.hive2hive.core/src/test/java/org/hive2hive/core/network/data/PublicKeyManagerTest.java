@@ -19,7 +19,6 @@ import org.hive2hive.core.model.UserPublicKey;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -53,8 +52,8 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 	@Before
 	public void createKeyManager() throws NoPeerConnectionException {
 		loggedInUserId = randomString();
-		loggedInUserKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		KeyPair loggedInProtectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		loggedInUserKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+		KeyPair loggedInProtectionKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		publicKeyManager = new PublicKeyManager(loggedInUserId, loggedInUserKeys, loggedInProtectionKeys,
@@ -73,7 +72,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
 		for (int i = 0; i < random.nextInt(10); i++) {
 			String userId = randomString();
-			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+			KeyPair key = generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
 			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY)
 					.setNetworkContent(userPublicKey);
@@ -92,7 +91,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
 		for (int i = 0; i < random.nextInt(5); i++) {
 			String userId = randomString();
-			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+			KeyPair key = generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
 			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY)
 					.setNetworkContent(userPublicKey);
@@ -135,7 +134,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 		Map<String, PublicKey> publicKeys = new HashMap<String, PublicKey>();
 		for (int i = 0; i < 5; i++) {
 			String userId = randomString();
-			KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+			KeyPair key = generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			UserPublicKey userPublicKey = new UserPublicKey(key.getPublic());
 			Parameters parameters = new Parameters().setLocationKey(userId).setContentKey(H2HConstants.USER_PUBLIC_KEY)
 					.setNetworkContent(userPublicKey);

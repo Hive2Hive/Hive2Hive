@@ -26,7 +26,6 @@ import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
@@ -85,7 +84,8 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		root = FileTestUtil.getTempDirectory();
 
 		// create an user profile
-		UserProfile userProfile = new UserProfile(userCredentials.getUserId());
+		UserProfile userProfile = new UserProfile(userCredentials.getUserId(),
+				generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS), generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION));
 		// encrypt it (fake encryption)
 		EncryptedNetworkContent encrypted = client.getDataManager().getEncryption().encryptAES(userProfile, null);
 		encrypted.setVersionKey(userProfile.getVersionKey());
@@ -229,7 +229,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 				FileUtils.writeStringToFile(file, randomString());
 			}
 			final byte[] md5Hash = HashUtil.hash(file);
-			final KeyPair fileKeys = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
+			final KeyPair fileKeys = generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
 
 			while (true) {
 				String pid = UUID.randomUUID().toString();

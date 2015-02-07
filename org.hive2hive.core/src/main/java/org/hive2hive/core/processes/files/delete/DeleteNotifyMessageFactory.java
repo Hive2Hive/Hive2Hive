@@ -7,6 +7,7 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.security.IH2HEncryption;
 
 public class DeleteNotifyMessageFactory extends BaseNotificationMessageFactory {
 
@@ -15,7 +16,9 @@ public class DeleteNotifyMessageFactory extends BaseNotificationMessageFactory {
 	private final String fileName;
 	private final boolean isFile;
 
-	public DeleteNotifyMessageFactory(PublicKey fileKey, PublicKey parentFileKey, String fileName, boolean isFile) {
+	public DeleteNotifyMessageFactory(IH2HEncryption encryption, PublicKey fileKey, PublicKey parentFileKey,
+			String fileName, boolean isFile) {
+		super(encryption);
 		this.fileKey = fileKey;
 		this.parentFileKey = parentFileKey;
 		this.fileName = fileName;
@@ -29,7 +32,7 @@ public class DeleteNotifyMessageFactory extends BaseNotificationMessageFactory {
 
 	@Override
 	public UserProfileTask createUserProfileTask(String sender) {
-		return new DeleteUserProfileTask(sender, fileKey);
+		return new DeleteUserProfileTask(sender, generateProtectionKeys(), fileKey);
 	}
 
 }

@@ -7,6 +7,7 @@ import net.tomp2p.peers.PeerAddress;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.security.IH2HEncryption;
 
 public class MoveNotificationMessageFactory extends BaseNotificationMessageFactory {
 
@@ -23,8 +24,9 @@ public class MoveNotificationMessageFactory extends BaseNotificationMessageFacto
 	 * @param oldParent the former parent key
 	 * @param newParent the key of the new parent
 	 */
-	public MoveNotificationMessageFactory(String sourceFileName, String destFileName, PublicKey oldParent,
-			PublicKey newParent) {
+	public MoveNotificationMessageFactory(IH2HEncryption encryption, String sourceFileName, String destFileName,
+			PublicKey oldParent, PublicKey newParent) {
+		super(encryption);
 		this.sourceFileName = sourceFileName;
 		this.destFileName = destFileName;
 		this.oldParent = oldParent;
@@ -38,6 +40,7 @@ public class MoveNotificationMessageFactory extends BaseNotificationMessageFacto
 
 	@Override
 	public UserProfileTask createUserProfileTask(String sender) {
-		return new MoveUserProfileTask(sender, sourceFileName, destFileName, oldParent, newParent);
+		return new MoveUserProfileTask(sender, generateProtectionKeys(), sourceFileName, destFileName,
+				oldParent, newParent);
 	}
 }

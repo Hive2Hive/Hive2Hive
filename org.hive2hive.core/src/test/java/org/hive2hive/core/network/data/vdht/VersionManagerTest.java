@@ -22,7 +22,6 @@ import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryGetMode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -39,7 +38,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 
 	// can be reused
 	private static final Random random = new Random();
-	private static KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+	private static KeyPair protectionKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -229,7 +228,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
 
-		KeyPair otherProtectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair otherProtectionKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		H2HTestData version0 = new H2HTestData("version0");
 		versionManager.put(version0, protectionKeys);
@@ -248,7 +247,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
 
-		KeyPair otherProtectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair otherProtectionKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		H2HTestData version0 = new H2HTestData("version0");
 		versionManager.put(version0, protectionKeys);
@@ -297,7 +296,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
 
-		KeyPair otherProtectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair otherProtectionKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		H2HTestData version0 = new H2HTestData("version0");
 		versionManager.put(version0, protectionKeys);
@@ -352,7 +351,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 		VersionManager<H2HTestData> versionManager = new VersionManager<H2HTestData>(node.getDataManager(), locationKey,
 				contentKey);
 
-		KeyPair otherProtectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair otherProtectionKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		H2HTestData version0 = new H2HTestData("version0");
 		versionManager.put(version0, protectionKeys);

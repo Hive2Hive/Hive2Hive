@@ -43,8 +43,7 @@ public class PutMetaFileStep extends BasePutProcessStep {
 			KeyPair encryptionKeys = context.consumeMetaFileEncryptionKeys();
 
 			logger.trace("Encrypting meta file in a hybrid manner.");
-			HybridEncryptedContent encrypted = dataManager.getEncryption().encryptHybrid(metaFile,
-					encryptionKeys.getPublic());
+			HybridEncryptedContent encrypted = context.getEncryption().encryptHybrid(metaFile, encryptionKeys.getPublic());
 			encrypted.setBasedOnKey(metaFile.getBasedOnKey());
 			encrypted.setVersionKey(metaFile.getVersionKey());
 			encrypted.generateVersionKey();

@@ -15,7 +15,6 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
@@ -102,7 +101,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 	public void testDownloadWrongKeys() throws IOException, NoSessionException, GetFailedException,
 			InvalidProcessStateException, NoPeerConnectionException {
 		// create fake file keys
-		KeyPair wrongKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
+		KeyPair wrongKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 
 		// try to download with wrong keys
 		IProcessComponent<Void> process = ProcessFactory.instance().createDownloadFileProcess(wrongKeys.getPublic(),

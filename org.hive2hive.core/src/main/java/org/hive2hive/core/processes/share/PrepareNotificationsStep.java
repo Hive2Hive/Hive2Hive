@@ -7,6 +7,7 @@ import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.processes.context.ShareProcessContext;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
@@ -23,11 +24,13 @@ public class PrepareNotificationsStep extends ProcessStep<Void> {
 
 	private final ShareProcessContext context;
 	private final String userId;
+	private final IH2HEncryption encryption;
 
-	public PrepareNotificationsStep(ShareProcessContext context, String userId) {
+	public PrepareNotificationsStep(ShareProcessContext context, String userId, IH2HEncryption encryption) {
 		this.setName(getClass().getName());
 		this.context = context;
 		this.userId = userId; // ownUserId
+		this.encryption = encryption;
 	}
 
 	@Override
@@ -54,7 +57,7 @@ public class PrepareNotificationsStep extends ProcessStep<Void> {
 		// skip to notify myself
 		friends.remove(userId);
 
-		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(sharedNode,
+		BaseNotificationMessageFactory messageFactory = new ShareFolderNotificationMessageFactory(encryption, sharedNode,
 				context.getUserPermission());
 		context.provideMessageFactory(messageFactory);
 		context.provideUsersToNotify(friends);

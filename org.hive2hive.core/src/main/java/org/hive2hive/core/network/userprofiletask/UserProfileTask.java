@@ -17,7 +17,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
@@ -52,14 +51,14 @@ public abstract class UserProfileTask extends BaseNetworkContent {
 	private static final long serialVersionUID = -773794512479641000L;
 
 	protected final String sender;
-	private final KeyPair protectionKey;
+	private final KeyPair protectionKeys;
 	private final String id;
 	private final Number160 contentKey;
 	protected NetworkManager networkManager;
 
-	public UserProfileTask(String sender) {
+	public UserProfileTask(String sender, KeyPair protectionKeys) {
 		this.sender = sender;
-		this.protectionKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		this.protectionKeys = protectionKeys;
 		this.id = UUID.randomUUID().toString();
 
 		// get the current time
@@ -81,8 +80,8 @@ public abstract class UserProfileTask extends BaseNetworkContent {
 		return contentKey;
 	}
 
-	public KeyPair getProtectionKey() {
-		return protectionKey;
+	public KeyPair getProtectionKeys() {
+		return protectionKeys;
 	}
 
 	/**

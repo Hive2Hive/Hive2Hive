@@ -24,6 +24,7 @@ import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
+import org.hive2hive.core.security.BCSecurityClassProvider;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.serializer.FSTSerializer;
 import org.hive2hive.core.serializer.IH2HSerialize;
@@ -155,7 +156,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 		if ("java".equalsIgnoreCase(config.getString("Serializer.mode"))) {
 			serializer = new JavaSerializer();
 		} else {
-			serializer = new FSTSerializer(config.getBoolean("Serializer.FST.unsafe"), "BC");
+			serializer = new FSTSerializer(config.getBoolean("Serializer.FST.unsafe"), new BCSecurityClassProvider());
 		}
 
 		node = H2HNode.createNode(fileConfig, new H2HDefaultEncryption(serializer), serializer);

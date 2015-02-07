@@ -1,9 +1,11 @@
 package org.hive2hive.core.processes.logout;
 
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.hive2hive.processframework.exceptions.ProcessRollbackException;
 
 public class StopDownloadsStep extends ProcessStep<Void> {
 
@@ -22,8 +24,13 @@ public class StopDownloadsStep extends ProcessStep<Void> {
 	}
 
 	@Override
-	protected Void doRollback() throws InvalidProcessStateException {
-		downloadManager.startBackgroundProcess();
+	protected Void doRollback() throws ProcessRollbackException {
+		try {
+			downloadManager.startBackgroundProcess();
+		} catch (NoPeerConnectionException e) {
+			throw new ProcessRollbackException(this, e);
+		}
+
 		setRequiresRollback(false);
 		return null;
 	}

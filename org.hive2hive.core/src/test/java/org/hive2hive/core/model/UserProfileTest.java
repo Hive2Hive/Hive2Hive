@@ -3,9 +3,9 @@ package org.hive2hive.core.model;
 import java.io.File;
 import java.security.KeyPair;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.junit.AfterClass;
@@ -31,20 +31,21 @@ public class UserProfileTest extends H2HJUnitTest {
 
 	@Before
 	public void createUserProfile() {
-		userProfile = new UserProfile(randomString());
+		userProfile = new UserProfile(randomString(), generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS),
+				generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION));
 	}
 
 	@Test
 	public void testGetFileById() {
 		FolderIndex root = userProfile.getRoot();
 
-		KeyPair child1Key = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
+		KeyPair child1Key = generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
 		FolderIndex child1Folder = new FolderIndex(root, child1Key, randomString());
 
-		KeyPair child2Key = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024);
+		KeyPair child2Key = generateRSAKeyPair(RSA_KEYLENGTH.BIT_1024);
 		new FileIndex(root, child2Key, randomString(), "bla".getBytes());
 
-		KeyPair child3Key = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
+		KeyPair child3Key = generateRSAKeyPair(RSA_KEYLENGTH.BIT_2048);
 		new FileIndex(child1Folder, child3Key, randomString(), "blubb".getBytes());
 
 		Assert.assertNotNull(userProfile.getFileById(child1Key.getPublic()));
@@ -57,16 +58,14 @@ public class UserProfileTest extends H2HJUnitTest {
 		FolderIndex root = userProfile.getRoot();
 
 		// tree in the UP
-		FolderIndex folderIndex1 = new FolderIndex(root, EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
-				randomString());
-		FileIndex fileIndex1 = new FileIndex(folderIndex1, EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
-				randomString(), "bla".getBytes());
-		FileIndex fileIndex2 = new FileIndex(folderIndex1, EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
-				randomString(), "blubb".getBytes());
-		FolderIndex folderIndex2 = new FolderIndex(folderIndex1, EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
-				randomString());
-		FileIndex fileIndex3 = new FileIndex(folderIndex2, EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
-				randomString(), "bla".getBytes());
+		FolderIndex folderIndex1 = new FolderIndex(root, generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), randomString());
+		FileIndex fileIndex1 = new FileIndex(folderIndex1, generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), randomString(),
+				"bla".getBytes());
+		FileIndex fileIndex2 = new FileIndex(folderIndex1, generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), randomString(),
+				"blubb".getBytes());
+		FolderIndex folderIndex2 = new FolderIndex(folderIndex1, generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), randomString());
+		FileIndex fileIndex3 = new FileIndex(folderIndex2, generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), randomString(),
+				"bla".getBytes());
 
 		// tree on the FS
 		File rootFile = FileTestUtil.getTempDirectory();

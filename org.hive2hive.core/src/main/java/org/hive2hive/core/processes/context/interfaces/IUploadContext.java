@@ -9,6 +9,7 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.model.versioned.BaseMetaFile;
+import org.hive2hive.core.security.IH2HEncryption;
 
 public interface IUploadContext {
 
@@ -72,4 +73,8 @@ public interface IUploadContext {
 
 	public IFileConfiguration consumeFileConfiguration();
 
+	// ------ CreateFileKeysStep, PrepareAddNotificationStep, InitializeChunksStep, PutMetaFileStep,
+	// PutSingleChunkStep ------
+
+	public IH2HEncryption getEncryption();
 }

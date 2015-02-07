@@ -58,11 +58,11 @@ public abstract class PutUserProfileTaskStep extends ProcessStep<Void> {
 		try {
 			logger.debug("Encrypting user profile task in a hybrid manner.");
 			this.contentKey = userProfileTask.getContentKey();
-			this.protectionKey = userProfileTask.getProtectionKey();
-			DataManager dataManager = networkManager.getDataManager();
-			HybridEncryptedContent encrypted = dataManager.getEncryption().encryptHybrid(userProfileTask, publicKey);
+			this.protectionKey = userProfileTask.getProtectionKeys();
+			HybridEncryptedContent encrypted = networkManager.getEncryption().encryptHybrid(userProfileTask, publicKey);
 			encrypted.setTimeToLive(userProfileTask.getTimeToLive());
 
+			DataManager dataManager = networkManager.getDataManager();
 			H2HPutStatus status = dataManager.putUserProfileTask(userId, contentKey, encrypted, protectionKey);
 			if (!status.equals(H2HPutStatus.OK)) {
 				throw new PutFailedException();

@@ -12,7 +12,6 @@ import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.MetaChunk;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.processes.context.interfaces.IUploadContext;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -59,7 +58,7 @@ public class InitializeChunksStep extends ProcessStep<Void> {
 		if (context.consumeChunkEncryptionKeys() == null) {
 			logger.trace("Create chunk keys for the file '{}'.", file.getName());
 			// create and provide chunk keys
-			KeyPair chunkKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
+			KeyPair chunkKeys = context.getEncryption().generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
 			context.provideChunkEncryptionKeys(chunkKeys);
 		}
 

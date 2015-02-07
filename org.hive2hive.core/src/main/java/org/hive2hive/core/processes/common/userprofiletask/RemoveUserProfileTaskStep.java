@@ -53,7 +53,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep<Void> {
 		}
 
 		boolean success = dataManager.removeUserProfileTask(userId, context.consumeUserProfileTask().getContentKey(),
-				context.consumeUserProfileTask().getProtectionKey());
+				context.consumeUserProfileTask().getProtectionKeys());
 		if (!success) {
 			throw new ProcessExecutionException(this, "Could not remove the user profile task.");
 		}
@@ -84,14 +84,14 @@ public class RemoveUserProfileTaskStep extends ProcessStep<Void> {
 
 		HybridEncryptedContent encrypted;
 		try {
-			encrypted = dataManager.getEncryption().encryptHybrid(upTask, session.getKeyPair().getPublic());
+			encrypted = networkManager.getEncryption().encryptHybrid(upTask, session.getKeyPair().getPublic());
 		} catch (GeneralSecurityException | IOException ex) {
 			throw new ProcessRollbackException(this, ex, "Could not encrypt the user profile task while rollback.");
 		}
 
 		encrypted.setTimeToLive(upTask.getTimeToLive());
 		H2HPutStatus status = dataManager.putUserProfileTask(userId, upTask.getContentKey(), encrypted,
-				upTask.getProtectionKey());
+				upTask.getProtectionKeys());
 		if (status.equals(H2HPutStatus.OK)) {
 			logger.debug("Rollback of removing user profile task succeeded. User ID = '{}', Content key = '{}'.", userId,
 					upTask.getContentKey());

@@ -25,7 +25,6 @@ import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.serializer.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +40,10 @@ public final class MessageManager implements IMessageManager {
 
 	private final NetworkManager networkManager;
 	private final Map<String, IResponseCallBackHandler> callBackHandlers;
-	private final IH2HEncryption encryption;
 	private final IH2HSerialize serializer;
 
-	public MessageManager(NetworkManager networkManager, IH2HEncryption encryption, IH2HSerialize serializer) {
+	public MessageManager(NetworkManager networkManager, IH2HSerialize serializer) {
 		this.networkManager = networkManager;
-		this.encryption = encryption;
 		this.serializer = serializer;
 		this.callBackHandlers = new HashMap<String, IResponseCallBackHandler>();
 	}
@@ -201,7 +198,7 @@ public final class MessageManager implements IMessageManager {
 		try {
 			// asymmetrically encrypt message
 			messageBytes = serializer.serialize(message);
-			encryptedMessage = encryption.encryptHybrid(messageBytes, targetPublicKey);
+			encryptedMessage = networkManager.getEncryption().encryptHybrid(messageBytes, targetPublicKey);
 		} catch (GeneralSecurityException | IOException e) {
 			logger.error("An exception occured while encrypting the message. The message will not be sent.", e);
 			return null;
@@ -209,8 +206,8 @@ public final class MessageManager implements IMessageManager {
 
 		try {
 			// create signature
-			byte[] signature = EncryptionUtil.sign(messageBytes, session.getKeyPair().getPrivate(),
-					encryption.getSecurityProvider());
+			byte[] signature = EncryptionUtil.sign(messageBytes, session.getKeyPair().getPrivate(), networkManager
+					.getEncryption().getSecurityProvider());
 			encryptedMessage.setSignature(session.getUserId(), signature);
 			return encryptedMessage;
 		} catch (InvalidKeyException | SignatureException e) {

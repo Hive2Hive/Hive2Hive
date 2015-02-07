@@ -38,7 +38,8 @@ public class PrepareUpdateNotificationStep extends ProcessStep<Void> {
 		// decouple from file tree
 		indexToSend.decoupleFromParent();
 
-		UpdateNotificationMessageFactory messageFactory = new UpdateNotificationMessageFactory(indexToSend);
+		UpdateNotificationMessageFactory messageFactory = new UpdateNotificationMessageFactory(context.getEncryption(),
+				indexToSend);
 		context.provideMessageFactory(messageFactory);
 
 		return null;

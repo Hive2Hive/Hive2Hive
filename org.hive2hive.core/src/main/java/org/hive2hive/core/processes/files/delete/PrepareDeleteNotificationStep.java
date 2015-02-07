@@ -28,15 +28,15 @@ public class PrepareDeleteNotificationStep extends ProcessStep<Void> {
 		Index fileNode = context.consumeIndex();
 
 		// provide the message factory
-		context.provideMessageFactory(new DeleteNotifyMessageFactory(fileNode.getFilePublicKey(), fileNode.getParent()
-				.getFilePublicKey(), fileNode.getName(), fileNode.isFile()));
+		context.provideMessageFactory(new DeleteNotifyMessageFactory(context.getEncryption(), fileNode.getFilePublicKey(),
+				fileNode.getParent().getFilePublicKey(), fileNode.getName(), fileNode.isFile()));
 
 		Set<String> users = new HashSet<String>();
 		users.addAll(fileNode.getCalculatedUserList());
 
 		// provide the user list
 		context.provideUsersToNotify(users);
-		
+
 		return null;
 	}
 }

@@ -70,7 +70,7 @@ public class GetUserProfileTaskStep extends ProcessStep<Void> {
 			}
 			BaseNetworkContent decrypted = null;
 			try {
-				decrypted = dataManager.getEncryption().decryptHybrid(encrypted, key);
+				decrypted = networkManager.getEncryption().decryptHybrid(encrypted, key);
 			} catch (GeneralSecurityException | ClassNotFoundException | IOException ex) {
 				throw new ProcessExecutionException(this, ex, "Could not decrypt user profile task.");
 			}

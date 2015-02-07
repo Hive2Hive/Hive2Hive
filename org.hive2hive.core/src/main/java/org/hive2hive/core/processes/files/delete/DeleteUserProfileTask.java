@@ -1,6 +1,7 @@
 package org.hive2hive.core.processes.files.delete;
 
 import java.io.File;
+import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.H2HSession;
@@ -18,6 +19,7 @@ import org.hive2hive.core.network.data.IUserProfileModification;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +35,8 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 
 	private final PublicKey fileKey;
 
-	public DeleteUserProfileTask(String sender, PublicKey fileKey) {
-		super(sender);
+	public DeleteUserProfileTask(String sender, KeyPair protectionKeys, PublicKey fileKey) {
+		super(sender, protectionKeys);
 		this.fileKey = fileKey;
 	}
 
@@ -48,7 +50,7 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 			return;
 		}
 
-		DeleteUPModification modification = new DeleteUPModification(session.getRootFile());
+		DeleteUPModification modification = new DeleteUPModification(session.getRootFile(), networkManager.getEncryption());
 		UserProfileManager profileManager = session.getProfileManager();
 		try {
 			profileManager.modifyUserProfile(getId(), modification);
@@ -72,35 +74,40 @@ public class DeleteUserProfileTask extends UserProfileTask implements IFileEvent
 	private class DeleteUPModification implements IUserProfileModification {
 
 		private final File root;
+		private final IH2HEncryption encryption;
 		private BaseNotificationMessageFactory messageFactory;
 		private FileDeleteEvent fileDeleteEvent;
 
-		public DeleteUPModification(File root) {
+		public DeleteUPModification(File root, IH2HEncryption encryption) {
 			this.root = root;
+			this.encryption = encryption;
 		}
 
 		@Override
 		public void modifyUserProfile(UserProfile userProfile) throws AbortModifyException {
 			Index fileToDelete = userProfile.getFileById(fileKey);
 			if (fileToDelete == null) {
-				throw new AbortModifyException(AbortModificationCode.FILE_INDEX_NOT_FOUND, "Got notified about a file we don't know.");
+				throw new AbortModifyException(AbortModificationCode.FILE_INDEX_NOT_FOUND,
+						"Got notified about a file we don't know.");
 			}
 
 			FolderIndex parent = fileToDelete.getParent();
 			if (parent == null) {
-				throw new AbortModifyException(AbortModificationCode.ROOT_DELETE_ATTEMPT, "Got task to delete the root, which is invalid.");
+				throw new AbortModifyException(AbortModificationCode.ROOT_DELETE_ATTEMPT,
+						"Got task to delete the root, which is invalid.");
 			}
 
 			// check write permission
 			if (!parent.canWrite(sender)) {
-				throw new AbortModifyException(AbortModificationCode.NO_WRITE_PERM, "User without WRITE permissions tried to delete a file.");
+				throw new AbortModifyException(AbortModificationCode.NO_WRITE_PERM,
+						"User without WRITE permissions tried to delete a file.");
 			}
 
 			parent.removeChild(fileToDelete);
 
 			// prepare objects for notification if the UP modification was successful
-			messageFactory = new DeleteNotifyMessageFactory(fileToDelete.getFilePublicKey(), parent.getFilePublicKey(),
-					fileToDelete.getName(), fileToDelete.isFile());
+			messageFactory = new DeleteNotifyMessageFactory(encryption, fileToDelete.getFilePublicKey(),
+					parent.getFilePublicKey(), fileToDelete.getName(), fileToDelete.isFile());
 			fileDeleteEvent = new FileDeleteEvent(fileToDelete.asFile(root), fileToDelete.isFile());
 		}
 

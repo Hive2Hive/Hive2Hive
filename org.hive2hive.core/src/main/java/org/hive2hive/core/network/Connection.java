@@ -26,7 +26,6 @@ import net.tomp2p.replication.IndirectReplication;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
 import org.hive2hive.core.security.H2HSignatureFactory;
-import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.serializer.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,15 +42,13 @@ public class Connection implements IPeerHolder {
 	private static final int MAX_PORT = 65535;
 
 	private final NetworkManager networkManager;
-	private final IH2HEncryption encryption;
 	private final IH2HSerialize serializer;
 
 	private PeerDHT peerDHT;
 	private DefaultEventExecutorGroup eventExecutorGroup;
 
-	public Connection(NetworkManager networkManager, IH2HEncryption encryption, IH2HSerialize serializer) {
+	public Connection(NetworkManager networkManager, IH2HSerialize serializer) {
 		this.networkManager = networkManager;
-		this.encryption = encryption;
 		this.serializer = serializer;
 	}
 
@@ -90,7 +87,7 @@ public class Connection implements IPeerHolder {
 		this.peerDHT = peer;
 
 		// attach a reply handler for messages
-		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption, serializer));
+		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, serializer));
 
 		if (startReplication) {
 			startReplication();
@@ -197,7 +194,7 @@ public class Connection implements IPeerHolder {
 		}
 
 		// attach a reply handler for messages
-		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption, serializer));
+		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, serializer));
 
 		// setup replication
 		startReplication();
@@ -281,7 +278,7 @@ public class Connection implements IPeerHolder {
 		}
 
 		// attach a reply handler for messages
-		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, encryption, serializer));
+		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, serializer));
 
 		// setup replication
 		startReplication();

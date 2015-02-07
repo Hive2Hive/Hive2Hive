@@ -6,6 +6,8 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.crypto.SecretKey;
+
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -46,8 +48,10 @@ public class UserProfileManager {
 
 	public UserProfileManager(DataManager dataManager, UserCredentials credentials) {
 		this.credentials = credentials;
-		this.versionManager = new EncryptedVersionManager<UserProfile>(dataManager, PasswordUtil.generateAESKeyFromPassword(
-				credentials.getPassword(), credentials.getPin(), H2HConstants.KEYLENGTH_USER_PROFILE),
+
+		SecretKey passwordKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(), credentials.getPin(),
+				H2HConstants.KEYLENGTH_USER_PROFILE);
+		this.versionManager = new EncryptedVersionManager<UserProfile>(dataManager, passwordKey,
 				credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 		startQueueWorker();
 	}

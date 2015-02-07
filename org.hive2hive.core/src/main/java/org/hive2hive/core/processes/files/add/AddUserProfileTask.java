@@ -1,5 +1,6 @@
 package org.hive2hive.core.processes.files.add;
 
+import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.H2HSession;
@@ -31,8 +32,8 @@ public class AddUserProfileTask extends UserProfileTask implements IUserProfileM
 	private final Index addedFileIndex;
 	private final PublicKey parentKey;
 
-	public AddUserProfileTask(String sender, Index index, PublicKey parentKey) {
-		super(sender);
+	public AddUserProfileTask(String sender, KeyPair protectionKeys, Index index, PublicKey parentKey) {
+		super(sender, protectionKeys);
 		this.addedFileIndex = index;
 		this.parentKey = parentKey;
 	}
@@ -57,7 +58,7 @@ public class AddUserProfileTask extends UserProfileTask implements IUserProfileM
 
 		try {
 			// notify own other clients
-			notifyOtherClients(new AddNotificationMessageFactory(addedFileIndex, parentKey));
+			notifyOtherClients(new AddNotificationMessageFactory(networkManager.getEncryption(), addedFileIndex, parentKey));
 			logger.debug("Notified other clients that a file has been updated by another user.");
 		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException | NoSessionException e) {
 			logger.error("Could not notify other clients of me about the new file.", e);

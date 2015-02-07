@@ -3,9 +3,6 @@ package org.hive2hive.core.serializer;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.UserPublicKey;
@@ -15,6 +12,7 @@ import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
+import org.hive2hive.core.security.BCSecurityClassProvider;
 import org.nustaq.serialization.FSTConfiguration;
 import org.nustaq.serialization.util.FSTUtil;
 import org.slf4j.Logger;
@@ -39,7 +37,7 @@ public final class FSTSerializer implements IH2HSerialize {
 	 * separately.
 	 */
 	public FSTSerializer() {
-		this(true, "BC");
+		this(true, new BCSecurityClassProvider());
 	}
 
 	/**
@@ -49,7 +47,7 @@ public final class FSTSerializer implements IH2HSerialize {
 	 *            used.
 	 * @param securityProvider the security provider, needed to decode key pairs correctly
 	 */
-	public FSTSerializer(boolean useUnsafe, String securityProvider) {
+	public FSTSerializer(boolean useUnsafe, ISecurityClassProvider securityProvider) {
 		if (!useUnsafe) {
 			// don't use sun.misc.Unsafe class
 			FSTUtil.unFlaggedUnsafe = null;
@@ -63,14 +61,14 @@ public final class FSTSerializer implements IH2HSerialize {
 		fst.registerClass(UserProfile.class, Locations.class, UserPublicKey.class, MetaFileSmall.class, MetaFileLarge.class,
 				Chunk.class, ContactPeerMessage.class, ResponseMessage.class);
 
-		/**
-		 * Custom serializers
-		 */
 		// for all public / private keys for full compatibility among multiple security providers
-		FSTKeyPairSerializer keySerializer = new FSTKeyPairSerializer(securityProvider);
-		fst.registerSerializer(KeyPair.class, keySerializer, true);
-		fst.registerSerializer(PublicKey.class, keySerializer, true);
-		fst.registerSerializer(PrivateKey.class, keySerializer, true);
+		fst.registerClass(securityProvider.getRSAPublicKeyClass(), securityProvider.getRSAPrivateKeyClass(),
+				securityProvider.getRSAPrivateCrtKeyClass());
+		// FSTKeyPairSerializer keySerializer = new
+		// FSTKeyPairSerializer(securityProvider.getSecurityProvider());
+		// fst.registerSerializer(KeyPair.class, keySerializer, true);
+		// fst.registerSerializer(PublicKey.class, keySerializer, true);
+		// fst.registerSerializer(PrivateKey.class, keySerializer, true);
 
 		// BigIntegers make problems sometime (in Android)
 		fst.registerSerializer(BigInteger.class, new FSTBigIntegerSerializer(), false);

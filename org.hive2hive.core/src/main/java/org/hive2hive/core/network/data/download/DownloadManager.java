@@ -9,9 +9,9 @@ import java.util.concurrent.Executors;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.MetaChunk;
-import org.hive2hive.core.network.data.DataManager;
-import org.hive2hive.core.network.messages.IMessageManager;
+import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.files.download.dht.DownloadChunkRunnableDHT;
 import org.hive2hive.core.processes.files.download.dht.DownloadTaskDHT;
 import org.hive2hive.core.processes.files.download.direct.DownloadChunkRunnableDirect;
@@ -33,26 +33,24 @@ public class DownloadManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DownloadManager.class);
 
-	private final DataManager dataManager;
-	private final IMessageManager messageManager;
+	private final NetworkManager networkManager;
 	private final IFileConfiguration fileConfig;
 	private final Set<BaseDownloadTask> openTasks;
 
 	private ExecutorService executor;
 
-	public DownloadManager(DataManager dataManager, IMessageManager messageManager, IFileConfiguration fileConfig) {
-		this.dataManager = dataManager;
-		this.messageManager = messageManager;
+	public DownloadManager(NetworkManager networkManager, IFileConfiguration fileConfig) {
+		this.networkManager = networkManager;
 		this.fileConfig = fileConfig;
 		this.openTasks = Collections.newSetFromMap(new ConcurrentHashMap<BaseDownloadTask, Boolean>());
-
-		startBackgroundProcess();
+		// start executor
+		this.executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);
 	}
 
 	/**
 	 * Add a new task to download a file. The download is automatically started in the background
 	 */
-	public void submit(BaseDownloadTask task) {
+	public void submit(BaseDownloadTask task) throws NoPeerConnectionException {
 		logger.debug("Submitted to download {}", task.getDestinationName());
 
 		// store the task for possible later recovery
@@ -65,24 +63,25 @@ public class DownloadManager {
 		schedule(task);
 	}
 
-	private void schedule(BaseDownloadTask task) {
+	private void schedule(BaseDownloadTask task) throws NoPeerConnectionException {
 		if (task.isDirectDownload()) {
 			// first get the locations of all users having access to this file
 			DownloadTaskDirect directTask = (DownloadTaskDirect) task;
 			// Hint: Run it in a separate thread (not in the thread pool) because the executor does not
 			// guarantee the in-order processing.
-			new Thread(new GetLocationsList(directTask, dataManager)).start();
+			new Thread(new GetLocationsList(directTask, networkManager.getDataManager())).start();
 
 			// then download all chunks in separate threads
 			for (MetaChunk chunk : task.getOpenChunks()) {
-				DownloadChunkRunnableDirect runnable = new DownloadChunkRunnableDirect(directTask, chunk, messageManager,
-						fileConfig);
+				DownloadChunkRunnableDirect runnable = new DownloadChunkRunnableDirect(directTask, chunk,
+						networkManager.getMessageManager(), fileConfig);
 				executor.submit(runnable);
 			}
 		} else {
 			// submit each chunk as a separate thread
 			for (MetaChunk chunk : task.getOpenChunks()) {
-				DownloadChunkRunnableDHT runnable = new DownloadChunkRunnableDHT((DownloadTaskDHT) task, chunk, dataManager);
+				DownloadChunkRunnableDHT runnable = new DownloadChunkRunnableDHT((DownloadTaskDHT) task, chunk,
+						networkManager.getDataManager(), networkManager.getEncryption());
 				executor.submit(runnable);
 			}
 		}
@@ -99,7 +98,7 @@ public class DownloadManager {
 	/**
 	 * Start / continue the downloads
 	 */
-	public void startBackgroundProcess() {
+	public void startBackgroundProcess() throws NoPeerConnectionException {
 		executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);
 		for (BaseDownloadTask task : openTasks) {
 			schedule(task);

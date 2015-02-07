@@ -52,9 +52,10 @@ public class PrepareAddNotificationStep extends ProcessStep<Void> {
 		// decouple from file tree
 		indexToSend.decoupleFromParent();
 
-		AddNotificationMessageFactory messageFactory = new AddNotificationMessageFactory(indexToSend, parentKey);
+		AddNotificationMessageFactory messageFactory = new AddNotificationMessageFactory(context.getEncryption(),
+				indexToSend, parentKey);
 		context.provideMessageFactory(messageFactory);
-		
+
 		return null;
 	}
 

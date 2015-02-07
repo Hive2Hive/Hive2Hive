@@ -1,6 +1,7 @@
 package org.hive2hive.core.security;
 
 import java.io.IOException;
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
@@ -11,6 +12,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.serializer.FSTSerializer;
 import org.hive2hive.core.serializer.IH2HSerialize;
 
@@ -71,5 +73,10 @@ public class H2HDummyEncryption implements IH2HEncryption {
 	public byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws ClassNotFoundException,
 			IOException {
 		return content.getEncryptedData();
+	}
+
+	@Override
+	public KeyPair generateRSAKeyPair(RSA_KEYLENGTH length) {
+		return EncryptionUtil.generateRSAKeyPair(length, SECURITY_PROVIDER);
 	}
 }

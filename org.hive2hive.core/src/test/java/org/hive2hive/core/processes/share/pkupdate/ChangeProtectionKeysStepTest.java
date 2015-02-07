@@ -25,7 +25,6 @@ import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.context.BasePKUpdateContext;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.utils.NetworkTestUtil;
@@ -67,9 +66,9 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		NetworkManager proxy = network.get(1);
 
 		// generate necessary keys
-		KeyPair encryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
-		KeyPair protectionKeysOld = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
-		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair encryptionKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
+		KeyPair protectionKeysOld = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKeysNew = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		// generate a fake chunk
 		Chunk chunk = new Chunk(proxy.getNodeId(), randomString().getBytes(), 0);
@@ -116,10 +115,10 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 		NetworkManager getter = network.get(0);
 
 		// generate necessary keys
-		KeyPair chunkEncryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
-		KeyPair metaFileEncryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
-		KeyPair protectionKeysOld = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
-		KeyPair protectionKeysNew = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair chunkEncryptionKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_CHUNK);
+		KeyPair metaFileEncryptionKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
+		KeyPair protectionKeysOld = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKeysNew = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		// generate a fake meta file
 		List<MetaChunk> metaChunks1 = new ArrayList<MetaChunk>();

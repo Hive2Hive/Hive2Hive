@@ -6,6 +6,7 @@ import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.security.IH2HEncryption;
 
 /**
  * The notification message factory is used when a file has been updated.
@@ -17,9 +18,11 @@ public class UpdateNotificationMessageFactory extends BaseNotificationMessageFac
 	private final FileIndex updatedFileIndex;
 
 	/**
+	 * @param encryption the encryption
 	 * @param updatedFileIndex the index that has been updated (may contain sub-files)
 	 */
-	public UpdateNotificationMessageFactory(FileIndex updatedFileIndex) {
+	public UpdateNotificationMessageFactory(IH2HEncryption encryption, FileIndex updatedFileIndex) {
+		super(encryption);
 		this.updatedFileIndex = updatedFileIndex;
 	}
 
@@ -30,6 +33,7 @@ public class UpdateNotificationMessageFactory extends BaseNotificationMessageFac
 
 	@Override
 	public UserProfileTask createUserProfileTask(String sender) {
-		return new UpdateUserProfileTask(sender, updatedFileIndex.getFilePublicKey(), updatedFileIndex.getMD5());
+		return new UpdateUserProfileTask(sender, generateProtectionKeys(),
+				updatedFileIndex.getFilePublicKey(), updatedFileIndex.getMD5());
 	}
 }

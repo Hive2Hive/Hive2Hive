@@ -12,7 +12,6 @@ import org.hive2hive.core.H2HTestData;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -41,7 +40,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		String locationKey = randomString();
 		String domainKey = randomString();
 		String contentKey = randomString();
-		KeyPair protectionKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKey = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
@@ -69,7 +68,7 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		String locationKey = randomString();
 		String domainKey = randomString();
 		String contentKey = randomString();
-		KeyPair protectionKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKey = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
@@ -106,8 +105,8 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		String locationKey = randomString();
 		String domainKey = randomString();
 		String contentKey = randomString();
-		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
-		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKey1 = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKey2 = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
@@ -135,8 +134,8 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		String locationKey = randomString();
 		String domainKey = randomString();
 		String contentKey = randomString();
-		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
-		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKey1 = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKey2 = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
@@ -177,8 +176,8 @@ public class ContentProtectionTest extends H2HJUnitTest {
 		String locationKey = randomString();
 		String domainKey = randomString();
 		String contentKey = randomString();
-		KeyPair protectionKey1 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
-		KeyPair protectionKey2 = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKey1 = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair protectionKey2 = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 

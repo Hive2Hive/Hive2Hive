@@ -57,7 +57,7 @@ public class PutSingleChunkStep extends BasePutProcessStep {
 		if (chunk != null) {
 			try {
 				// encrypt the chunk prior to put such that nobody can read it
-				HybridEncryptedContent encryptedContent = dataManager.getEncryption().encryptHybrid(chunk,
+				HybridEncryptedContent encryptedContent = context.getEncryption().encryptHybrid(chunk,
 						context.consumeChunkEncryptionKeys().getPublic());
 
 				logger.debug("Uploading chunk {} of file {}.", chunk.getOrder(), file.getName());

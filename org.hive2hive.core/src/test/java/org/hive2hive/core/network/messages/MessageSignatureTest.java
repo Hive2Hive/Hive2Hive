@@ -13,7 +13,6 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.testmessages.TestSignedMessage;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -87,10 +86,8 @@ public class MessageSignatureTest extends H2HJUnitTest {
 		NetworkManager receiver = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
 
 		// put a wrong public key of the sender into the cache
-		receiver.getSession()
-				.getKeyManager()
-				.putPublicKey(sender.getUserId(),
-						EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS).getPublic());
+		receiver.getSession().getKeyManager()
+				.putPublicKey(sender.getUserId(), generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS).getPublic());
 
 		// location key is target node id
 		String locationKey = receiver.getNodeId();

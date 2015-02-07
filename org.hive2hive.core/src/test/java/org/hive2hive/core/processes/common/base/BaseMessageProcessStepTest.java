@@ -168,8 +168,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			// check if selected location is still empty
 			assertNull(nodeA.getDataManager().get(parameters));
 		} finally {
-			nodeB.getConnection().getPeer().peer()
-					.objectDataReply(new MessageReplyHandler(nodeB, nodeB.getDataManager().getEncryption(), serializer));
+			nodeB.getConnection().getPeer().peer().objectDataReply(new MessageReplyHandler(nodeB, serializer));
 		}
 	}
 
@@ -350,8 +349,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			// check if selected location is still empty
 			assertNull(nodeB.getDataManager().get(parameters));
 		} finally {
-			nodeB.getConnection().getPeer().peer()
-					.objectDataReply(new MessageReplyHandler(nodeB, nodeB.getDataManager().getEncryption(), serializer));
+			nodeB.getConnection().getPeer().peer().objectDataReply(new MessageReplyHandler(nodeB, serializer));
 		}
 	}
 

@@ -1,9 +1,13 @@
 package org.hive2hive.core.processes.notify;
 
+import java.security.KeyPair;
+
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
+import org.hive2hive.core.security.IH2HEncryption;
 
 /**
  * Abstract class needed by the notification process to generate notification messages. It generates
@@ -14,6 +18,19 @@ import org.hive2hive.core.network.userprofiletask.UserProfileTask;
  * 
  */
 public abstract class BaseNotificationMessageFactory {
+
+	private final IH2HEncryption encryption;
+
+	public BaseNotificationMessageFactory(IH2HEncryption encryption) {
+		this.encryption = encryption;
+	}
+
+	/**
+	 * Generates the protection keys for the user profile task. This is just a convenience method
+	 */
+	protected KeyPair generateProtectionKeys() {
+		return encryption.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+	}
 
 	/**
 	 * Create a private message to notify clients of the same user.

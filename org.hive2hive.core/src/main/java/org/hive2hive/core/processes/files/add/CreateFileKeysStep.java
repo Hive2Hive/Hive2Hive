@@ -4,7 +4,6 @@ import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.processes.context.AddFileProcessContext;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 
@@ -26,7 +25,7 @@ public class CreateFileKeysStep extends ProcessStep<Void> {
 	@Override
 	protected Void doExecute() throws InvalidProcessStateException {
 		// generate the meta keys used for encrypting the meta file and as id of the meta file and index
-		KeyPair metaKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
+		KeyPair metaKeys = context.getEncryption().generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 
 		context.provideFileKeys(metaKeys);
 		setRequiresRollback(true);

@@ -83,7 +83,7 @@ public class SerializerTest extends H2HJUnitTest {
 			Security.addProvider(new BouncyCastleProvider());
 		}
 
-		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
+		KeyPair keyPair = generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
 		byte[] encoded = serializer.serialize(keyPair);
 		KeyPair decoded = (KeyPair) serializer.deserialize(encoded);
 		assertEquals(keyPair.getPrivate(), decoded.getPrivate());

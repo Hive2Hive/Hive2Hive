@@ -127,9 +127,9 @@ public final class EncryptionUtil {
 	 * @param keyLength The length the RSA keys should have.
 	 * @return An asymmetric RSA key pair of the specified length.
 	 */
-	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength) {
+	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength, String securityProvider) {
 		try {
-			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "BC");
+			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", securityProvider);
 			RSAKeyGenParameterSpec params = new RSAKeyGenParameterSpec(keyLength.value(), RSA_PUBLIC_EXP);
 			gen.initialize(params, new SecureRandom());
 			return gen.generateKeyPair();

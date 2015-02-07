@@ -30,6 +30,7 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 	private final H2HTestData data = new H2HTestData(H2HJUnitTest.randomString());
 
 	public CountingNotificationMessageFactory(NetworkManager sender) {
+		super(sender.getEncryption());
 		this.sender = sender;
 		testContentKeys = new ArrayList<String>();
 	}
@@ -80,7 +81,7 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 
 	@Override
 	public UserProfileTask createUserProfileTask(String sender) {
-		return new TestUserProfileTask();
+		return new TestUserProfileTask(generateProtectionKeys());
 	}
 
 	@Override

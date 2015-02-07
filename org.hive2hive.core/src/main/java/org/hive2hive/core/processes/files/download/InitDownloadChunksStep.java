@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hive2hive.core.H2HSession;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.MetaChunk;
@@ -85,10 +86,15 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 				}
 			}
 
-			// start the download
 			DownloadTaskDHT task = new DownloadTaskDHT(metaChunks, destination, metaFileSmall.getChunkKey().getPrivate(),
 					networkManager.getEventBus(), session.getKeyManager());
-			session.getDownloadManager().submit(task);
+
+			// start the download
+			try {
+				session.getDownloadManager().submit(task);
+			} catch (NoPeerConnectionException e) {
+				throw new ProcessExecutionException(this, e);
+			}
 
 			// join the download process
 			try {
@@ -104,7 +110,11 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 			DownloadTaskDirect task = new DownloadTaskDirect(metaFileLarge.getMetaChunks(), destination, metaFile.getId(),
 					session.getUserId(), networkManager.getConnection().getPeer().peerAddress(), users,
 					networkManager.getEventBus(), session.getKeyManager());
-			session.getDownloadManager().submit(task);
+			try {
+				session.getDownloadManager().submit(task);
+			} catch (NoPeerConnectionException e) {
+				throw new ProcessExecutionException(this, e);
+			}
 
 			// join the download process
 			try {

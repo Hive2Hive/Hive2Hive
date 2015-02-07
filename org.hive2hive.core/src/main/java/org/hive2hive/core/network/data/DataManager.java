@@ -42,18 +42,18 @@ public class DataManager {
 		VERSION_FORK
 	};
 
-	private final IH2HEncryption encryptionTool;
 	private final IH2HSerialize serializer;
 	private final IPeerHolder peerHolder;
+	private final IH2HEncryption encryption;
 
-	public DataManager(IPeerHolder peerHolder, IH2HEncryption encryptionTool, IH2HSerialize serializer) {
+	public DataManager(IPeerHolder peerHolder, IH2HSerialize serializer, IH2HEncryption encryption) {
 		this.peerHolder = peerHolder;
-		this.encryptionTool = encryptionTool;
 		this.serializer = serializer;
+		this.encryption = encryption;
 	}
 
 	public IH2HEncryption getEncryption() {
-		return encryptionTool;
+		return encryption;
 	}
 
 	public IH2HSerialize getSerializer() {

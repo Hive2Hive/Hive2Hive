@@ -16,7 +16,6 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -108,8 +107,8 @@ public class DataManagerTest extends H2HJUnitTest {
 	@Test
 	public void testChangeProtectionKeySingleVersionKey() throws NoPeerConnectionException, IOException,
 			InvalidKeyException, SignatureException {
-		KeyPair keypairOld = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
-		KeyPair keypairNew = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair keypairOld = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		KeyPair keypairNew = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 
 		H2HTestData data = new H2HTestData(randomString());
 		data.generateVersionKey();

@@ -13,7 +13,7 @@ import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.junit.After;
@@ -77,9 +77,9 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		file2d = new File(file1d, "2d");
 		file2d.mkdir();
 
-		userProfile = new UserProfile("test-user");
+		KeyPair keys = generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
+		userProfile = new UserProfile("test-user", keys, keys);
 		root = userProfile.getRoot();
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		node1f1 = new FileIndex(root, keys, "1f1", HashUtil.hash(file1f1));
 		node1f2 = new FileIndex(root, keys, "1f2", HashUtil.hash(file1f2));
 		node1d = new FolderIndex(root, keys, "1d");
@@ -143,7 +143,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Test
 	public void testAddedRemotely() throws IOException, ClassNotFoundException {
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
+		KeyPair keys = generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		Index node1f3 = new FileIndex(root, keys, "1f3", null);
 		Index node2d2 = new FolderIndex(node1d, keys, "2d2");
 

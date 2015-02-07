@@ -138,24 +138,24 @@ public class RelinkUserProfileStep extends BaseModifyUserProfileStep {
 		logger.debug("Inform {} users that a file has been moved.", common.size());
 		PublicKey newParentKey = movedNode.getParent().getFilePublicKey();
 		MoveNotificationContext moveContext = context.getMoveNotificationContext();
-		moveContext.provideMessageFactory(new MoveNotificationMessageFactory(sourceName, destName, oldParentNode
-				.getFilePublicKey(), newParentKey));
+		moveContext.provideMessageFactory(new MoveNotificationMessageFactory(dataManger.getEncryption(), sourceName,
+				destName, oldParentNode.getFilePublicKey(), newParentKey));
 		moveContext.provideUsersToNotify(common);
 
 		// inform users that don't have access to the new destination anymore
 		logger.debug("Inform {} users that a file has been removed (after movement).", usersAtSource.size());
 		usersAtSource.removeAll(common);
 		DeleteNotificationContext deleteContext = context.getDeleteNotificationContext();
-		deleteContext.provideMessageFactory(new DeleteNotifyMessageFactory(fileKey, oldParentNode.getFilePublicKey(),
-				sourceName, movedNode.isFile()));
+		deleteContext.provideMessageFactory(new DeleteNotifyMessageFactory(dataManger.getEncryption(), fileKey,
+				oldParentNode.getFilePublicKey(), sourceName, movedNode.isFile()));
 		deleteContext.provideUsersToNotify(usersAtSource);
 
 		// inform users that have now access to the moved file
 		logger.debug("Inform {} users that a file has been added (after movement).", usersAtDestination.size());
 		usersAtDestination.removeAll(common);
 		AddNotificationContext addContext = context.getAddNotificationContext();
-		addContext.provideMessageFactory(new AddNotificationMessageFactory(movedNode, movedNode.getParent()
-				.getFilePublicKey()));
+		addContext.provideMessageFactory(new AddNotificationMessageFactory(dataManger.getEncryption(), movedNode, movedNode
+				.getParent().getFilePublicKey()));
 		addContext.provideUsersToNotify(usersAtDestination);
 	}
 

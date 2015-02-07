@@ -20,6 +20,7 @@ public class NetworkManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(NetworkManager.class);
 
+	private final IH2HEncryption encryption;
 	private final Connection connection;
 	private final DataManager dataManager;
 	private final MessageManager messageManager;
@@ -30,10 +31,11 @@ public class NetworkManager {
 	private final DownloadManager downloadManager;
 
 	public NetworkManager(IH2HEncryption encryption, IH2HSerialize serializer, IFileConfiguration fileConfig) {
-		connection = new Connection(this, encryption, serializer);
-		dataManager = new DataManager(connection, encryption, serializer);
-		messageManager = new MessageManager(this, encryption, serializer);
-		downloadManager = new DownloadManager(dataManager, messageManager, fileConfig);
+		this.encryption = encryption;
+		connection = new Connection(this, serializer);
+		dataManager = new DataManager(connection, serializer, encryption);
+		messageManager = new MessageManager(this, serializer);
+		downloadManager = new DownloadManager(this, fileConfig);
 	}
 
 	/**
@@ -158,5 +160,9 @@ public class NetworkManager {
 
 	public EventBus getEventBus() {
 		return eventBus;
+	}
+
+	public IH2HEncryption getEncryption() {
+		return encryption;
 	}
 }

@@ -93,7 +93,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 			// generate RSA key pair
 			long start = System.currentTimeMillis();
-			KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
+			KeyPair rsaKeyPair = generateRSAKeyPair(sizes[s]);
 			long stop = System.currentTimeMillis();
 
 			assertNotNull(rsaKeyPair);
@@ -169,7 +169,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			printBytes("Original Data", data);
 
 			// generate RSA key pair
-			KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
+			KeyPair rsaKeyPair = generateRSAKeyPair(sizes[s]);
 
 			// encrypt data with public key
 			byte[] encryptedData = null;
@@ -226,7 +226,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 
 				// generate RSA key pair
 				long start = System.currentTimeMillis();
-				KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(rsaSizes[s1]);
+				KeyPair rsaKeyPair = generateRSAKeyPair(rsaSizes[s1]);
 				long stop = System.currentTimeMillis();
 				logger.debug("RSA Key Generation Time: {} ms.", stop - start);
 
@@ -282,7 +282,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 			printBytes("Original Data:", data);
 
 			// generate RSA key pair
-			KeyPair rsaKeyPair = EncryptionUtil.generateRSAKeyPair(sizes[s]);
+			KeyPair rsaKeyPair = generateRSAKeyPair(sizes[s]);
 
 			// sign data with private key
 			byte[] signature = null;

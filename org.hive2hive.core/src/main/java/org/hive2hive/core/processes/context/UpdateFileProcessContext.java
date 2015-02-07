@@ -19,12 +19,14 @@ import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.context.interfaces.IUploadContext;
 import org.hive2hive.core.processes.files.update.UpdateNotificationMessageFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.security.IH2HEncryption;
 
 public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysContext, IGetMetaFileContext, INotifyContext {
 
 	private final File file;
 	private final H2HSession session;
 	private final IFileConfiguration fileConfiguration;
+	private final IH2HEncryption encryption;
 
 	private List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
 
@@ -39,10 +41,12 @@ public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysCon
 	private UpdateNotificationMessageFactory messageFactory;
 	private List<MetaChunk> chunksToDelete;
 
-	public UpdateFileProcessContext(File file, H2HSession session, IFileConfiguration fileConfiguration) {
+	public UpdateFileProcessContext(File file, H2HSession session, IFileConfiguration fileConfiguration,
+			IH2HEncryption encryption) {
 		this.file = file;
 		this.session = session;
 		this.fileConfiguration = fileConfiguration;
+		this.encryption = encryption;
 	}
 
 	@Override
@@ -181,6 +185,11 @@ public class UpdateFileProcessContext implements IUploadContext, IGetFileKeysCon
 	@Override
 	public Set<String> consumeUsersToNotify() {
 		return users;
+	}
+
+	@Override
+	public IH2HEncryption getEncryption() {
+		return encryption;
 	}
 
 }

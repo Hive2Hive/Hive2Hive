@@ -23,7 +23,6 @@ import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.data.vdht.VersionManager;
 import org.hive2hive.core.processes.login.SessionParameters;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.serializer.FSTSerializer;
@@ -100,15 +99,14 @@ public class NetworkTestUtil {
 	 */
 	public static void setDifferentSessions(List<NetworkManager> network) throws NoPeerConnectionException {
 		for (NetworkManager node : network) {
-			KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-			KeyPair protectionKeyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+			KeyPair keyPair = H2HJUnitTest.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+			KeyPair protectionKeyPair = H2HJUnitTest.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 			UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();
 
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeyPair,
 					node.getDataManager());
-			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					new TestFileConfiguration());
+			DownloadManager downloadManager = new DownloadManager(node, new TestFileConfiguration());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 
@@ -130,15 +128,14 @@ public class NetworkTestUtil {
 	 * @throws NoPeerConnectionException
 	 */
 	public static void setSameSession(List<NetworkManager> network) throws NoPeerConnectionException {
-		KeyPair keyPair = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
-		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+		KeyPair keyPair = H2HJUnitTest.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+		KeyPair protectionKeys = H2HJUnitTest.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();
 		for (NetworkManager node : network) {
 			UserProfileManager profileManager = new UserProfileManager(node.getDataManager(), userCredentials);
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeys,
 					node.getDataManager());
-			DownloadManager downloadManager = new DownloadManager(node.getDataManager(), node.getMessageManager(),
-					new TestFileConfiguration());
+			DownloadManager downloadManager = new DownloadManager(node, new TestFileConfiguration());
 			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
 					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
 

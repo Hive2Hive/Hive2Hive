@@ -14,6 +14,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.serializer.IH2HSerialize;
 
 public class H2HDefaultEncryption implements IH2HEncryption {
@@ -125,5 +126,10 @@ public class H2HDefaultEncryption implements IH2HEncryption {
 		}
 
 		return keypair1.getPrivate().equals(keypair2.getPrivate()) && keypair1.getPublic().equals(keypair2.getPublic());
+	}
+
+	@Override
+	public KeyPair generateRSAKeyPair(RSA_KEYLENGTH length) {
+		return EncryptionUtil.generateRSAKeyPair(length, getSecurityProvider());
 	}
 }

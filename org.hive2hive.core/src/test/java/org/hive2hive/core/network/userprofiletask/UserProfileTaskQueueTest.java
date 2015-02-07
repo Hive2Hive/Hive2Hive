@@ -32,7 +32,6 @@ import org.hive2hive.core.processes.common.userprofiletask.PutUserProfileTaskSte
 import org.hive2hive.core.processes.common.userprofiletask.RemoveUserProfileTaskStep;
 import org.hive2hive.core.processes.context.interfaces.IUserProfileTaskContext;
 import org.hive2hive.core.processes.login.SessionParameters;
-import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
@@ -65,8 +64,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	@Test
 	public void testPut() throws NoPeerConnectionException, InvalidProcessStateException, ProcessRollbackException {
 		UserCredentials credentials = generateRandomCredentials();
-		TestUserProfileTask userProfileTask = new TestUserProfileTask();
-		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+		TestUserProfileTask userProfileTask = new TestUserProfileTask(generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION));
+		KeyPair key = generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 
 		TestPutUserProfileTaskStep putStep = new TestPutUserProfileTaskStep(credentials.getUserId(), userProfileTask,
@@ -89,8 +88,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	public void testPutGet() throws IOException, NoPeerConnectionException, InvalidProcessStateException,
 			ProcessRollbackException {
 		UserCredentials credentials = generateRandomCredentials();
-		TestUserProfileTask userProfileTask = new TestUserProfileTask();
-		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+		TestUserProfileTask userProfileTask = new TestUserProfileTask(generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION));
+		KeyPair key = generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
@@ -128,8 +127,8 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 	public void testPutGetRemove() throws NoPeerConnectionException, IOException, InvalidProcessStateException,
 			ProcessRollbackException {
 		UserCredentials credentials = generateRandomCredentials();
-		TestUserProfileTask userProfileTask = new TestUserProfileTask();
-		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+		TestUserProfileTask userProfileTask = new TestUserProfileTask(generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION));
+		KeyPair key = generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
@@ -166,7 +165,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 			NoPeerConnectionException {
 		UserCredentials credentials = generateRandomCredentials();
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
-		KeyPair key = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+		KeyPair key = generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		PublicKeyManager publicKeyManager = new PublicKeyManager(credentials.getUserId(), key, key, node.getDataManager());
 		UserProfileManager userProfileManager = new UserProfileManager(node.getDataManager(), credentials);
 		SessionParameters params = new SessionParameters(fileAgent);
@@ -177,7 +176,7 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 		// create some tasks
 		List<TestUserProfileTask> tasks = new ArrayList<TestUserProfileTask>();
 		for (int i = 0; i < 5; i++) {
-			TestUserProfileTask task = new TestUserProfileTask();
+			TestUserProfileTask task = new TestUserProfileTask(generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION));
 			tasks.add(task);
 			// to guarantee different time stamps
 			Thread.sleep(10);

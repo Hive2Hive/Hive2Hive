@@ -13,6 +13,7 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +31,13 @@ public class DownloadChunkRunnableDHT implements Runnable {
 	private final MetaChunk metaChunk;
 	private final File tempDestination;
 	private final DataManager dataManager;
+	private final IH2HEncryption encryption;
 
-	public DownloadChunkRunnableDHT(DownloadTaskDHT task, MetaChunk chunk, DataManager dataManager) {
+	public DownloadChunkRunnableDHT(DownloadTaskDHT task, MetaChunk chunk, DataManager dataManager, IH2HEncryption encryption) {
 		this.task = task;
 		this.metaChunk = chunk;
 		this.dataManager = dataManager;
+		this.encryption = encryption;
 
 		// create temporary file
 		this.tempDestination = new File(task.getTempDirectory(), task.getDestinationName() + "-" + chunk.getIndex());
@@ -63,7 +66,7 @@ public class DownloadChunkRunnableDHT implements Runnable {
 		Chunk chunk;
 
 		try {
-			BaseNetworkContent decrypted = dataManager.getEncryption().decryptHybrid(encrypted, task.getDecryptionKey());
+			BaseNetworkContent decrypted = encryption.decryptHybrid(encrypted, task.getDecryptionKey());
 			chunk = (Chunk) decrypted;
 		} catch (GeneralSecurityException | IllegalArgumentException | IOException | ClassNotFoundException e) {
 			task.abortDownload(String.format("Decryption of the chunk failed. reason = '%s'", e.getMessage()));

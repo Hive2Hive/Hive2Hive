@@ -7,13 +7,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.TimeToLiveStore;
 import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.model.UserPermission;
-import org.hive2hive.core.security.EncryptionUtil;
 
 /**
  * File which contains all keys and meta information about the files of the owner.
@@ -29,14 +27,14 @@ public class UserProfile extends BaseVersionedNetworkContent {
 	private final KeyPair encryptionKeys;
 	private final FolderIndex root;
 
-	public UserProfile(String userId) {
+	public UserProfile(String userId, KeyPair encryptionKeys, KeyPair protectionKeys) {
 		assert userId != null;
 		this.userId = userId;
-		this.encryptionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
+		this.encryptionKeys = encryptionKeys;
 
 		// create the root node
 		root = new FolderIndex(encryptionKeys);
-		root.setProtectionKeys(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION));
+		root.setProtectionKeys(protectionKeys);
 		root.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 	}
 

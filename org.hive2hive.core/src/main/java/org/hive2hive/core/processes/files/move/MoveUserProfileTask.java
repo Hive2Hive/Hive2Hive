@@ -1,6 +1,7 @@
 package org.hive2hive.core.processes.files.move;
 
 import java.io.File;
+import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.H2HSession;
@@ -39,9 +40,9 @@ public class MoveUserProfileTask extends UserProfileTask implements IUserProfile
 	private Index movedNode;
 	private FolderIndex newParentNode;
 
-	public MoveUserProfileTask(String sender, String sourceFileName, String destFileName, PublicKey oldParentKey,
-			PublicKey newParentKey) {
-		super(sender);
+	public MoveUserProfileTask(String sender, KeyPair protectionKeys, String sourceFileName, String destFileName,
+			PublicKey oldParentKey, PublicKey newParentKey) {
+		super(sender, protectionKeys);
 		this.sourceFileName = sourceFileName;
 		this.destFileName = destFileName;
 		this.oldParentKey = oldParentKey;
@@ -69,7 +70,8 @@ public class MoveUserProfileTask extends UserProfileTask implements IUserProfile
 
 		try {
 			// notify own other clients
-			notifyOtherClients(new MoveNotificationMessageFactory(sourceFileName, destFileName, oldParentKey, newParentKey));
+			notifyOtherClients(new MoveNotificationMessageFactory(networkManager.getEncryption(), sourceFileName,
+					destFileName, oldParentKey, newParentKey));
 			logger.debug("Notified other clients that a file has been moved by another user.");
 		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException | NoSessionException e) {
 			logger.error("Could not notify other clients of me about the moved file.", e);

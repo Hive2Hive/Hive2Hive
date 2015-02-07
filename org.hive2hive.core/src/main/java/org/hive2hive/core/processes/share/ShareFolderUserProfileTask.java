@@ -1,5 +1,6 @@
 package org.hive2hive.core.processes.share;
 
+import java.security.KeyPair;
 import java.util.List;
 
 import org.hive2hive.core.H2HSession;
@@ -31,8 +32,9 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 	private final FolderIndex sharedIndex;
 	private final UserPermission addedFriend;
 
-	public ShareFolderUserProfileTask(String sender, FolderIndex sharedIndex, UserPermission addedFriend) {
-		super(sender);
+	public ShareFolderUserProfileTask(String sender, KeyPair protectionKeys, FolderIndex sharedIndex,
+			UserPermission addedFriend) {
+		super(sender, protectionKeys);
 		this.sharedIndex = sharedIndex;
 		this.addedFriend = addedFriend;
 	}
@@ -79,7 +81,7 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 
 				try {
 					// notify own other clients about
-					notifyOtherClients(new AddNotificationMessageFactory(sharedFile, null));
+					notifyOtherClients(new AddNotificationMessageFactory(networkManager.getEncryption(), sharedFile, null));
 					logger.debug("Notified other client(s) that new (shared) file '{}' are available for download.",
 							sharedFile.getFullPath());
 				} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException

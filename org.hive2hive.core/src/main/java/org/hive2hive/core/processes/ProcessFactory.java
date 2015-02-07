@@ -115,7 +115,7 @@ public final class ProcessFactory {
 		SyncProcess process = new SyncProcess();
 
 		process.add(new CheckIsUserRegisteredStep(context, dataManager));
-		process.add(new UserProfileCreationStep(context));
+		process.add(new UserProfileCreationStep(context, networkManager.getEncryption()));
 		process.add(new AsyncComponent<>(new PutUserProfileStep(context, dataManager)));
 		process.add(new AsyncComponent<>(new org.hive2hive.core.processes.register.PutLocationsStep(context, dataManager)));
 		process.add(new AsyncComponent<>(new PutPublicKeyStep(context, dataManager)));
@@ -209,7 +209,8 @@ public final class ProcessFactory {
 		}
 		H2HSession session = networkManager.getSession();
 		DataManager dataManager = networkManager.getDataManager();
-		AddFileProcessContext context = new AddFileProcessContext(file, session, fileConfiguration);
+		AddFileProcessContext context = new AddFileProcessContext(file, session, fileConfiguration,
+				networkManager.getEncryption());
 
 		// process composition
 		SyncProcess process = new SyncProcess();
@@ -235,7 +236,8 @@ public final class ProcessFactory {
 			IFileConfiguration fileConfiguration) throws NoPeerConnectionException, NoSessionException {
 		DataManager dataManager = networkManager.getDataManager();
 		H2HSession session = networkManager.getSession();
-		UpdateFileProcessContext context = new UpdateFileProcessContext(file, session, fileConfiguration);
+		UpdateFileProcessContext context = new UpdateFileProcessContext(file, session, fileConfiguration,
+				networkManager.getEncryption());
 
 		// process composition
 		SyncProcess process = new SyncProcess();
@@ -321,7 +323,7 @@ public final class ProcessFactory {
 
 		H2HSession session = networkManager.getSession();
 
-		DeleteFileProcessContext context = new DeleteFileProcessContext(file, session);
+		DeleteFileProcessContext context = new DeleteFileProcessContext(file, session, networkManager.getEncryption());
 
 		// process composition
 		SyncProcess process = new SyncProcess();
@@ -380,9 +382,9 @@ public final class ProcessFactory {
 		SyncProcess process = new SyncProcess();
 
 		process.add(new VerifyFriendIdStep(networkManager.getSession().getKeyManager(), permission.getUserId()));
-		process.add(new UpdateUserProfileStep(context, networkManager.getSession()));
+		process.add(new UpdateUserProfileStep(context, networkManager.getSession(), networkManager.getEncryption()));
 		process.add(new InitializeMetaUpdateStep(context, networkManager.getDataManager()));
-		process.add(new PrepareNotificationsStep(context, networkManager.getUserId()));
+		process.add(new PrepareNotificationsStep(context, networkManager.getUserId(), networkManager.getEncryption()));
 		process.add(createNotificationProcess(context, networkManager));
 
 		process.setName("Share Process");

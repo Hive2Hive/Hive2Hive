@@ -17,7 +17,6 @@ import org.hive2hive.core.extras.AndroidAddressFixer;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.serializer.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +36,10 @@ public class MessageReplyHandler implements ObjectDataReply {
 	private static final Logger logger = LoggerFactory.getLogger(MessageReplyHandler.class);
 
 	private final NetworkManager networkManager;
-	private final IH2HEncryption encryption;
 	private final IH2HSerialize serializer;
 
-	public MessageReplyHandler(NetworkManager networkManager, IH2HEncryption encryption, IH2HSerialize serializer) {
+	public MessageReplyHandler(NetworkManager networkManager, IH2HSerialize serializer) {
 		this.networkManager = networkManager;
-		this.encryption = encryption;
 		this.serializer = serializer;
 	}
 
@@ -80,7 +77,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 		byte[] decryptedMessage = null;
 		try {
 			KeyPair keys = session.getKeyPair();
-			decryptedMessage = encryption.decryptHybridRaw(encryptedMessage, keys.getPrivate());
+			decryptedMessage = networkManager.getEncryption().decryptHybridRaw(encryptedMessage, keys.getPrivate());
 		} catch (Exception e) {
 			logger.warn("Decryption of message failed.", e);
 			return AcceptanceReply.FAILURE_DECRYPTION;
@@ -138,7 +135,8 @@ public class MessageReplyHandler implements ObjectDataReply {
 	private boolean verifySignature(String senderId, byte[] decryptedMessage, byte[] signature) {
 		try {
 			PublicKey publicKey = networkManager.getSession().getKeyManager().getPublicKey(senderId);
-			if (EncryptionUtil.verify(decryptedMessage, signature, publicKey, encryption.getSecurityProvider())) {
+			if (EncryptionUtil.verify(decryptedMessage, signature, publicKey, networkManager.getEncryption()
+					.getSecurityProvider())) {
 				logger.debug("Message signature from user '{}' verified. Node ID = '{}'.", senderId,
 						networkManager.getNodeId());
 				return true;

@@ -43,8 +43,8 @@ public class IndexTest extends H2HJUnitTest {
 	@Before
 	public void createTreeNode() {
 		// create a tree
-		KeyPair keys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
-		KeyPair protectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
+		KeyPair keys = generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
+		KeyPair protectionKeys = generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE);
 		root = new FolderIndex(null, keys, null);
 		root.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 		root.setProtectionKeys(protectionKeys);
@@ -87,7 +87,7 @@ public class IndexTest extends H2HJUnitTest {
 	@Test
 	public void testShare() {
 		// set 1d to be shared (use a shorter key to speed up)
-		dir1.share(EncryptionUtil.generateRSAKeyPair(EncryptionUtil.RSA_KEYLENGTH.BIT_512));
+		dir1.share(generateRSAKeyPair(EncryptionUtil.RSA_KEYLENGTH.BIT_512));
 
 		// 1d, 2f, 2d, 3d and 4d should return to be shared, others not
 		Assert.assertTrue(dir1.isShared());
@@ -118,13 +118,13 @@ public class IndexTest extends H2HJUnitTest {
 	@Test(expected = IllegalStateException.class)
 	public void testShareRoot() {
 		// (use a shorter key to speed up)
-		root.share(EncryptionUtil.generateRSAKeyPair(EncryptionUtil.RSA_KEYLENGTH.BIT_512));
+		root.share(generateRSAKeyPair(EncryptionUtil.RSA_KEYLENGTH.BIT_512));
 	}
 
 	@Test
 	public void testHasShared() {
 		// set 2d to be shared (use a shorter key to speed up)
-		dir2.share(EncryptionUtil.generateRSAKeyPair(EncryptionUtil.RSA_KEYLENGTH.BIT_512));
+		dir2.share(generateRSAKeyPair(EncryptionUtil.RSA_KEYLENGTH.BIT_512));
 
 		// root, 1d and 2d should show that they contain a shared folder
 		Assert.assertTrue(root.isSharedOrHasSharedChildren());
@@ -164,7 +164,7 @@ public class IndexTest extends H2HJUnitTest {
 		Assert.assertEquals(1, root.getCalculatedUserList().size());
 
 		// add permission to sub-folder
-		dir1.share(EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE));
+		dir1.share(generateRSAKeyPair(H2HConstants.KEYLENGTH_META_FILE));
 		dir1.addUserPermissions(new UserPermission(userId, PermissionType.WRITE));
 		dir1.addUserPermissions(new UserPermission("UserB", PermissionType.READ));
 

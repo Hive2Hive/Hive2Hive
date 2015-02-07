@@ -1,10 +1,14 @@
 package org.hive2hive.core;
 
+import java.security.KeyPair;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Random;
 import java.util.UUID;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.After;
 import org.junit.Before;
@@ -125,6 +129,14 @@ public class H2HJUnitTest {
 
 	public static UserCredentials generateRandomCredentials() {
 		return new UserCredentials(randomString(), randomString(), randomString());
+	}
+
+	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH size) {
+		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+			Security.addProvider(new BouncyCastleProvider());
+		}
+
+		return EncryptionUtil.generateRSAKeyPair(size, BouncyCastleProvider.PROVIDER_NAME);
 	}
 
 	protected static void printBytes(String description, byte[] bytes) {

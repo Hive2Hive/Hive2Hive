@@ -15,6 +15,7 @@ import org.hive2hive.core.processes.context.interfaces.INotifyContext;
 import org.hive2hive.core.processes.context.interfaces.IUploadContext;
 import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
 import org.hive2hive.core.processes.notify.BaseNotificationMessageFactory;
+import org.hive2hive.core.security.IH2HEncryption;
 
 /**
  * The context for the process of putting a file.
@@ -26,6 +27,7 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 	private final File file;
 	private final H2HSession session;
 	private final IFileConfiguration fileConfiguration;
+	private final IH2HEncryption encryption;
 
 	private List<MetaChunk> metaChunks = new ArrayList<MetaChunk>();
 
@@ -39,10 +41,12 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 	private Set<String> usersToNotify;
 	private AddNotificationMessageFactory messageFactory;
 
-	public AddFileProcessContext(File file, H2HSession session, IFileConfiguration fileConfiguration) {
+	public AddFileProcessContext(File file, H2HSession session, IFileConfiguration fileConfiguration,
+			IH2HEncryption encryption) {
 		this.file = file;
 		this.session = session;
 		this.fileConfiguration = fileConfiguration;
+		this.encryption = encryption;
 	}
 
 	@Override
@@ -159,6 +163,11 @@ public class AddFileProcessContext implements IUploadContext, INotifyContext {
 	@Override
 	public boolean allowLargeFile() {
 		return true;
+	}
+
+	@Override
+	public IH2HEncryption getEncryption() {
+		return encryption;
 	}
 
 }

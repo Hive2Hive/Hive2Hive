@@ -13,7 +13,7 @@ import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.processes.common.base.BaseModifyUserProfileStep;
 import org.hive2hive.core.processes.context.ShareProcessContext;
-import org.hive2hive.core.security.EncryptionUtil;
+import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +31,15 @@ public class UpdateUserProfileStep extends BaseModifyUserProfileStep {
 	private final ShareProcessContext context;
 	private final File root;
 	private final String userId;
+	private final IH2HEncryption encryption;
 
 	private KeyPair newProtectionKeys;
 
-	public UpdateUserProfileStep(ShareProcessContext context, H2HSession session) throws NoSessionException {
+	public UpdateUserProfileStep(ShareProcessContext context, H2HSession session, IH2HEncryption encryption)
+			throws NoSessionException {
 		super(session.getProfileManager());
 		this.context = context;
+		this.encryption = encryption;
 		this.root = session.getRootFile();
 		this.userId = session.getUserId();
 	}
@@ -44,7 +47,7 @@ public class UpdateUserProfileStep extends BaseModifyUserProfileStep {
 	@Override
 	protected void beforeModify() throws ProcessExecutionException {
 		// generate the new key pair only once
-		newProtectionKeys = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		newProtectionKeys = encryption.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 		// make it available for future steps where we change protection keys
 		context.provideNewProtectionKeys(newProtectionKeys);
 	}

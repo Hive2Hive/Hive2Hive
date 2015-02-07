@@ -27,7 +27,7 @@ public class H2HSignatureFactoryTest extends H2HJUnitTest {
 	@BeforeClass
 	public static void initTest() throws Exception {
 		// create a content protection key
-		protectionKey = EncryptionUtil.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
+		protectionKey = generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
 		// generate some test data
 		testData = new Data("test");
 

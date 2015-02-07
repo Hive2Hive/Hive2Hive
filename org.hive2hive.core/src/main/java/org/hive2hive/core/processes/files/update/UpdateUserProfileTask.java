@@ -1,5 +1,6 @@
 package org.hive2hive.core.processes.files.update;
 
+import java.security.KeyPair;
 import java.security.PublicKey;
 
 import org.hive2hive.core.H2HSession;
@@ -36,8 +37,8 @@ public class UpdateUserProfileTask extends UserProfileTask implements IUserProfi
 	// initialized during profile modification
 	private FileIndex updatedFile;
 
-	public UpdateUserProfileTask(String sender, PublicKey fileKey, byte[] newHash) {
-		super(sender);
+	public UpdateUserProfileTask(String sender, KeyPair protectionKeys, PublicKey fileKey, byte[] newHash) {
+		super(sender, protectionKeys);
 		this.fileKey = fileKey;
 		this.newHash = newHash;
 	}
@@ -62,7 +63,7 @@ public class UpdateUserProfileTask extends UserProfileTask implements IUserProfi
 
 		try {
 			// notify own other clients
-			notifyOtherClients(new UpdateNotificationMessageFactory(updatedFile));
+			notifyOtherClients(new UpdateNotificationMessageFactory(networkManager.getEncryption(), updatedFile));
 			logger.debug("Notified other clients that a file has been updated by another user.");
 		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException | NoSessionException e) {
 			logger.error("Could not notify other clients of me about the updated file.", e);
@@ -77,20 +78,24 @@ public class UpdateUserProfileTask extends UserProfileTask implements IUserProfi
 	public void modifyUserProfile(UserProfile userProfile) throws AbortModifyException {
 		Index index = userProfile.getFileById(fileKey);
 		if (index == null) {
-			throw new AbortModifyException(AbortModificationCode.FILE_INDEX_NOT_FOUND, "Got notified about a file we don't know.");
+			throw new AbortModifyException(AbortModificationCode.FILE_INDEX_NOT_FOUND,
+					"Got notified about a file we don't know.");
 		} else if (!index.isFile()) {
-			throw new AbortModifyException(AbortModificationCode.FOLDER_UPDATE,"Got notified about a folder update (illegal)");
+			throw new AbortModifyException(AbortModificationCode.FOLDER_UPDATE,
+					"Got notified about a folder update (illegal)");
 		}
 
 		updatedFile = (FileIndex) index;
 		FolderIndex parent = updatedFile.getParent();
 		if (parent == null) {
-			throw new AbortModifyException(AbortModificationCode.ROOT_DELETE_ATTEMPT, "Got task to update the root, which is invalid.");
+			throw new AbortModifyException(AbortModificationCode.ROOT_DELETE_ATTEMPT,
+					"Got task to update the root, which is invalid.");
 		}
 
 		// check write permission
 		if (!parent.canWrite(sender)) {
-			throw new AbortModifyException(AbortModificationCode.NO_WRITE_PERM, "User without WRITE permissions tried to update a file.");
+			throw new AbortModifyException(AbortModificationCode.NO_WRITE_PERM,
+					"User without WRITE permissions tried to update a file.");
 		}
 
 		// copy the md5 parameter of the received file

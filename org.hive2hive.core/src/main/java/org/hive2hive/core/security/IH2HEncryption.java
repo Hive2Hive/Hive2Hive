@@ -2,6 +2,7 @@ package org.hive2hive.core.security;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -10,6 +11,7 @@ import javax.crypto.SecretKey;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
+import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 
 public interface IH2HEncryption {
 
@@ -97,4 +99,11 @@ public interface IH2HEncryption {
 	byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws ClassNotFoundException,
 			IOException, GeneralSecurityException;
 
+	/**
+	 * Generates an RSA keypair using the correct security provider
+	 * 
+	 * @param length the length of the key
+	 * @return an RSA keypair
+	 */
+	KeyPair generateRSAKeyPair(RSA_KEYLENGTH length);
 }
