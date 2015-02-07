@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.Security;
 import java.util.Arrays;
@@ -87,6 +88,14 @@ public class SerializerTest extends H2HJUnitTest {
 		KeyPair decoded = (KeyPair) serializer.deserialize(encoded);
 		assertEquals(keyPair.getPrivate(), decoded.getPrivate());
 		assertEquals(keyPair.getPublic(), decoded.getPublic());
+	}
+
+	@Test
+	public void testBigInteger() throws IOException, ClassNotFoundException {
+		BigInteger bigInteger = new BigInteger("12321231923898098019283098120398");
+		byte[] encoded = serializer.serialize(bigInteger);
+		BigInteger decoded = (BigInteger) serializer.deserialize(encoded);
+		assertEquals(bigInteger, decoded);
 	}
 
 	@AfterClass
