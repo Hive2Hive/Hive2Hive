@@ -354,8 +354,8 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 				.setVersionKey(version1.getVersionKey());
 
 		// try to remove version0 and version1 without protection keys
-		Assert.assertEquals(false,
-				node.getDataManager().remove(new Parameters().setLocationKey(locationKey).setContentKey(contentKey)));
+		Assert.assertFalse(node.getDataManager().remove(
+				new Parameters().setLocationKey(locationKey).setContentKey(contentKey)));
 		// verify that nothing changed
 		EncryptedNetworkContent encrypted = (EncryptedNetworkContent) node.getDataManager().getVersion(parameters0);
 		Assert.assertEquals(version0.getTestString(),
@@ -365,11 +365,9 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 				((H2HTestData) node.getDataManager().getEncryption().decryptAES(encrypted, encryptionKey)).getTestString());
 
 		// try to remove version0 and version1 with wrong protection keys
-		Assert.assertEquals(
-				false,
-				node.getDataManager().remove(
-						new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-								.setProtectionKeys(otherProtectionKeys)));
+		Assert.assertFalse(node.getDataManager().remove(
+				new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+						.setProtectionKeys(otherProtectionKeys)));
 		// verify that nothing changed
 		encrypted = (EncryptedNetworkContent) node.getDataManager().getVersion(parameters0);
 		Assert.assertEquals(version0.getTestString(),
@@ -379,11 +377,8 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 				((H2HTestData) node.getDataManager().getEncryption().decryptAES(encrypted, encryptionKey)).getTestString());
 
 		// remove version0 and version1 with correct protection keys
-		Assert.assertEquals(
-				true,
-				node.getDataManager().remove(
-						new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-								.setProtectionKeys(protectionKeys)));
+		Assert.assertTrue(node.getDataManager().remove(
+				new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setProtectionKeys(protectionKeys)));
 		// verify successful remove
 		Assert.assertNull(node.getDataManager().getVersion(parameters0));
 		Assert.assertNull(node.getDataManager().getVersion(parameters1));
@@ -411,21 +406,21 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 				.setVersionKey(version1.getVersionKey());
 
 		// try to remove version1 without protection keys
-		Assert.assertEquals(false, node.getDataManager().removeVersion(parameters));
+		Assert.assertFalse(node.getDataManager().removeVersion(parameters));
 		// verify that nothing changed
 		EncryptedNetworkContent encrypted = (EncryptedNetworkContent) node.getDataManager().getVersion(parameters);
 		Assert.assertEquals(version1.getTestString(),
 				((H2HTestData) node.getDataManager().getEncryption().decryptAES(encrypted, encryptionKey)).getTestString());
 
 		// try to remove version1 with wrong protection keys
-		Assert.assertEquals(false, node.getDataManager().removeVersion(parameters.setProtectionKeys(otherProtectionKeys)));
+		Assert.assertFalse(node.getDataManager().removeVersion(parameters.setProtectionKeys(otherProtectionKeys)));
 		// verify that nothing changed
 		encrypted = (EncryptedNetworkContent) node.getDataManager().getVersion(parameters);
 		Assert.assertEquals(version1.getTestString(),
 				((H2HTestData) node.getDataManager().getEncryption().decryptAES(encrypted, encryptionKey)).getTestString());
 
 		// remove version1 with correct protection keys
-		Assert.assertEquals(true, node.getDataManager().removeVersion(parameters.setProtectionKeys(protectionKeys)));
+		Assert.assertTrue(node.getDataManager().removeVersion(parameters.setProtectionKeys(protectionKeys)));
 		// verify successful remove
 		Assert.assertNull(node.getDataManager().getVersion(parameters));
 	}
