@@ -95,7 +95,7 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 	public void testGetChunkRandom() throws IOException {
 		Random rnd = new Random();
 		for (int i = 0; i < 10; i++) {
-			int genNOC = rnd.nextInt(100) + 1; // avoid 0's
+			int genNOC = rnd.nextInt(100) + 2; // avoid 0's
 			File randomFile = FileTestUtil.createFileRandomContent(genNOC, parent);
 
 			// get chunk 0 ... n-1
