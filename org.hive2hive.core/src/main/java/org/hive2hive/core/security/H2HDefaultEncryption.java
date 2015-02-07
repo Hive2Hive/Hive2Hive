@@ -130,6 +130,6 @@ public class H2HDefaultEncryption implements IH2HEncryption {
 
 	@Override
 	public KeyPair generateRSAKeyPair(RSA_KEYLENGTH length) {
-		return EncryptionUtil.generateRSAKeyPair(length, getSecurityProvider());
+		return EncryptionUtil.generateRSAKeyPair(length, securityProvider);
 	}
 }

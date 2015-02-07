@@ -64,11 +64,6 @@ public final class FSTSerializer implements IH2HSerialize {
 		// for all public / private keys for full compatibility among multiple security providers
 		fst.registerClass(securityProvider.getRSAPublicKeyClass(), securityProvider.getRSAPrivateKeyClass(),
 				securityProvider.getRSAPrivateCrtKeyClass());
-		// FSTKeyPairSerializer keySerializer = new
-		// FSTKeyPairSerializer(securityProvider.getSecurityProvider());
-		// fst.registerSerializer(KeyPair.class, keySerializer, true);
-		// fst.registerSerializer(PublicKey.class, keySerializer, true);
-		// fst.registerSerializer(PrivateKey.class, keySerializer, true);
 
 		// BigIntegers make problems sometime (in Android)
 		fst.registerSerializer(BigInteger.class, new FSTBigIntegerSerializer(), false);
