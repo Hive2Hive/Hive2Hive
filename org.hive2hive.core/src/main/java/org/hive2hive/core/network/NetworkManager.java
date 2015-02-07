@@ -12,7 +12,7 @@ import org.hive2hive.core.network.data.DataManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.security.IH2HEncryption;
-import org.hive2hive.core.security.IH2HSerialize;
+import org.hive2hive.core.serializer.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -27,7 +27,7 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
 import org.hive2hive.core.security.H2HSignatureFactory;
 import org.hive2hive.core.security.IH2HEncryption;
-import org.hive2hive.core.security.IH2HSerialize;
+import org.hive2hive.core.serializer.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,7 +265,8 @@ public class Connection implements IPeerHolder {
 		// set flag to keep data, even when peer looses replication responsibility
 		replication.keepData(true);
 		// start the indirect replication
-		replication.start();
+		// TODO disabled for mobile testing
+		// replication.start();
 	}
 
 	private boolean createPeer(String nodeId, int port) {

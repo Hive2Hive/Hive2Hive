@@ -11,7 +11,7 @@ import java.util.List;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
-import org.hive2hive.core.security.IH2HSerialize;
+import org.hive2hive.core.serializer.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

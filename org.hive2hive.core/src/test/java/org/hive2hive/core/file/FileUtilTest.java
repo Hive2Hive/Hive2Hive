@@ -11,7 +11,7 @@ import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
-import org.hive2hive.core.security.FSTSerializer;
+import org.hive2hive.core.serializer.FSTSerializer;
 import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.junit.After;
 import org.junit.AfterClass;

@@ -24,10 +24,10 @@ import org.hive2hive.core.api.configs.FileConfiguration;
 import org.hive2hive.core.api.configs.NetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
-import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDefaultEncryption;
-import org.hive2hive.core.security.IH2HSerialize;
-import org.hive2hive.core.security.JavaSerializer;
+import org.hive2hive.core.serializer.FSTSerializer;
+import org.hive2hive.core.serializer.IH2HSerialize;
+import org.hive2hive.core.serializer.JavaSerializer;
 
 /**
  * The network configuration menu of the {@link ConsoleClient}.

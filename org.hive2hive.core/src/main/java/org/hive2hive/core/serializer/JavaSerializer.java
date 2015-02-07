@@ -1,4 +1,4 @@
-package org.hive2hive.core.security;
+package org.hive2hive.core.serializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

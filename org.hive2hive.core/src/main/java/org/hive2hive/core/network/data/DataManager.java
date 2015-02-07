@@ -25,7 +25,7 @@ import org.hive2hive.core.network.data.futures.FutureRemoveListener;
 import org.hive2hive.core.network.data.parameters.IParameters;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.IH2HEncryption;
-import org.hive2hive.core.security.IH2HSerialize;
+import org.hive2hive.core.serializer.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

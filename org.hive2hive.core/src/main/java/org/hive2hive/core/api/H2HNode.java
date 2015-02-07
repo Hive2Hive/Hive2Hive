@@ -8,10 +8,10 @@ import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.IH2HEncryption;
-import org.hive2hive.core.security.IH2HSerialize;
+import org.hive2hive.core.serializer.FSTSerializer;
+import org.hive2hive.core.serializer.IH2HSerialize;
 
 /**
  * Default implementation of {@link IH2HNode}.

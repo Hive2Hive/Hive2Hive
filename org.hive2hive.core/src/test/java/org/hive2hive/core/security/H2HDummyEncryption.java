@@ -11,6 +11,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
+import org.hive2hive.core.serializer.FSTSerializer;
+import org.hive2hive.core.serializer.IH2HSerialize;
 
 /**
  * Dummy encryption class that does not really encrypt but just serializes the object. This class should

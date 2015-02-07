@@ -24,7 +24,7 @@ import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessage
 import org.hive2hive.core.network.messages.direct.testmessages.TestDirectMessageWithReply;
 import org.hive2hive.core.network.messages.testmessages.TestMessage;
 import org.hive2hive.core.network.messages.testmessages.TestMessageWithReply;
-import org.hive2hive.core.security.FSTSerializer;
+import org.hive2hive.core.serializer.FSTSerializer;
 import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;

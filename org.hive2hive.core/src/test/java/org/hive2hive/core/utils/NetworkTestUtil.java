@@ -24,9 +24,9 @@ import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.data.vdht.VersionManager;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.EncryptionUtil;
-import org.hive2hive.core.security.FSTSerializer;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.serializer.FSTSerializer;
 import org.hive2hive.core.utils.helper.TestFileAgent;
 
 // TODO test classes using a test network should inherit from the same test class that handles instantiation and shutdown of network, all in the same way
