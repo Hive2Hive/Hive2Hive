@@ -9,7 +9,13 @@ import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.peers.PeerSocketAddress;
 
 import org.hive2hive.core.model.Chunk;
+import org.hive2hive.core.model.FileIndex;
+import org.hive2hive.core.model.FileVersion;
+import org.hive2hive.core.model.FolderIndex;
+import org.hive2hive.core.model.MetaChunk;
+import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.UserPublicKey;
+import org.hive2hive.core.model.versioned.EncryptedNetworkContent;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.model.versioned.MetaFileLarge;
 import org.hive2hive.core.model.versioned.MetaFileSmall;
@@ -61,9 +67,11 @@ public final class FSTSerializer implements IH2HSerialize {
 		fst = FSTConfiguration.createDefaultConfiguration();
 
 		// register all often serialized classes for speedup. Note that every peer should have the same
-		// configuration, which also depends on the order!
-		fst.registerClass(UserProfile.class, Locations.class, UserPublicKey.class, MetaFileSmall.class, MetaFileLarge.class,
-				Chunk.class, ContactPeerMessage.class, ResponseMessage.class);
+		// configuration, which also depends on the order! Changing these registrations might break backward
+		// compatibility!
+		fst.registerClass(UserProfile.class, FolderIndex.class, FileIndex.class, UserPermission.class, Locations.class,
+				UserPublicKey.class, MetaFileSmall.class, MetaFileLarge.class, FileVersion.class, MetaChunk.class,
+				Chunk.class, EncryptedNetworkContent.class, ContactPeerMessage.class, ResponseMessage.class);
 
 		// for all public / private keys for full compatibility among multiple security providers
 		fst.registerClass(securityProvider.getRSAPublicKeyClass(), securityProvider.getRSAPrivateKeyClass(),

@@ -17,7 +17,7 @@ public class ContactPeerMessage extends DirectRequestMessage {
 
 	private static final Logger logger = LoggerFactory.getLogger(ContactPeerMessage.class);
 
-	private String evidenceContent;
+	private final String evidenceContent;
 
 	public ContactPeerMessage(PeerAddress targetPeerAddress, String evidenceContent) {
 		super(targetPeerAddress);
