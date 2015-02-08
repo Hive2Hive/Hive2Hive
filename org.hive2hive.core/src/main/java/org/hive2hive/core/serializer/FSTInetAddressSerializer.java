@@ -1,7 +1,7 @@
 package org.hive2hive.core.serializer;
 
 import java.io.IOException;
-import java.math.BigInteger;
+import java.net.InetAddress;
 
 import org.nustaq.serialization.FSTBasicObjectSerializer;
 import org.nustaq.serialization.FSTClazzInfo;
@@ -10,12 +10,12 @@ import org.nustaq.serialization.FSTObjectInput;
 import org.nustaq.serialization.FSTObjectOutput;
 
 @SuppressWarnings("rawtypes")
-public class FSTBigIntegerSerializer extends FSTBasicObjectSerializer {
+public class FSTInetAddressSerializer extends FSTBasicObjectSerializer {
 
 	@Override
 	public void writeObject(FSTObjectOutput out, Object toWrite, FSTClazzInfo clzInfo, FSTFieldInfo referencedBy,
 			int streamPosition) throws IOException {
-		byte[] value = ((BigInteger) toWrite).toByteArray();
+		byte[] value = ((InetAddress) toWrite).getAddress();
 		out.writeInt(value.length);
 		out.write(value);
 	}
@@ -25,9 +25,9 @@ public class FSTBigIntegerSerializer extends FSTBasicObjectSerializer {
 			int streamPosition) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 		byte[] buf = new byte[in.readInt()];
 		in.read(buf);
-		BigInteger result = new BigInteger(buf);
-		in.registerObject(result, streamPosition, serializationInfo, referencee);
-		return result;
+		InetAddress address = InetAddress.getByAddress(buf);
+		in.registerObject(address, streamPosition, serializationInfo, referencee);
+		return address;
 	}
 
 }

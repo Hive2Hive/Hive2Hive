@@ -3,6 +3,7 @@ package org.hive2hive.core.serializer;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.net.InetAddress;
 
 import org.hive2hive.core.model.Chunk;
 import org.hive2hive.core.model.UserPublicKey;
@@ -67,6 +68,8 @@ public final class FSTSerializer implements IH2HSerialize {
 
 		// BigIntegers make problems sometime (in Android)
 		fst.registerSerializer(BigInteger.class, new FSTBigIntegerSerializer(), false);
+		// InetAddress can cause fatal JVM addresses because Android devices don't support IPv6
+		fst.registerSerializer(InetAddress.class, new FSTInetAddressSerializer(), true);
 	}
 
 	@Override

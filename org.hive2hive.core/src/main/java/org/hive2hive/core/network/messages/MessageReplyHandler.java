@@ -13,7 +13,6 @@ import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.extras.AndroidAddressFixer;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
@@ -93,8 +92,6 @@ public class MessageReplyHandler implements ObjectDataReply {
 
 		if (message != null && message instanceof BaseMessage) {
 			BaseMessage receivedMessage = (BaseMessage) message;
-
-			receivedMessage.setSenderAddress(AndroidAddressFixer.fix(receivedMessage.getSenderAddress()));
 
 			// verify the signature
 			if (session.getKeyManager().containsPublicKey(senderId)) {

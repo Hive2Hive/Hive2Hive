@@ -262,8 +262,7 @@ public class Connection implements IPeerHolder {
 		// set flag to keep data, even when peer looses replication responsibility
 		replication.keepData(true);
 		// start the indirect replication
-		// TODO disabled for mobile testing
-		// replication.start();
+		replication.start();
 	}
 
 	private boolean createPeer(String nodeId, int port) {

@@ -15,7 +15,6 @@ import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.extras.AndroidAddressFixer;
 import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
@@ -98,8 +97,6 @@ public final class MessageManager implements IMessageManager {
 		// prepare message
 		prepareMessage(message);
 		message.increaseDirectSendingCounter();
-
-		message.setTargetAddress(AndroidAddressFixer.fix(message.getTargetAddress()));
 
 		// encrypt the message with the given public key
 		HybridEncryptedContent encryptedMessage = signAndEncryptMessage(message, targetPublicKey);
