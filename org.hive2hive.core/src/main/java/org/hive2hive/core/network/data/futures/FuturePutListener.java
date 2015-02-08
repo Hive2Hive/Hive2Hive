@@ -97,11 +97,12 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 					} else {
 						switch (PutStatus.values()[putStatus]) {
 							case OK:
+							case OK_PREPARED:
 								break;
 							case FAILED:
 							case FAILED_SECURITY:
-								logger.warn("A node denied putting data. reason = '{}'. '{}'", PutStatus.values()[putStatus],
-										parameters.toString());
+								logger.warn("A node denied putting data. reason = '{}'. '{}'",
+										PutStatus.values()[putStatus], parameters.toString());
 								fail.add(peeradress);
 								break;
 							case VERSION_FORK:
@@ -160,8 +161,8 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 												fail.add(peeradress);
 												break;
 											default:
-												logger.warn("Got an unknown status = '{}' {}", PutStatus.values()[putStatus],
-														parameters.toString());
+												logger.warn("Got an unknown status = '{}' {}",
+														PutStatus.values()[putStatus], parameters.toString());
 										}
 									}
 								}
