@@ -2,10 +2,10 @@ package org.hive2hive.core.network.data.vdht;
 
 import java.security.KeyPair;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Random;
+import java.util.TreeMap;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
@@ -173,7 +173,7 @@ public class VersionManagerTest extends H2HJUnitTest {
 			String locationKey = randomString();
 			String contentKey = randomString();
 
-			Map<Number640, Data> manipulatedMap = new HashMap<Number640, Data>(2);
+			NavigableMap<Number640, Data> manipulatedMap = new TreeMap<Number640, Data>();
 			manipulatedMap.put(
 					new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
 							version0A.getVersionKey()), new Data(version0A).addBasedOn(Number160.ZERO));

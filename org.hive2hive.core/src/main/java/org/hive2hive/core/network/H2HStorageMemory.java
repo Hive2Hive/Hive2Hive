@@ -2,6 +2,7 @@ package org.hive2hive.core.network;
 
 import java.security.PublicKey;
 import java.util.Map;
+import java.util.NavigableMap;
 
 import net.tomp2p.dht.StorageLayer;
 import net.tomp2p.dht.StorageMemory;
@@ -38,7 +39,7 @@ public class H2HStorageMemory extends StorageLayer {
 		MANIPULATED
 	}
 
-	private Map<Number640, Data> manipulatedMap;
+	private NavigableMap<Number640, Data> manipulatedMap;
 
 	private StorageMemoryPutMode putMode;
 	private StorageMemoryGetMode getMode;
@@ -59,7 +60,7 @@ public class H2HStorageMemory extends StorageLayer {
 		this.getMode = mode;
 	}
 
-	public void setManipulatedMap(Map<Number640, Data> manipulatedMap) {
+	public void setManipulatedMap(NavigableMap<Number640, Data> manipulatedMap) {
 		this.manipulatedMap = manipulatedMap;
 	}
 
@@ -81,7 +82,7 @@ public class H2HStorageMemory extends StorageLayer {
 		}
 	}
 
-	public Map<Number640, Data> getLatestVersion(Number640 key) {
+	public NavigableMap<Number640, Data> getLatestVersion(Number640 key) {
 		switch (getMode) {
 			case STANDARD: {
 				return super.getLatestVersion(key);
