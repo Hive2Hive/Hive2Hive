@@ -1,5 +1,7 @@
 package org.hive2hive.core.network.data.futures;
 
+import io.netty.buffer.ByteBuf;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -9,6 +11,7 @@ import net.tomp2p.futures.BaseFutureListener;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.model.BaseNetworkContent;
 import org.hive2hive.core.network.data.parameters.IParameters;
+import org.hive2hive.core.serializer.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +26,15 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 	private static final Logger logger = LoggerFactory.getLogger(FutureGetListener.class);
 
 	private final IParameters parameters;
+	private final IH2HSerialize serializer;
 	private final CountDownLatch latch;
 
 	// the result when it came back
 	private BaseNetworkContent result = null;
 
-	public FutureGetListener(IParameters parameters) {
+	public FutureGetListener(IParameters parameters, IH2HSerialize serializer) {
 		this.parameters = parameters;
+		this.serializer = serializer;
 		this.latch = new CountDownLatch(1);
 	}
 
@@ -55,8 +60,16 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 			logger.debug("Got null. '{}'", parameters.toString());
 		} else {
 			// set the result
-			result = (BaseNetworkContent) future.data().object();
-			logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(), parameters.toString());
+			ByteBuf byteBuf = future.data().buffer();
+			if (byteBuf.isReadable()) {
+				byte[] buffer = new byte[byteBuf.readableBytes()];
+				byteBuf.readBytes(buffer);
+				result = (BaseNetworkContent) serializer.deserialize(buffer);
+				logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(), parameters.toString());
+			} else {
+				result = null;
+				logger.debug("Got null. '{}'", parameters.toString());
+			}
 		}
 		// release the lock
 		latch.countDown();

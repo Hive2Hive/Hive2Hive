@@ -163,8 +163,12 @@ public class AddFileTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(uploaderRoot);
-		FileUtils.deleteDirectory(downloaderRoot);
+		if (uploaderRoot != null && uploaderRoot.exists()) {
+			FileUtils.deleteDirectory(uploaderRoot);
+		}
+		if (downloaderRoot != null && downloaderRoot.exists()) {
+			FileUtils.deleteDirectory(downloaderRoot);
+		}
 		afterClass();
 	}
 }

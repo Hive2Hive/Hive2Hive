@@ -137,7 +137,9 @@ public class DataManager {
 	public FuturePut putUnblocked(IParameters parameters) {
 		logger.debug("Put. {}", parameters.toString());
 		try {
-			Data data = new Data(parameters.getNetworkContent());
+			// serialize with custom serializer (TomP2P would use Java serializer)
+			Data data = new Data(serializer.serialize(parameters.getNetworkContent()));
+
 			data.ttlSeconds(parameters.getTTL());
 			if (parameters.getBasedOnKey() != null) {
 				data.addBasedOn(parameters.getBasedOnKey());
@@ -182,14 +184,14 @@ public class DataManager {
 
 	public BaseNetworkContent get(IParameters parameters) {
 		FutureGet futureGet = getUnblocked(parameters);
-		FutureGetListener listener = new FutureGetListener(parameters);
+		FutureGetListener listener = new FutureGetListener(parameters, serializer);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
 	}
 
 	public BaseNetworkContent getVersion(IParameters parameters) {
 		FutureGet futureGet = getVersionUnblocked(parameters);
-		FutureGetListener listener = new FutureGetListener(parameters);
+		FutureGetListener listener = new FutureGetListener(parameters, serializer);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
 	}
@@ -200,7 +202,7 @@ public class DataManager {
 				.from(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.ZERO, Number160.ZERO))
 				.to(new Number640(parameters.getLKey(), parameters.getDKey(), Number160.MAX_VALUE, Number160.MAX_VALUE))
 				.ascending().returnNr(1).start();
-		FutureGetListener listener = new FutureGetListener(parameters);
+		FutureGetListener listener = new FutureGetListener(parameters, serializer);
 		futureGet.addListener(listener);
 		return listener.awaitAndGet();
 	}

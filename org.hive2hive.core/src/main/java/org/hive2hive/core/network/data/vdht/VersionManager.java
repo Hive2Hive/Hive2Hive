@@ -1,5 +1,7 @@
 package org.hive2hive.core.network.data.vdht;
 
+import io.netty.buffer.ByteBuf;
+
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.Collection;
@@ -233,14 +235,20 @@ public class VersionManager<T extends BaseVersionedNetworkContent> {
 			} else {
 				for (Number640 key : tmp.keySet()) {
 					try {
-						Object object = tmp.get(key).object();
-						if (object instanceof BaseVersionedNetworkContent) {
-							dataMap.put(key.versionKey(), (T) tmp.get(key).object());
+						ByteBuf byteBuf = tmp.get(key).buffer();
+						if (byteBuf.isReadable()) {
+							byte[] buffer = new byte[byteBuf.readableBytes()];
+							byteBuf.readBytes(buffer);
+							T object = (T) dataManager.getSerializer().deserialize(buffer);
+							dataMap.put(key.versionKey(), object);
 						} else {
-							logger.warn("Received unkown object = '{}'", object.getClass().getSimpleName());
+							logger.warn("Received unreadable buffer object = '{}'", tmp.get(key).object().getClass()
+									.getSimpleName());
 						}
-					} catch (ClassNotFoundException | IOException e) {
-						logger.warn("Could not get data. reason = '{}'", e.getMessage());
+					} catch (IOException e) {
+						logger.warn("Could not deserialize the data. Data could be null. Reason = '{}'", e.getMessage());
+					} catch (Exception e) {
+						logger.warn("Could not get data. Reason = '{}'", e.getMessage());
 					}
 				}
 			}
