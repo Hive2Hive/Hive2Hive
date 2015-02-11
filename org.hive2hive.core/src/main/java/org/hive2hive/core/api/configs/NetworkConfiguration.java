@@ -22,7 +22,6 @@ public class NetworkConfiguration implements INetworkConfiguration {
 
 	private String nodeID = UUID.randomUUID().toString();
 	private int port = AUTO_PORT;
-	private boolean isInitialPeer = true;
 	private InetAddress bootstrapAddress = null;
 	private boolean isLocal = false;
 	private Peer bootstrapPeer = null;
@@ -47,18 +46,8 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	}
 
 	/**
-	 * Set when the peer is the first one in the network
-	 * 
-	 * @return this instance
-	 */
-	public NetworkConfiguration setInitial() {
-		this.isInitialPeer = true;
-		this.bootstrapAddress = null;
-		return this;
-	}
-
-	/**
-	 * @param bootstrapAddress the address to bootstrap to
+	 * @param bootstrapAddress the address to bootstrap to. If it is <code>null</code>, the peer is 'initial'
+	 *            and does not bootstrap to any other peer.
 	 * @return this instance
 	 */
 	public NetworkConfiguration setBootstrap(InetAddress bootstrapAddress) {
@@ -76,7 +65,8 @@ public class NetworkConfiguration implements INetworkConfiguration {
 
 	/**
 	 * 
-	 * @param bootstrapAddress the address to bootstrap to
+	 * @param bootstrapAddress the address to bootstrap to. If it is <code>null</code>, the peer is 'initial'
+	 *            and does not bootstrap to any other peer.
 	 * @param bootstrapPort the port to bootstrap to
 	 * @return this instance
 	 */
@@ -119,7 +109,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @return the network configuration
 	 */
 	public static NetworkConfiguration createInitial(String nodeID) {
-		return new NetworkConfiguration().setNodeId(nodeID).setInitial().setPort(AUTO_PORT);
+		return new NetworkConfiguration().setNodeId(nodeID).setPort(AUTO_PORT);
 	}
 
 	/**
@@ -169,7 +159,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @return the network configuration for local peers (initial)
 	 */
 	public static NetworkConfiguration createInitialLocalPeer(String nodeID) {
-		return new NetworkConfiguration().setNodeId(nodeID).setPort(AUTO_PORT).setInitial().setLocal();
+		return new NetworkConfiguration().setNodeId(nodeID).setPort(AUTO_PORT).setLocal();
 	}
 
 	@Override
@@ -178,8 +168,8 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	}
 
 	@Override
-	public boolean isInitialPeer() {
-		return isInitialPeer;
+	public boolean isInitial() {
+		return bootstrapAddress == null;
 	}
 
 	@Override

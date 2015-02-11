@@ -53,7 +53,7 @@ public class NetworkManager {
 		} else {
 			boolean success = connection.connect(networkConfiguration.getNodeID(), networkConfiguration.getPort());
 			// bootstrap if not initial peer
-			if (success && !networkConfiguration.isInitialPeer()) {
+			if (success && !networkConfiguration.isInitial()) {
 				success = connection.bootstrap(networkConfiguration.getBootstrapAddress(),
 						networkConfiguration.getBootstrapPort());
 			}

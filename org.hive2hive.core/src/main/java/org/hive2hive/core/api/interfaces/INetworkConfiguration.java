@@ -30,13 +30,12 @@ public interface INetworkConfiguration {
 
 	/**
 	 * Returns whether this peer is initial. When a peer is initial, it is the first one in the network and
-	 * does
-	 * not try to bootstrap anywhere. In each network, only one initial peer needs to exist. When other peers
-	 * have joined, the initial peer can also go offline.
+	 * does not try to bootstrap anywhere. In each network, only one initial peer needs to exist. When other
+	 * peers have joined, the initial peer can also go offline.
 	 * 
 	 * @return true when this peer is initial.
 	 */
-	boolean isInitialPeer();
+	boolean isInitial();
 
 	/**
 	 * If this peer is not initial, it needs to bootstrap anywhere to connect to the p2p network.
