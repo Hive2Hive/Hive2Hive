@@ -31,7 +31,7 @@ public class HashUtil {
 
 	/**
 	 * Generates a MD5 hash of a given data
-	 * 
+	 *
 	 * @param data to calculate the MD5 hash over it
 	 * @return the md5 hash
 	 */
@@ -48,7 +48,7 @@ public class HashUtil {
 
 	/**
 	 * Generates a MD5 hash of an input stream (can take a while)
-	 * 
+	 *
 	 * @param file
 	 * @return the hash of the file
 	 * @throws IOException
@@ -70,10 +70,7 @@ public class HashUtil {
 			return new byte[0];
 		}
 
-		byte[] buffer = new byte[1024];
-		int numRead;
 		FileInputStream fis;
-
 		try {
 			// open the stream
 			fis = new FileInputStream(file);
@@ -83,21 +80,28 @@ public class HashUtil {
 		}
 
 		DigestInputStream dis = new DigestInputStream(fis, digest);
-		do {
-			numRead = dis.read(buffer);
-			if (numRead > 0) {
-				digest.update(buffer, 0, numRead);
+		try {
+			byte[] buffer = new byte[1024];
+			int numRead;
+			do {
+				numRead = dis.read(buffer);
+			} while (numRead != -1);
+		} finally {
+			if (dis != null) {
+				dis.close();
 			}
-		} while (numRead != -1);
-		dis.close();
-		fis.close();
+
+			if (fis != null) {
+				fis.close();
+			}
+		}
 
 		return digest.digest();
 	}
 
 	/**
 	 * Compares if the file md5 matches a given md5 hash
-	 * 
+	 *
 	 * @param file
 	 * @param expectedMD5
 	 * @return <code>true</code> if the file has the expected hash
@@ -119,7 +123,7 @@ public class HashUtil {
 	/**
 	 * Compares if the given md5 matches another md5 hash. This method works symmetrically and is not
 	 * dependent on the parameter order
-	 * 
+	 *
 	 * @param md5 the hash to test
 	 * @param expectedMD5 the expected md5 hash
 	 * @return <code>true</code> if the hashes match
