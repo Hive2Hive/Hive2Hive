@@ -80,6 +80,10 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 		logger.debug("Adding own peeraddress to locations file: {}", ownAddress);
 		locations.addPeerAddress(ownAddress);
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("Current locations: {}", locations);
+		}
+
 		// evaluate if initial
 		List<PeerAddress> clientAddresses = new ArrayList<PeerAddress>(locations.getPeerAddresses());
 		if (NetworkUtils.choseFirstPeerAddress(clientAddresses).equals(ownAddress)) {

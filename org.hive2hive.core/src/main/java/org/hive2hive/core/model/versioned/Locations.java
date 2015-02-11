@@ -46,4 +46,15 @@ public class Locations extends BaseVersionedNetworkContent {
 	public int getTimeToLive() {
 		return TimeToLiveStore.getInstance().getLocations();
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("Locations [");
+		sb.append("userId=").append(userId);
+		sb.append(", ").append("addresses=[");
+		for (PeerAddress peerAddress : addresses) {
+			sb.append(peerAddress).append(", ");
+		}
+		return sb.append("]]").toString();
+	}
 }
