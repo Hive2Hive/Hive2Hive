@@ -242,8 +242,7 @@ public class Connection implements IPeerHolder {
 		serverConfig.ports(new Ports(bindPort, bindPort));
 
 		// listen on any interfaces (see https://github.com/Hive2Hive/Hive2Hive/issues/117)
-		Bindings bindings = new Bindings();
-		bindings.listenAny();
+		Bindings bindings = new Bindings().listenAny();
 
 		return new PeerBuilder(Number160.createHash(nodeID)).ports(bindPort).bindings(bindings)
 				.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig);
