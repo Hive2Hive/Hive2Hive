@@ -1,8 +1,5 @@
 package org.hive2hive.core.network;
 
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
-import io.netty.util.concurrent.Future;
-
 import java.io.IOException;
 import java.net.InetAddress;
 
@@ -45,7 +42,6 @@ public class Connection implements IPeerHolder {
 	private final IH2HSerialize serializer;
 
 	private PeerDHT peerDHT;
-	private DefaultEventExecutorGroup eventExecutorGroup;
 
 	public Connection(NetworkManager networkManager, IH2HSerialize serializer) {
 		this.networkManager = networkManager;
@@ -153,12 +149,6 @@ public class Connection implements IPeerHolder {
 			logger.warn("Peer disconnection failed. Peer is not connected.");
 		}
 
-		if (eventExecutorGroup != null) {
-			Future<?> shutdownGracefully = eventExecutorGroup.shutdownGracefully();
-			shutdownGracefully.awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
-			eventExecutorGroup = null;
-		}
-
 		return isDisconnected;
 	}
 
@@ -229,16 +219,11 @@ public class Connection implements IPeerHolder {
 	private PeerBuilder preparePeerBuilder(String nodeID, int port) {
 		int bindPort = port < 0 ? searchFreePort() : port;
 
-		// configure the thread handling internally, callback can be blocking
-		// eventExecutorGroup = new DefaultEventExecutorGroup(H2HConstants.NUM_OF_NETWORK_THREADS);
-
 		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
 		clientConfig.signatureFactory(new H2HSignatureFactory());
-		// clientConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
 
 		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
 		serverConfig.signatureFactory(new H2HSignatureFactory());
-		// serverConfig.pipelineFilter(new PeerBuilder.EventExecutorGroupFilter(eventExecutorGroup));
 		serverConfig.ports(new Ports(bindPort, bindPort));
 
 		// listen on any interfaces (see https://github.com/Hive2Hive/Hive2Hive/issues/117)
