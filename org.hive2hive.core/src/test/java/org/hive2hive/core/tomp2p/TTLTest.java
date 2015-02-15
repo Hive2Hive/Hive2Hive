@@ -66,37 +66,40 @@ public class TTLTest extends H2HJUnitTest {
 		Data data = new Data(testData).protectEntry(keyPair1);
 		data.ttlSeconds(ttl).addBasedOn(bKey);
 
-		// initial put
-		FuturePut futurePut = p1.put(lKey).domainKey(dKey).data(cKey, data).versionKey(vKey).keyPair(keyPair1).start();
-		futurePut.awaitUninterruptibly();
-		Assert.assertTrue(futurePut.isSuccess());
+		try {
+			// initial put
+			FuturePut futurePut = p1.put(lKey).domainKey(dKey).data(cKey, data).versionKey(vKey).keyPair(keyPair1).start();
+			futurePut.awaitUninterruptibly();
+			Assert.assertTrue(futurePut.isSuccess());
 
-		// wait a moment, so that the ttl decrements
-		Thread.sleep(2000);
+			// wait a moment, so that the ttl decrements
+			Thread.sleep(2000);
 
-		// check decrement of ttl through a normal get
-		FutureGet futureGet = p1.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).start();
-		futureGet.awaitUninterruptibly();
-		Assert.assertTrue(futureGet.isSuccess());
-		Assert.assertTrue(ttl > futureGet.data().ttlSeconds());
+			// check decrement of ttl through a normal get
+			FutureGet futureGet = p1.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).start();
+			futureGet.awaitUninterruptibly();
+			Assert.assertTrue(futureGet.isSuccess());
+			Assert.assertTrue(ttl > futureGet.data().ttlSeconds());
 
-		// check decrement of ttl through a get meta
-		FutureDigest futureDigest = p1.digest(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).returnMetaValues()
-				.start();
-		futureDigest.awaitUninterruptibly();
-		Assert.assertTrue(futureDigest.isSuccess());
-		Data dataMeta = futureDigest.digest().dataMap().values().iterator().next();
-		Assert.assertTrue(ttl > dataMeta.ttlSeconds());
+			// check decrement of ttl through a get meta
+			FutureDigest futureDigest = p1.digest(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).returnMetaValues()
+					.start();
+			futureDigest.awaitUninterruptibly();
+			Assert.assertTrue(futureDigest.isSuccess());
+			Data dataMeta = futureDigest.digest().dataMap().values().iterator().next();
+			Assert.assertTrue(ttl > dataMeta.ttlSeconds());
 
-		// wait again a moment, till data gets expired
-		Thread.sleep(2000);
+			// wait again a moment, till data gets expired
+			Thread.sleep(2000);
 
-		// check if data has been removed
-		Data retData = p2.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).start().awaitUninterruptibly().data();
-		Assert.assertNull(retData);
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
+			// check if data has been removed
+			Data retData = p2.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).start().awaitUninterruptibly()
+					.data();
+			Assert.assertNull(retData);
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
+		}
 	}
 
 	@Test
@@ -121,30 +124,32 @@ public class TTLTest extends H2HJUnitTest {
 		Number160 dKey = Number160.createHash("domain");
 		Number160 cKey = Number160.createHash("content");
 
-		// put first version
-		FuturePut futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version1").protectEntry(keyPair1))
-				.versionKey(new Number160(0)).keyPair(keyPair1).start();
-		futurePut.awaitUninterruptibly();
-		Assert.assertTrue(futurePut.isSuccess());
-		// put second version
-		futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version2").protectEntry(keyPair1))
-				.versionKey(new Number160(1)).keyPair(keyPair1).start();
-		futurePut.awaitUninterruptibly();
-		Assert.assertTrue(futurePut.isSuccess());
-		// put third version
-		futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version3").protectEntry(keyPair1))
-				.versionKey(new Number160(2)).keyPair(keyPair1).start();
-		futurePut.awaitUninterruptibly();
-		Assert.assertTrue(futurePut.isSuccess());
+		try {
+			// put first version
+			FuturePut futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version1").protectEntry(keyPair1))
+					.versionKey(new Number160(0)).keyPair(keyPair1).start();
+			futurePut.awaitUninterruptibly();
+			Assert.assertTrue(futurePut.isSuccess());
+			// put second version
+			futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version2").protectEntry(keyPair1))
+					.versionKey(new Number160(1)).keyPair(keyPair1).start();
+			futurePut.awaitUninterruptibly();
+			Assert.assertTrue(futurePut.isSuccess());
+			// put third version
+			futurePut = p1.put(lKey).domainKey(dKey).data(cKey, new Data("version3").protectEntry(keyPair1))
+					.versionKey(new Number160(2)).keyPair(keyPair1).start();
+			futurePut.awaitUninterruptibly();
+			Assert.assertTrue(futurePut.isSuccess());
 
-		// first version should be not available
-		FutureGet futureGet = p1.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(new Number160(0)).start();
-		futureGet.awaitUninterruptibly();
-		Assert.assertTrue(futureGet.isSuccess());
-		Assert.assertNull(futureGet.data());
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
+			// first version should be not available
+			FutureGet futureGet = p1.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(new Number160(0)).start();
+			futureGet.awaitUninterruptibly();
+			Assert.assertTrue(futureGet.isSuccess());
+			Assert.assertNull(futureGet.data());
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
+		}
 	}
 
 	@AfterClass

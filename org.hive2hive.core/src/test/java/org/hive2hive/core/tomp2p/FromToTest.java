@@ -29,8 +29,7 @@ import org.junit.Test;
 
 /**
  * A test which tests the range mechanisms (from/to) of the <code>TomP2P</code> project. Tests should be
- * completely
- * independent of <code>Hive2Hive</code>.
+ * completely independent of <code>Hive2Hive</code>.
  * 
  * @author Seppi
  */
@@ -52,33 +51,35 @@ public class FromToTest extends H2HJUnitTest {
 		String locationKey = "location";
 		String contentKey = "content";
 
-		List<H2HTestData> content = new ArrayList<H2HTestData>();
-		int numberOfContent = 3;
-		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(randomString());
-			data.generateVersionKey();
-			if (i > 0) {
-				data.setBasedOnKey(content.get(i - 1).getVersionKey());
+		try {
+			List<H2HTestData> content = new ArrayList<H2HTestData>();
+			int numberOfContent = 3;
+			for (int i = 0; i < numberOfContent; i++) {
+				H2HTestData data = new H2HTestData(randomString());
+				data.generateVersionKey();
+				if (i > 0) {
+					data.setBasedOnKey(content.get(i - 1).getVersionKey());
+				}
+				content.add(data);
+
+				p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
+						.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
 			}
-			content.add(data);
 
-			p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
-					.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
+			FutureGet future = p1
+					.get(Number160.createHash(locationKey))
+					.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.ZERO))
+					.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.MAX_VALUE)).descending().returnNr(1).start();
+			future.awaitUninterruptibly();
+
+			assertEquals(content.get(numberOfContent - 1).getTestString(),
+					((H2HTestData) future.data().object()).getTestString());
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
 		}
-
-		FutureGet future = p1
-				.get(Number160.createHash(locationKey))
-				.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.ZERO))
-				.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.MAX_VALUE)).descending().returnNr(1).start();
-		future.awaitUninterruptibly();
-
-		assertEquals(content.get(numberOfContent - 1).getTestString(),
-				((H2HTestData) future.data().object()).getTestString());
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
 	}
 
 	@Test
@@ -100,41 +101,44 @@ public class FromToTest extends H2HJUnitTest {
 			Thread.sleep(10);
 		}
 
-		// shuffle to change the order for put
-		List<Long> shuffledTimeStamps = new ArrayList<Long>(timeStamps);
-		Collections.shuffle(shuffledTimeStamps);
-		for (Long timeStamp : shuffledTimeStamps) {
-			Number160 contentKey = new Number160(timeStamp);
-			logger.debug("{}, {}", timeStamp, contentKey);
-			p2.put(lKey).data(contentKey, new Data(timeStamp)).domainKey(dKey).start().awaitUninterruptibly();
-		}
-
-		// fetch time stamps from network, respectively the implicit queue
-		List<Long> downloadedTimestamps = new ArrayList<Long>();
-		while (true) {
-			FutureGet futureGet = p1.get(lKey).from(new Number640(lKey, dKey, Number160.ZERO, Number160.ZERO))
-					.to(new Number640(lKey, dKey, Number160.MAX_VALUE, Number160.MAX_VALUE)).ascending().returnNr(1).start();
-			futureGet.awaitUninterruptibly();
-			if (futureGet.data() != null) {
-				long timeStamp = (Long) futureGet.data().object();
+		try {
+			// shuffle to change the order for put
+			List<Long> shuffledTimeStamps = new ArrayList<Long>(timeStamps);
+			Collections.shuffle(shuffledTimeStamps);
+			for (Long timeStamp : shuffledTimeStamps) {
 				Number160 contentKey = new Number160(timeStamp);
 				logger.debug("{}, {}", timeStamp, contentKey);
-				downloadedTimestamps.add(timeStamp);
-				// remove fetched time stamp from network
-				p2.remove(lKey).domainKey(dKey).contentKey(contentKey).start().awaitUninterruptibly();
-			} else {
-				break;
+				p2.put(lKey).data(contentKey, new Data(timeStamp)).domainKey(dKey).start().awaitUninterruptibly();
 			}
-		}
 
-		// order of fetched tasks should be like the inital one
-		assertEquals(timeStamps.size(), downloadedTimestamps.size());
-		for (int i = 0; i < timeStamps.size(); i++) {
-			assertEquals(timeStamps.get(i), downloadedTimestamps.get(i));
-		}
+			// fetch time stamps from network, respectively the implicit queue
+			List<Long> downloadedTimestamps = new ArrayList<Long>();
+			while (true) {
+				FutureGet futureGet = p1.get(lKey).from(new Number640(lKey, dKey, Number160.ZERO, Number160.ZERO))
+						.to(new Number640(lKey, dKey, Number160.MAX_VALUE, Number160.MAX_VALUE)).ascending().returnNr(1)
+						.start();
+				futureGet.awaitUninterruptibly();
+				if (futureGet.data() != null) {
+					long timeStamp = (Long) futureGet.data().object();
+					Number160 contentKey = new Number160(timeStamp);
+					logger.debug("{}, {}", timeStamp, contentKey);
+					downloadedTimestamps.add(timeStamp);
+					// remove fetched time stamp from network
+					p2.remove(lKey).domainKey(dKey).contentKey(contentKey).start().awaitUninterruptibly();
+				} else {
+					break;
+				}
+			}
 
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
+			// order of fetched tasks should be like the inital one
+			assertEquals(timeStamps.size(), downloadedTimestamps.size());
+			for (int i = 0; i < timeStamps.size(); i++) {
+				assertEquals(timeStamps.get(i), downloadedTimestamps.get(i));
+			}
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
+		}
 	}
 
 	@Test
@@ -147,40 +151,42 @@ public class FromToTest extends H2HJUnitTest {
 		String locationKey = "location";
 		String contentKey = "content";
 
-		List<H2HTestData> content = new ArrayList<H2HTestData>();
-		int numberOfContent = 3;
-		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(randomString());
-			data.generateVersionKey();
-			if (i > 0) {
-				data.setBasedOnKey(content.get(i - 1).getVersionKey());
+		try {
+			List<H2HTestData> content = new ArrayList<H2HTestData>();
+			int numberOfContent = 3;
+			for (int i = 0; i < numberOfContent; i++) {
+				H2HTestData data = new H2HTestData(randomString());
+				data.generateVersionKey();
+				if (i > 0) {
+					data.setBasedOnKey(content.get(i - 1).getVersionKey());
+				}
+				content.add(data);
+
+				p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
+						.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
 			}
-			content.add(data);
 
-			p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
-					.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
+			FutureRemove futureRemove = p1
+					.remove(Number160.createHash(locationKey))
+					.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.ZERO))
+					.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.MAX_VALUE)).start();
+			futureRemove.awaitUninterruptibly();
+
+			FutureGet futureGet = p1
+					.get(Number160.createHash(locationKey))
+					.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.ZERO))
+					.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.MAX_VALUE)).start();
+			futureGet.awaitUninterruptibly();
+
+			assertNull(futureGet.data());
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
 		}
-
-		FutureRemove futureRemove = p1
-				.remove(Number160.createHash(locationKey))
-				.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.ZERO))
-				.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.MAX_VALUE)).start();
-		futureRemove.awaitUninterruptibly();
-
-		FutureGet futureGet = p1
-				.get(Number160.createHash(locationKey))
-				.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.ZERO))
-				.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.MAX_VALUE)).start();
-		futureGet.awaitUninterruptibly();
-
-		assertNull(futureGet.data());
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
 	}
 
 	@Test
@@ -193,40 +199,42 @@ public class FromToTest extends H2HJUnitTest {
 		String locationKey = "location";
 		String contentKey = "content";
 
-		List<H2HTestData> content = new ArrayList<H2HTestData>();
-		int numberOfContent = 3;
-		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(randomString());
-			data.generateVersionKey();
-			if (i > 0) {
-				data.setBasedOnKey(content.get(i - 1).getVersionKey());
+		try {
+			List<H2HTestData> content = new ArrayList<H2HTestData>();
+			int numberOfContent = 3;
+			for (int i = 0; i < numberOfContent; i++) {
+				H2HTestData data = new H2HTestData(randomString());
+				data.generateVersionKey();
+				if (i > 0) {
+					data.setBasedOnKey(content.get(i - 1).getVersionKey());
+				}
+				content.add(data);
+
+				p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
+						.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
 			}
-			content.add(data);
 
-			p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
-					.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
+			FutureRemove futureRemove = p1
+					.remove(Number160.createHash(locationKey))
+					.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.ZERO))
+					.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.MAX_VALUE)).start();
+			futureRemove.awaitUninterruptibly();
+
+			FutureDigest futureDigest = p1
+					.digest(Number160.createHash(locationKey))
+					.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.ZERO))
+					.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.MAX_VALUE)).start();
+			futureDigest.awaitUninterruptibly();
+
+			assertTrue(futureDigest.digest().keyDigest().isEmpty());
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
 		}
-
-		FutureRemove futureRemove = p1
-				.remove(Number160.createHash(locationKey))
-				.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.ZERO))
-				.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.MAX_VALUE)).start();
-		futureRemove.awaitUninterruptibly();
-
-		FutureDigest futureDigest = p1
-				.digest(Number160.createHash(locationKey))
-				.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.ZERO))
-				.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.MAX_VALUE)).start();
-		futureDigest.awaitUninterruptibly();
-
-		assertTrue(futureDigest.digest().keyDigest().isEmpty());
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
 	}
 
 	@Test
@@ -242,21 +250,23 @@ public class FromToTest extends H2HJUnitTest {
 		H2HTestData data = new H2HTestData(randomString());
 		data.generateVersionKey();
 
-		p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
-				.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
+		try {
+			p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
+					.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
 
-		FutureRemove futureRemove = p1.remove(Number160.createHash(locationKey)).domainKey(Number160.ZERO)
-				.contentKey(Number160.createHash(contentKey)).versionKey(data.getVersionKey()).start();
-		futureRemove.awaitUninterruptibly();
+			FutureRemove futureRemove = p1.remove(Number160.createHash(locationKey)).domainKey(Number160.ZERO)
+					.contentKey(Number160.createHash(contentKey)).versionKey(data.getVersionKey()).start();
+			futureRemove.awaitUninterruptibly();
 
-		FutureDigest futureDigest = p1.digest(Number160.createHash(locationKey))
-				.contentKey(Number160.createHash(contentKey)).versionKey(data.getVersionKey()).start();
-		futureDigest.awaitUninterruptibly();
+			FutureDigest futureDigest = p1.digest(Number160.createHash(locationKey))
+					.contentKey(Number160.createHash(contentKey)).versionKey(data.getVersionKey()).start();
+			futureDigest.awaitUninterruptibly();
 
-		assertTrue(futureDigest.digest().keyDigest().isEmpty());
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
+			assertTrue(futureDigest.digest().keyDigest().isEmpty());
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
+		}
 	}
 
 	@Test
@@ -273,24 +283,26 @@ public class FromToTest extends H2HJUnitTest {
 
 		H2HTestData data = new H2HTestData(randomString());
 
-		p2.put(lKey).data(cKey, new Data(data)).domainKey(dKey).start().awaitUninterruptibly();
+		try {
+			p2.put(lKey).data(cKey, new Data(data)).domainKey(dKey).start().awaitUninterruptibly();
 
-		FutureRemove futureRemove = p1.remove(lKey).domainKey(dKey).contentKey(cKey).start();
-		futureRemove.awaitUninterruptibly();
+			FutureRemove futureRemove = p1.remove(lKey).domainKey(dKey).contentKey(cKey).start();
+			futureRemove.awaitUninterruptibly();
 
-		// check with a normal digest
-		FutureDigest futureDigest = p1.digest(lKey).contentKey(cKey).domainKey(dKey).start();
-		futureDigest.awaitUninterruptibly();
-		assertTrue(futureDigest.digest().keyDigest().isEmpty());
+			// check with a normal digest
+			FutureDigest futureDigest = p1.digest(lKey).contentKey(cKey).domainKey(dKey).start();
+			futureDigest.awaitUninterruptibly();
+			assertTrue(futureDigest.digest().keyDigest().isEmpty());
 
-		// check with a from/to digest
-		futureDigest = p1.digest(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
-				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
-		futureDigest.awaitUninterruptibly();
-		assertTrue(futureDigest.digest().keyDigest().isEmpty());
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
+			// check with a from/to digest
+			futureDigest = p1.digest(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
+					.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
+			futureDigest.awaitUninterruptibly();
+			assertTrue(futureDigest.digest().keyDigest().isEmpty());
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
+		}
 	}
 
 	@Test
@@ -307,21 +319,23 @@ public class FromToTest extends H2HJUnitTest {
 
 		H2HTestData data = new H2HTestData(randomString());
 
-		p2.put(lKey).data(cKey, new Data(data)).domainKey(dKey).start().awaitUninterruptibly();
+		try {
+			p2.put(lKey).data(cKey, new Data(data)).domainKey(dKey).start().awaitUninterruptibly();
 
-		FutureRemove futureRemove = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
-				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
-		futureRemove.awaitUninterruptibly();
+			FutureRemove futureRemove = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
+					.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
+			futureRemove.awaitUninterruptibly();
 
-		FutureDigest futureDigest = p1.digest(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
-				.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
-		futureDigest.awaitUninterruptibly();
+			FutureDigest futureDigest = p1.digest(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
+					.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
+			futureDigest.awaitUninterruptibly();
 
-		// should be empty
-		assertTrue(futureDigest.digest().keyDigest().isEmpty());
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
+			// should be empty
+			assertTrue(futureDigest.digest().keyDigest().isEmpty());
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
+		}
 	}
 
 	@Test
@@ -334,41 +348,43 @@ public class FromToTest extends H2HJUnitTest {
 		String locationKey = "location";
 		String contentKey = "content";
 
-		List<H2HTestData> content = new ArrayList<H2HTestData>();
-		int numberOfContent = 3;
-		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(randomString());
-			data.generateVersionKey();
-			if (i > 0) {
-				data.setBasedOnKey(content.get(i - 1).getVersionKey());
+		try {
+			List<H2HTestData> content = new ArrayList<H2HTestData>();
+			int numberOfContent = 3;
+			for (int i = 0; i < numberOfContent; i++) {
+				H2HTestData data = new H2HTestData(randomString());
+				data.generateVersionKey();
+				if (i > 0) {
+					data.setBasedOnKey(content.get(i - 1).getVersionKey());
+				}
+				content.add(data);
+
+				p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
+						.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
 			}
-			content.add(data);
 
-			p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
-					.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
+			FutureDigest futureDigest = p1
+					.digest(Number160.createHash(locationKey))
+					.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.ZERO))
+					.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+							Number160.MAX_VALUE)).start();
+			futureDigest.awaitUninterruptibly();
+
+			assertEquals(numberOfContent, futureDigest.digest().keyDigest().size());
+
+			for (H2HTestData data : content) {
+				assertTrue(futureDigest
+						.digest()
+						.keyDigest()
+						.containsKey(
+								new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160
+										.createHash(contentKey), data.getVersionKey())));
+			}
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
 		}
-
-		FutureDigest futureDigest = p1
-				.digest(Number160.createHash(locationKey))
-				.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.ZERO))
-				.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-						Number160.MAX_VALUE)).start();
-		futureDigest.awaitUninterruptibly();
-
-		assertEquals(numberOfContent, futureDigest.digest().keyDigest().size());
-
-		for (H2HTestData data : content) {
-			assertTrue(futureDigest
-					.digest()
-					.keyDigest()
-					.containsKey(
-							new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160
-									.createHash(contentKey), data.getVersionKey())));
-		}
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
 	}
 
 	@Test
@@ -381,32 +397,35 @@ public class FromToTest extends H2HJUnitTest {
 		String locationKey = "location";
 		String contentKey = "content";
 
-		List<H2HTestData> content = new ArrayList<H2HTestData>();
-		int numberOfContent = 3;
-		for (int i = 0; i < numberOfContent; i++) {
-			H2HTestData data = new H2HTestData(randomString());
-			data.generateVersionKey();
-			if (i > 0) {
-				data.setBasedOnKey(content.get(i - 1).getVersionKey());
+		try {
+			List<H2HTestData> content = new ArrayList<H2HTestData>();
+			int numberOfContent = 3;
+			for (int i = 0; i < numberOfContent; i++) {
+				H2HTestData data = new H2HTestData(randomString());
+				data.generateVersionKey();
+				if (i > 0) {
+					data.setBasedOnKey(content.get(i - 1).getVersionKey());
+				}
+				content.add(data);
+
+				p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
+						.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
 			}
-			content.add(data);
 
-			p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
-					.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
+			for (H2HTestData data : content) {
+				FutureDigest future = p1.digest(Number160.createHash(locationKey)).domainKey(Number160.ZERO)
+						.contentKey(Number160.createHash(contentKey)).versionKey(data.getVersionKey()).start();
+				future.awaitUninterruptibly();
+
+				assertEquals(1, future.digest().keyDigest().size());
+				assertEquals(
+						new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
+								data.getVersionKey()), future.digest().keyDigest().firstKey());
+			}
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
 		}
-
-		for (H2HTestData data : content) {
-			FutureDigest future = p1.digest(Number160.createHash(locationKey)).domainKey(Number160.ZERO)
-					.contentKey(Number160.createHash(contentKey)).versionKey(data.getVersionKey()).start();
-			future.awaitUninterruptibly();
-
-			assertEquals(1, future.digest().keyDigest().size());
-			assertEquals(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-					data.getVersionKey()), future.digest().keyDigest().firstKey());
-		}
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
 	}
 
 	@Test
@@ -423,17 +442,19 @@ public class FromToTest extends H2HJUnitTest {
 		data.generateVersionKey();
 		// data.setBasedOnKey(Number160.createHash(10));
 
-		p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
-				.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
+		try {
+			p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
+					.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
 
-		FutureGet futureGet = p2.get(Number160.createHash(locationKey)).contentKey(Number160.createHash(contentKey))
-				.versionKey(data.getVersionKey()).start();
-		futureGet.awaitUninterruptibly();
+			FutureGet futureGet = p2.get(Number160.createHash(locationKey)).contentKey(Number160.createHash(contentKey))
+					.versionKey(data.getVersionKey()).start();
+			futureGet.awaitUninterruptibly();
 
-		assertNotNull(futureGet.data());
-
-		p1.shutdown().awaitUninterruptibly();
-		p2.shutdown().awaitUninterruptibly();
+			assertNotNull(futureGet.data());
+		} finally {
+			p1.shutdown().awaitUninterruptibly();
+			p2.shutdown().awaitUninterruptibly();
+		}
 	}
 
 	@AfterClass
