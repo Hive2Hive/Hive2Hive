@@ -55,7 +55,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	@Override
 	public void operationComplete(FutureGet future) throws Exception {
-		if (future == null || future.isFailed() || future.data() == null) {
+		if (future == null || future.isFailed() || future.isEmpty() || future.data() == null) {
 			result = null;
 			logger.debug("Got null. '{}'", parameters.toString());
 		} else {

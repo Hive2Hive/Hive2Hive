@@ -317,7 +317,7 @@ public class SecurityTest extends H2HJUnitTest {
 			// try to remove without content protection keys
 			FutureRemove futureRemove1 = p1.remove(lKey).contentKey(cKey).start();
 			futureRemove1.awaitUninterruptibly();
-			assertFalse(futureRemove1.isSuccess());
+			assertFalse(futureRemove1.isRemoved());
 
 			// verify failed remove
 			FutureGet futureGet2 = p1.get(lKey).contentKey(cKey).start();
@@ -330,7 +330,7 @@ public class SecurityTest extends H2HJUnitTest {
 			// try to remove with wrong content protection keys 2
 			FutureRemove futureRemove2 = p1.remove(lKey).contentKey(cKey).keyPair(keyPair2).start();
 			futureRemove2.awaitUninterruptibly();
-			assertFalse(futureRemove2.isSuccess());
+			assertFalse(futureRemove2.isRemoved());
 
 			// verify failed remove
 			FutureGet futureGet3 = p1.get(lKey).contentKey(cKey).start();
@@ -343,19 +343,19 @@ public class SecurityTest extends H2HJUnitTest {
 			// remove with correct content protection keys
 			FutureRemove futureRemove4 = p1.remove(lKey).contentKey(cKey).keyPair(keyPair1).start();
 			futureRemove4.awaitUninterruptibly();
-			assertTrue(futureRemove4.isSuccess());
+			assertTrue(futureRemove4.isRemoved());
 
 			// verify remove from peer 1
 			FutureGet futureGet4a = p1.get(lKey).contentKey(cKey).start();
 			futureGet4a.awaitUninterruptibly();
-			assertFalse(futureGet4a.isSuccess());
+			assertTrue(futureGet4a.isEmpty());
 			// should have been removed
 			assertNull(futureGet4a.data());
 
 			// verify remove from peer 2
 			FutureGet futureGet4b = p2.get(lKey).contentKey(cKey).start();
 			futureGet4b.awaitUninterruptibly();
-			assertFalse(futureGet4b.isSuccess());
+			assertTrue(futureGet4b.isEmpty());
 			// should have been removed
 			assertNull(futureGet4b.data());
 		} finally {
@@ -397,7 +397,7 @@ public class SecurityTest extends H2HJUnitTest {
 			// try to remove without content protection keys
 			FutureRemove futureRemove1 = p1.remove(lKey).contentKey(cKey).versionKey(vKey).start();
 			futureRemove1.awaitUninterruptibly();
-			assertFalse(futureRemove1.isSuccess());
+			assertFalse(futureRemove1.isRemoved());
 
 			// verify failed remove
 			FutureGet futureGet2 = p1.get(lKey).contentKey(cKey).versionKey(vKey).start();
@@ -410,7 +410,7 @@ public class SecurityTest extends H2HJUnitTest {
 			// try to remove with wrong content protection keys 2
 			FutureRemove futureRemove2 = p1.remove(lKey).contentKey(cKey).versionKey(vKey).keyPair(keyPair2).start();
 			futureRemove2.awaitUninterruptibly();
-			assertFalse(futureRemove2.isSuccess());
+			assertFalse(futureRemove2.isRemoved());
 
 			// verify failed remove
 			FutureGet futureGet3 = p1.get(lKey).contentKey(cKey).versionKey(vKey).start();
@@ -428,14 +428,14 @@ public class SecurityTest extends H2HJUnitTest {
 			// verify remove from peer 1
 			FutureGet futureGet4a = p1.get(lKey).contentKey(cKey).versionKey(vKey).start();
 			futureGet4a.awaitUninterruptibly();
-			assertFalse(futureGet4a.isSuccess());
+			assertTrue(futureGet4a.isEmpty());
 			// should have been removed
 			assertNull(futureGet4a.data());
 
 			// verify remove from peer 2
 			FutureGet futureGet4b = p2.get(lKey).contentKey(cKey).versionKey(vKey).start();
 			futureGet4b.awaitUninterruptibly();
-			assertFalse(futureGet4b.isSuccess());
+			assertTrue(futureGet4b.isEmpty());
 			// should have been removed
 			assertNull(futureGet4b.data());
 		} finally {
@@ -479,7 +479,7 @@ public class SecurityTest extends H2HJUnitTest {
 			FutureRemove futureRemove1 = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
 					.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).start();
 			futureRemove1.awaitUninterruptibly();
-			assertFalse(futureRemove1.isSuccess());
+			assertFalse(futureRemove1.isRemoved());
 
 			// verify failed remove
 			FutureGet futureGet2 = p2.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).start();
@@ -493,7 +493,7 @@ public class SecurityTest extends H2HJUnitTest {
 			FutureRemove futureRemove2a = p1.remove(lKey).from(new Number640(lKey, dKey, cKey, Number160.ZERO))
 					.to(new Number640(lKey, dKey, cKey, Number160.MAX_VALUE)).keyPair(key2).start();
 			futureRemove2a.awaitUninterruptibly();
-			assertFalse(futureRemove2a.isSuccess());
+			assertFalse(futureRemove2a.isRemoved());
 
 			// verify failed remove
 			FutureGet futureGet3 = p2.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).start();
@@ -513,7 +513,7 @@ public class SecurityTest extends H2HJUnitTest {
 			FutureGet futureGet4 = p2.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).start();
 			futureGet4.awaitUninterruptibly();
 			// we did not find the data
-			Assert.assertTrue(futureGet4.isFailed());
+			Assert.assertTrue(futureGet4.isEmpty());
 			// should have been removed
 			assertNull(futureGet4.data());
 		} finally {
@@ -568,7 +568,7 @@ public class SecurityTest extends H2HJUnitTest {
 			FutureGet futureGet4a = p2.get(lKey).contentKey(cKey).versionKey(vKey1).start();
 			futureGet4a.awaitUninterruptibly();
 			// we did not find the data
-			Assert.assertTrue(futureGet4a.isFailed());
+			Assert.assertTrue(futureGet4a.isEmpty());
 			// should have been removed
 			assertNull(futureGet4a.data());
 
@@ -576,7 +576,7 @@ public class SecurityTest extends H2HJUnitTest {
 			FutureGet futureGet4b = p2.get(lKey).contentKey(cKey).versionKey(vKey2).start();
 			futureGet4b.awaitUninterruptibly();
 			// we did not find the data
-			Assert.assertTrue(futureGet4b.isFailed());
+			Assert.assertTrue(futureGet4b.isEmpty());
 			// should have been removed
 			assertNull(futureGet4b.data());
 		} finally {
