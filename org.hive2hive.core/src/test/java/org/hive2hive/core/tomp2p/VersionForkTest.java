@@ -1,5 +1,6 @@
 package org.hive2hive.core.tomp2p;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -7,6 +8,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Map;
 
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
@@ -53,6 +55,10 @@ public class VersionForkTest extends H2HJUnitTest {
 		FuturePut putB = p1.put(locationKey).data(contentKey, versionB, Number160.ONE).keyPair(keyPair1).start()
 				.awaitUninterruptibly();
 		assertTrue(hasVersionFork(putB));
+
+		FutureGet get = p2.get(locationKey).contentKey(contentKey).versionKey(Number160.ONE).keyPair(keyPair1).start()
+				.awaitUninterruptibly();
+		assertEquals("versionA", get.data().object().toString());
 	}
 
 	private static boolean hasVersionFork(FuturePut future) throws Exception {
