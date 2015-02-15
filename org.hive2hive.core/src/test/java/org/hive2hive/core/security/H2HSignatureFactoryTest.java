@@ -40,16 +40,17 @@ public class H2HSignatureFactoryTest extends H2HJUnitTest {
 		SignatureFactory signatureFactory = new H2HSignatureFactory();
 
 		// sign the data
-		SignatureCodec signature = signatureFactory.sign(protectionKey.getPrivate(), testData.buffer());
+		SignatureCodec signature = signatureFactory.sign(protectionKey.getPrivate(), testData.buffer().nioBuffers());
 
 		// verify the data with the signature
-		Assert.assertTrue(signatureFactory.verify(protectionKey.getPublic(), testData.buffer(), signature));
+		Assert.assertTrue(signatureFactory.verify(protectionKey.getPublic(), testData.buffer().nioBuffers(), signature));
 	}
 
 	@Test
 	public void testUpdateSingle() throws InvalidKeyException, SignatureException, IOException {
 		// sign the data
-		SignatureCodec signatureCodec = new H2HSignatureFactory().sign(protectionKey.getPrivate(), testData.buffer());
+		SignatureCodec signatureCodec = new H2HSignatureFactory().sign(protectionKey.getPrivate(), testData.buffer()
+				.nioBuffers());
 
 		// update (already belongs to the verification)
 		Signature signature = new H2HSignatureFactory().update(protectionKey.getPublic(), testData.toByteBuffers());
@@ -61,7 +62,8 @@ public class H2HSignatureFactoryTest extends H2HJUnitTest {
 	@Test
 	public void testUpdateMultiple() throws InvalidKeyException, SignatureException, IOException {
 		// sign the data
-		SignatureCodec signatureCodec = new H2HSignatureFactory().sign(protectionKey.getPrivate(), testData.buffer());
+		SignatureCodec signatureCodec = new H2HSignatureFactory().sign(protectionKey.getPrivate(), testData.buffer()
+				.nioBuffers());
 
 		// update (already belongs to the verification)
 		int length = testData.buffer().readableBytes();

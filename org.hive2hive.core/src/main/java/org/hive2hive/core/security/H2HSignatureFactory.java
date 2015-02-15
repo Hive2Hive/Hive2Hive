@@ -89,11 +89,10 @@ public class H2HSignatureFactory implements SignatureFactory {
 	}
 
 	@Override
-	public SignatureCodec sign(PrivateKey privateKey, ByteBuf buf) throws InvalidKeyException, SignatureException,
-			IOException {
+	public SignatureCodec sign(PrivateKey privateKey, ByteBuffer[] byteBuffers) throws InvalidKeyException,
+			SignatureException, IOException {
 		Signature signature = signatureInstance();
 		signature.initSign(privateKey);
-		ByteBuffer[] byteBuffers = buf.nioBuffers();
 		int len = byteBuffers.length;
 		for (int i = 0; i < len; i++) {
 			ByteBuffer buffer = byteBuffers[i];
@@ -106,18 +105,17 @@ public class H2HSignatureFactory implements SignatureFactory {
 	}
 
 	@Override
-	public boolean verify(PublicKey publicKey, ByteBuf buf, SignatureCodec signatureEncoded) throws SignatureException,
-			InvalidKeyException {
+	public boolean verify(PublicKey publicKey, ByteBuffer[] byteBuffers, SignatureCodec signatureCodec)
+			throws SignatureException, InvalidKeyException {
 		Signature signature = signatureInstance();
 		signature.initVerify(publicKey);
-		ByteBuffer[] byteBuffers = buf.nioBuffers();
 		int len = byteBuffers.length;
 		for (int i = 0; i < len; i++) {
 			ByteBuffer buffer = byteBuffers[i];
 			signature.update(buffer);
 		}
 
-		byte[] signatureReceived = signatureEncoded.encode();
+		byte[] signatureReceived = signatureCodec.encode();
 		return signature.verify(signatureReceived);
 	}
 

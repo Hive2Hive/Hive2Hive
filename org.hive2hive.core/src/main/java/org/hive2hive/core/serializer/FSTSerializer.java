@@ -2,7 +2,6 @@ package org.hive2hive.core.serializer;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.math.BigInteger;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
@@ -79,9 +78,6 @@ public final class FSTSerializer implements IH2HSerialize {
 
 		// for performance improvements, native TomP2P classes which are serialized quite often
 		fst.registerClass(PeerAddress.class, PeerSocketAddress.class, Number160.class);
-
-		// BigIntegers make problems sometime (in Android)
-		fst.registerSerializer(BigInteger.class, new FSTBigIntegerSerializer(), false);
 
 		// Since PeerAddresses are serialized very often, this is just an efficiency improvement
 		fst.registerSerializer(PeerAddress.class, new FSTPeerAddressSerializer(), false);
