@@ -107,6 +107,8 @@ public class H2HJUnitTest {
 	}
 
 	public static String randomString(int maxLength) {
+		assert maxLength > 1;
+
 		Random random = new Random();
 		char[] subset = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 

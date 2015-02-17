@@ -1,6 +1,5 @@
 package org.hive2hive.core.tomp2p;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -8,7 +7,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Map;
 
-import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
@@ -33,32 +31,42 @@ public class VersionForkTest extends H2HJUnitTest {
 
 	@Test
 	public void testVersionFork() throws Exception {
-		KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
-		KeyPair keyPair1 = gen.generateKeyPair();
+		PeerDHT p1 = null;
+		PeerDHT p2 = null;
 
-		PeerDHT p1 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(1)).ports(4838).start()).start();
-		PeerDHT p2 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(2)).masterPeer(p1.peer()).start()).start();
+		try {
+			KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+			KeyPair keyPair1 = gen.generateKeyPair();
+			p1 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(1)).ports(4000).start()).start();
+			p2 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(2)).masterPeer(p1.peer()).start()).start();
 
-		p2.peer().bootstrap().peerAddress(p1.peerAddress()).start().awaitUninterruptibly();
+			p2.peer().bootstrap().peerAddress(p1.peerAddress()).start().awaitUninterruptibly();
+			p1.peer().bootstrap().peerAddress(p2.peerAddress()).start().awaitUninterruptibly();
 
-		Number160 locationKey = Number160.createHash(randomString());
-		Number160 contentKey = Number160.createHash(randomString());
+			Number160 locationKey = Number160.createHash(randomString());
+			Number160 contentKey = Number160.createHash(randomString());
 
-		Data versionA = new Data("versionA").addBasedOn(Number160.ZERO).protectEntry(keyPair1);
-		Data versionB = new Data("versionB").addBasedOn(Number160.ZERO).protectEntry(keyPair1);
+			Data versionA = new Data("versionA").addBasedOn(new Number160(0, Number160.ZERO)).protectEntry(keyPair1);
+			Data versionB = new Data("versionB").addBasedOn(new Number160(0, Number160.ONE)).protectEntry(keyPair1);
 
-		FuturePut putA = p1.put(locationKey).data(contentKey, versionA, Number160.ONE).keyPair(keyPair1).start()
-				.awaitUninterruptibly();
-		assertTrue(putA.isSuccess());
-		assertFalse(hasVersionFork(putA));
+			FuturePut putA = p1.put(locationKey).data(contentKey, versionA, Number160.ONE).keyPair(keyPair1).start()
+					.awaitUninterruptibly();
+			assertTrue(putA.isSuccess());
+			assertFalse(hasVersionFork(putA));
 
-		FuturePut putB = p1.put(locationKey).data(contentKey, versionB, Number160.ONE).keyPair(keyPair1).start()
-				.awaitUninterruptibly();
-		assertTrue(hasVersionFork(putB));
-
-		FutureGet get = p2.get(locationKey).contentKey(contentKey).versionKey(Number160.ONE).keyPair(keyPair1).start()
-				.awaitUninterruptibly();
-		assertEquals("versionA", get.data().object().toString());
+			// put version B where a version conflict should be detected because it
+			// is not based on version A
+			FuturePut putB = p1.put(locationKey).data(contentKey, versionB, Number160.ONE).keyPair(keyPair1).start()
+					.awaitUninterruptibly();
+			assertTrue(hasVersionFork(putB));
+		} finally {
+			if (p1 != null) {
+				p1.shutdown().awaitUninterruptibly();
+			}
+			if (p2 != null) {
+				p2.shutdown().awaitUninterruptibly();
+			}
+		}
 	}
 
 	private static boolean hasVersionFork(FuturePut future) throws Exception {

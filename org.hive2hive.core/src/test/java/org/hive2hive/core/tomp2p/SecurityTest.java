@@ -841,7 +841,7 @@ public class SecurityTest extends H2HJUnitTest {
 			rsa.init(Cipher.ENCRYPT_MODE, keyPair2.getPrivate());
 			byte[] signatureNew = rsa.doFinal(hash);
 
-			// verify data signature
+			// verify data signature with keys 1
 			Assert.assertTrue(p1.get(lKey).domainKey(dKey).contentKey(cKey).versionKey(vKey).start().awaitUninterruptibly()
 					.data().verify(keyPair1.getPublic(), factory));
 
@@ -849,7 +849,8 @@ public class SecurityTest extends H2HJUnitTest {
 			data = new Data().ttlSeconds(ttl).signature(new H2HSignatureCodec(signatureNew));
 			// don't forget to set signed flag, create meta data
 			data.signed(true).duplicateMeta();
-			FuturePut futurePutMeta = p1.put(lKey).domainKey(dKey).putMeta().data(cKey, data).versionKey(vKey).start();
+			FuturePut futurePutMeta = p1.put(lKey).domainKey(dKey).putMeta().data(cKey, data).versionKey(vKey)
+					.keyPair(keyPair1).start();
 			futurePutMeta.awaitUninterruptibly();
 			Assert.assertTrue(futurePutMeta.isSuccess());
 
@@ -1113,9 +1114,8 @@ public class SecurityTest extends H2HJUnitTest {
 			Assert.assertTrue(retData.verify(keyPair1.getPublic(), factory));
 
 			// change data signature to keys 2 using same data, sign with new key 2
-			data = new Data("data1").ttlSeconds(ttl).protectEntry().signatureFactory(factory).sign(keyPair2);
 			// change content protection keys to keys 2
-			// data.publicKey(keyPair2.getPublic()); is already done with data.sign(...)
+			data = new Data("data1").ttlSeconds(ttl).protectEntry().signatureFactory(factory).sign(keyPair2);
 			// create meta data
 			data.duplicateMeta();
 			// put meta using content content protection key 1 to sign message
@@ -1133,8 +1133,8 @@ public class SecurityTest extends H2HJUnitTest {
 			Assert.assertTrue(retData.verify(keyPair2.getPublic(), factory));
 
 			// try overwrite with content protection key 1 and data signature (expected to fail)
-			data = new Data("data2").protectEntry();
-			data.ttlSeconds(ttl).addBasedOn(bKey).signatureFactory(factory).sign(keyPair2);
+			data = new Data("data2");
+			data.ttlSeconds(ttl).addBasedOn(bKey).signatureFactory(factory).sign(keyPair1);
 			// put using content wrong protection keys 1 to sign message
 			FuturePut futureOverwrite3 = p1.put(lKey).domainKey(dKey).data(cKey, data).versionKey(vKey).keyPair(keyPair1)
 					.start();
