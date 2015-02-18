@@ -42,39 +42,40 @@ public class FromToTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void getFromToTest1() throws IOException, ClassNotFoundException {
+	public void getFromToTest1() throws IOException, ClassNotFoundException, InterruptedException {
 		PeerDHT p1 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(1)).ports(4838).start()).start();
 		PeerDHT p2 = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(2)).masterPeer(p1.peer()).start()).start();
 
 		p2.peer().bootstrap().peerAddress(p1.peerAddress()).start().awaitUninterruptibly();
+		p1.peer().bootstrap().peerAddress(p2.peerAddress()).start().awaitUninterruptibly();
 
-		String locationKey = "location";
-		String contentKey = "content";
+		Number160 locationKey = Number160.createHash("location");
+		Number160 contentKey = Number160.createHash("content");
 
 		try {
-			List<H2HTestData> content = new ArrayList<H2HTestData>();
+			List<H2HTestData> contents = new ArrayList<H2HTestData>();
 			int numberOfContent = 3;
 			for (int i = 0; i < numberOfContent; i++) {
 				H2HTestData data = new H2HTestData(randomString());
 				data.generateVersionKey();
 				if (i > 0) {
-					data.setBasedOnKey(content.get(i - 1).getVersionKey());
+					data.setBasedOnKey(contents.get(i - 1).getVersionKey());
 				}
-				content.add(data);
+				contents.add(data);
 
-				p2.put(Number160.createHash(locationKey)).data(Number160.createHash(contentKey), new Data(data))
-						.versionKey(data.getVersionKey()).start().awaitUninterruptibly();
+				System.err.println(data.getTestString());
+				p2.put(locationKey).data(contentKey, new Data(data)).versionKey(data.getVersionKey()).start()
+						.awaitUninterruptibly();
 			}
 
-			FutureGet future = p1
-					.get(Number160.createHash(locationKey))
-					.from(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-							Number160.ZERO))
-					.to(new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-							Number160.MAX_VALUE)).descending().returnNr(1).start();
+			// get the last version
+			FutureGet future = p1.get(locationKey)
+					.from(new Number640(locationKey, Number160.ZERO, contentKey, Number160.ZERO))
+					.to(new Number640(locationKey, Number160.ZERO, contentKey, Number160.MAX_VALUE)).descending()
+					.returnNr(1).start();
 			future.awaitUninterruptibly();
 
-			assertEquals(content.get(numberOfContent - 1).getTestString(),
+			assertEquals(contents.get(numberOfContent - 1).getTestString(),
 					((H2HTestData) future.data().object()).getTestString());
 		} finally {
 			p1.shutdown().awaitUninterruptibly();
