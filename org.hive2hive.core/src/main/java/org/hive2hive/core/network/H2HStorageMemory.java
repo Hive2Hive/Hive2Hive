@@ -1,8 +1,10 @@
 package org.hive2hive.core.network;
 
 import java.security.PublicKey;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Set;
 
 import net.tomp2p.dht.StorageLayer;
 import net.tomp2p.dht.StorageMemory;
@@ -16,7 +18,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Allows to deny data and/or return manipulated data. <b>Important:</b> This features are used only for
  * testing purposes.
- *
+ * 
  * @author Seppi, Nico
  */
 public class H2HStorageMemory extends StorageLayer {
@@ -80,6 +82,32 @@ public class H2HStorageMemory extends StorageLayer {
 				return PutStatus.FAILED;
 			}
 		}
+	}
+
+	@Override
+	public Map<Number640, Enum<?>> putAll(NavigableMap<Number640, Data> dataMap, PublicKey publicKey, boolean putIfAbsent,
+			boolean domainProtection, boolean sendSelf) {
+		switch (putMode) {
+			case STANDARD: {
+				return super.putAll(dataMap, publicKey, putIfAbsent, domainProtection, sendSelf);
+			}
+			case DENY_ALL: {
+				// logger.warn("Memory mode is denying the put request.");
+				return buildReturnMap(dataMap.keySet(), PutStatus.FAILED);
+			}
+			default: {
+				logger.error("Invalid mode {}. Returning a failure.", putMode);
+				return buildReturnMap(dataMap.keySet(), PutStatus.FAILED);
+			}
+		}
+	}
+
+	private Map<Number640, Enum<?>> buildReturnMap(Set<Number640> keys, PutStatus status) {
+		HashMap<Number640, Enum<?>> result = new HashMap<>(keys.size());
+		for (Number640 key : keys) {
+			result.put(key, status);
+		}
+		return result;
 	}
 
 	public NavigableMap<Number640, Data> getLatestVersion(Number640 key) {
