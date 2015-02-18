@@ -57,22 +57,23 @@ public class FromToTest extends H2HJUnitTest {
 			int numberOfContent = 3;
 			for (int i = 0; i < numberOfContent; i++) {
 				H2HTestData data = new H2HTestData(randomString());
-				data.generateVersionKey();
-				if (i > 0) {
-					data.setBasedOnKey(contents.get(i - 1).getVersionKey());
-				}
 				contents.add(data);
 
-				System.err.println(data.getTestString());
-				p2.put(locationKey).data(contentKey, new Data(data)).versionKey(data.getVersionKey()).start()
-						.awaitUninterruptibly();
+				Data object = new Data(data);
+				if (i == 0) {
+					object.addBasedOn(Number160.ZERO);
+				} else {
+					object.addBasedOn(contents.get(i - 1).getVersionKey());
+				}
+				p2.put(locationKey).data(contentKey, object).versionKey(new Number160(i)).start().awaitUninterruptibly();
 			}
 
 			// get the last version
-			FutureGet future = p1.get(locationKey)
-					.from(new Number640(locationKey, Number160.ZERO, contentKey, Number160.ZERO))
-					.to(new Number640(locationKey, Number160.ZERO, contentKey, Number160.MAX_VALUE)).descending()
-					.returnNr(1).start();
+			Number640 from = new Number640(locationKey, Number160.ZERO, contentKey, Number160.ZERO);
+			Number640 to = new Number640(locationKey, Number160.ZERO, contentKey, Number160.MAX_VALUE);
+			System.err.println("from: " + from);
+			System.err.println("to:   " + to);
+			FutureGet future = p1.get(locationKey).from(from).to(to).descending().returnNr(1).start();
 			future.awaitUninterruptibly();
 
 			assertEquals(contents.get(numberOfContent - 1).getTestString(),
