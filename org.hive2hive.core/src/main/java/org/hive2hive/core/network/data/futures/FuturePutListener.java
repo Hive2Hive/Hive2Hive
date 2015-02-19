@@ -98,6 +98,7 @@ public class FuturePutListener extends BaseFutureAdapter<FuturePut> {
 						switch (PutStatus.values()[putStatus]) {
 							case OK:
 							case OK_PREPARED:
+							case OK_UNCHANGED:
 								break;
 							case FAILED:
 							case FAILED_SECURITY:

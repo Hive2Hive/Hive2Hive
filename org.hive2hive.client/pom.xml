@@ -25,13 +25,13 @@
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-nat</artifactId>
-			<version>5.0-Beta4-SNAPSHOT</version>
+			<version>5.0-Beta4</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-android</artifactId>
-			<version>5.0-Beta4-SNAPSHOT</version>
+			<version>5.0-Beta4</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
