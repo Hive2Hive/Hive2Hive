@@ -14,6 +14,7 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
+import org.hive2hive.core.serializer.IH2HSerialize;
 import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
@@ -49,13 +50,14 @@ public class LogoutTest extends H2HJUnitTest {
 	@Test
 	public void testLogout() throws ClassNotFoundException, IOException, NoSessionException, NoPeerConnectionException {
 		NetworkManager client = network.get(0);
+		IH2HSerialize serializer = client.getDataManager().getSerializer();
 
 		// verify the locations map before logout
 		FutureGet futureGet = client.getDataManager().getUnblocked(
 				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
 		futureGet.awaitUninterruptibly();
 		futureGet.futureRequests().awaitUninterruptibly();
-		Locations locations = (Locations) futureGet.data().object();
+		Locations locations = (Locations) serializer.deserialize(futureGet.data().toBytes());
 
 		Assert.assertEquals(1, locations.getPeerAddresses().size());
 
@@ -68,7 +70,7 @@ public class LogoutTest extends H2HJUnitTest {
 				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
 		futureGet2.awaitUninterruptibly();
 		futureGet2.futureRequests().awaitUninterruptibly();
-		Locations locations2 = (Locations) futureGet2.data().object();
+		Locations locations2 = (Locations) serializer.deserialize(futureGet2.data().toBytes());
 
 		Assert.assertEquals(0, locations2.getPeerAddresses().size());
 	}
