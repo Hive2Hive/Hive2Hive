@@ -14,6 +14,7 @@ public class TimeToLiveStore {
 	private int locations = convertDaysToSeconds(2 * 365);
 	private int userMessageQueue = convertDaysToSeconds(2 * 365);
 
+	private static final int DAY_SECOND_FACTOR = 24 * 60 * 60;
 	private static TimeToLiveStore instance;
 
 	public static TimeToLiveStore getInstance() {
@@ -65,12 +66,18 @@ public class TimeToLiveStore {
 	}
 
 	/**
-	 * Converts an integer number of days to seconds (which are used by the {@link TimeToLiveStore}
+	 * Converts an integer number of days to seconds (which are used by the {@link TimeToLiveStore}). If an
+	 * Integer overflow happens, {@link Integer#MAX_VALUE} is returned.
 	 * 
 	 * @param days
 	 * @return seconds
 	 */
 	public static int convertDaysToSeconds(int days) {
-		return days * 24 * 60 * 60;
+		assert days > 0;
+		if (days > Long.MAX_VALUE / DAY_SECOND_FACTOR) {
+			// it will overflow, return the max value
+			return Integer.MAX_VALUE;
+		}
+		return days * DAY_SECOND_FACTOR;
 	}
 }
