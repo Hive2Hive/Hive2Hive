@@ -60,12 +60,13 @@ public class CountingNotificationMessageFactory extends BaseNotificationMessageF
 			}
 
 			try {
-				H2HTestData gotData = (H2HTestData) futureGet.data().object();
+				H2HTestData gotData = (H2HTestData) sender.getDataManager().getSerializer()
+						.deserialize(futureGet.data().toBytes());
 				if (gotData.getTestString().equalsIgnoreCase(data.getTestString())) {
 					counter++;
 				}
-			} catch (ClassNotFoundException | IOException e) {
-				Assert.fail();
+			} catch (ClassNotFoundException | IOException | NoPeerConnectionException e) {
+				Assert.fail(e.getMessage());
 			}
 		}
 
