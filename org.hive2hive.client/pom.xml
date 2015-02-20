@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.hive2hive</groupId>
 		<artifactId>org.hive2hive.parent</artifactId>
-		<version>1.1.1-SNAPSHOT</version>
+		<version>1.2.0</version>
 	</parent>
 
 	<artifactId>org.hive2hive.client</artifactId>
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>org.hive2hive</groupId>
 			<artifactId>org.hive2hive.core</artifactId>
-			<version>1.1.1-SNAPSHOT</version>
+			<version>1.2.0</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
