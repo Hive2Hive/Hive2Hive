@@ -1,5 +1,6 @@
 package org.hive2hive.core.model.versioned;
 
+import org.bouncycastle.util.Arrays;
 import org.hive2hive.core.TimeToLiveStore;
 
 /**
@@ -9,7 +10,7 @@ import org.hive2hive.core.TimeToLiveStore;
  */
 public final class EncryptedNetworkContent extends BaseVersionedNetworkContent {
 
-	// TODO maybe this class should not just represent symmetric encrypted content but also asymmetric	
+	// TODO maybe this class should not just represent symmetric encrypted content but also asymmetric
 
 	private static final long serialVersionUID = -1330623025391853102L;
 	private final byte[] cipherContent;
@@ -36,5 +37,10 @@ public final class EncryptedNetworkContent extends BaseVersionedNetworkContent {
 
 	public void setTimeToLive(int timeToLive) {
 		this.timeToLive = timeToLive;
+	}
+
+	@Override
+	protected int getContentHash() {
+		return Arrays.hashCode(cipherContent);
 	}
 }

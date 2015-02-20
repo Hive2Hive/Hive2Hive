@@ -16,6 +16,11 @@ public class H2HTestData extends BaseVersionedNetworkContent {
 		return 10000;
 	}
 
+	@Override
+	protected int getContentHash() {
+		return testString.hashCode();
+	}
+
 	public String getTestString() {
 		return testString;
 	}

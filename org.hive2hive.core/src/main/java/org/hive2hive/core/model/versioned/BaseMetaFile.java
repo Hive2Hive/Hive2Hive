@@ -34,4 +34,9 @@ public abstract class BaseMetaFile extends BaseVersionedNetworkContent {
 	public int getTimeToLive() {
 		return TimeToLiveStore.getInstance().getMetaFile();
 	}
+
+	@Override
+	protected int getContentHash() {
+		return id.hashCode();
+	}
 }

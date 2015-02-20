@@ -48,6 +48,11 @@ public class Locations extends BaseVersionedNetworkContent {
 	}
 
 	@Override
+	protected int getContentHash() {
+		return addresses.hashCode();
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("Locations [");
 		sb.append("userId=").append(userId);

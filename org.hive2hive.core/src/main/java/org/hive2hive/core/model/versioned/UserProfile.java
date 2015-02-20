@@ -59,6 +59,11 @@ public class UserProfile extends BaseVersionedNetworkContent {
 		return TimeToLiveStore.getInstance().getUserProfile();
 	}
 
+	@Override
+	protected int getContentHash() {
+		return userId.hashCode() + 11 * encryptionKeys.hashCode() + 23 * root.hashCode();
+	}
+
 	public Index getFileById(PublicKey fileId) {
 		return findById(root, fileId);
 	}

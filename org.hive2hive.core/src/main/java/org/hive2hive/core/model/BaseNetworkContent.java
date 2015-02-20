@@ -22,5 +22,4 @@ public abstract class BaseNetworkContent implements Serializable {
 	 * @return time to live
 	 */
 	public abstract int getTimeToLive();
-
 }

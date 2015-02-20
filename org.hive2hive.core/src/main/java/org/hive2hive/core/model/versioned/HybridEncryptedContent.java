@@ -1,5 +1,6 @@
 package org.hive2hive.core.model.versioned;
 
+import org.bouncycastle.util.Arrays;
 import org.hive2hive.core.TimeToLiveStore;
 
 /**
@@ -81,5 +82,10 @@ public final class HybridEncryptedContent extends BaseVersionedNetworkContent {
 
 	public void setTimeToLive(int timeToLive) {
 		this.timeToLive = timeToLive;
+	}
+
+	@Override
+	protected int getContentHash() {
+		return Arrays.hashCode(encryptedData);
 	}
 }

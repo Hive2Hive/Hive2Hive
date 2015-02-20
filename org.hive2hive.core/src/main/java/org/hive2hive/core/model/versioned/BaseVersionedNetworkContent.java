@@ -24,6 +24,11 @@ public abstract class BaseVersionedNetworkContent extends BaseNetworkContent {
 	 */
 	private Number160 basedOnKey = Number160.ZERO;
 
+	/**
+	 * @return a hash of the content (or at least its identifier)
+	 */
+	protected abstract int getContentHash();
+
 	public Number160 getVersionKey() {
 		return versionKey;
 	}
@@ -46,6 +51,6 @@ public abstract class BaseVersionedNetworkContent extends BaseNetworkContent {
 		// increase counter
 		long counter = basedOnKey.timestamp() + 1;
 		// create new version key based on increased counter and hash
-		versionKey = new Number160(counter, new Number160(this.hashCode()).number96());
+		versionKey = new Number160(counter, new Number160(getContentHash()).number96());
 	}
 }
