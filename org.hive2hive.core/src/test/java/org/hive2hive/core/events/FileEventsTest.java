@@ -1,7 +1,6 @@
 package org.hive2hive.core.events;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,8 +30,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class FileEventsTest extends H2HJUnitTest {
 
@@ -103,13 +100,6 @@ public class FileEventsTest extends H2HJUnitTest {
 		} catch (IOException ioex) {
 			logger.error("Could not cleanup directories.", ioex);
 		}
-	}
-
-	@Test
-	@Ignore
-	public void testFileShareEvent() throws NoPeerConnectionException, IOException, NoSessionException {
-		// TODO
-		fail("not implemented yet");
 	}
 
 	/**
