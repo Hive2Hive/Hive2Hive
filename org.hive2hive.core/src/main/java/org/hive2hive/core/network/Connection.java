@@ -38,14 +38,11 @@ public class Connection implements IPeerHolder {
 	private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 	private static final int MAX_PORT = 65535;
 
-	private final NetworkManager networkManager;
-	private final IH2HSerialize serializer;
-
+	private final MessageReplyHandler messageReplyHandler;
 	private PeerDHT peerDHT;
 
 	public Connection(NetworkManager networkManager, IH2HSerialize serializer) {
-		this.networkManager = networkManager;
-		this.serializer = serializer;
+		this.messageReplyHandler = new MessageReplyHandler(networkManager, serializer);
 	}
 
 	/**
@@ -83,7 +80,7 @@ public class Connection implements IPeerHolder {
 		this.peerDHT = peer;
 
 		// attach a reply handler for messages
-		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, serializer));
+		peerDHT.peer().objectDataReply(messageReplyHandler);
 
 		if (startReplication) {
 			startReplication();
@@ -184,7 +181,7 @@ public class Connection implements IPeerHolder {
 		}
 
 		// attach a reply handler for messages
-		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, serializer));
+		peerDHT.peer().objectDataReply(messageReplyHandler);
 
 		if (masterPeer != null) {
 			// bootstrap to master peer
@@ -211,6 +208,13 @@ public class Connection implements IPeerHolder {
 	@Override
 	public PeerDHT getPeer() {
 		return peerDHT;
+	}
+
+	/**
+	 * @return the reply handler if a direct message is sent
+	 */
+	public MessageReplyHandler getMessageReplyHandler() {
+		return messageReplyHandler;
 	}
 
 	private PeerBuilder preparePeerBuilder(String nodeID, int port) {
@@ -242,7 +246,7 @@ public class Connection implements IPeerHolder {
 		}
 
 		// attach a reply handler for messages
-		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, serializer));
+		peerDHT.peer().objectDataReply(messageReplyHandler);
 
 		// setup replication
 		startReplication();
