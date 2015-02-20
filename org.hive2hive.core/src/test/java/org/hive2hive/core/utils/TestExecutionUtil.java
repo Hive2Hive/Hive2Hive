@@ -7,12 +7,7 @@ import org.junit.Assert;
 
 public final class TestExecutionUtil {
 
-	public static final int DEFAULT_WAITING_TIME = 1000;
 	public static final int MAX_PROCESS_WAIT_TIME = 120;
-
-	public static void waitDefault() {
-		wait(DEFAULT_WAITING_TIME);
-	}
 
 	public static void wait(int ms) {
 		try {
@@ -26,7 +21,7 @@ public final class TestExecutionUtil {
 		H2HWaiter waiter = new H2HWaiter(maxSeconds);
 		do {
 			if (listener.hasExecutionFailed())
-				Assert.fail();
+				Assert.fail("Execution of process failed");
 			waiter.tickASecond();
 		} while (!listener.hasExecutionSucceeded());
 	}
@@ -39,7 +34,7 @@ public final class TestExecutionUtil {
 			waitTillSucceded(listener, MAX_PROCESS_WAIT_TIME);
 		} catch (InvalidProcessStateException | ProcessExecutionException ex) {
 			System.err.println("ERROR: Cannot wait until process is done.");
-			Assert.fail();
+			Assert.fail("Process failed with exception " + ex.getMessage());
 		}
 	}
 

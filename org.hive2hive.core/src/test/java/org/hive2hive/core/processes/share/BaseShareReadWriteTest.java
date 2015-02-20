@@ -115,7 +115,6 @@ public abstract class BaseShareReadWriteTest extends H2HJUnitTest {
 		Assert.assertEquals(originalFile.getName(), synchronizedFile.getName());
 		if (originalFile.isFile() || synchronizedFile.isFile()) {
 			Assert.assertTrue(FileUtils.contentEquals(originalFile, synchronizedFile));
-			Assert.assertEquals(FileUtils.readFileToString(originalFile), FileUtils.readFileToString(synchronizedFile));
 		}
 	}
 
