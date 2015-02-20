@@ -37,11 +37,12 @@ public class SharedFolderWithWritePermissionDeleteTest extends BaseShareReadWrit
 	public static void printIdentifier() throws Exception {
 		testClass = SharedFolderWithWritePermissionDeleteTest.class;
 		beforeClass();
+		setupNetwork();
 	}
 
 	@Before
 	public void initTest() throws Exception {
-		setupNetworkAndShares(PermissionType.WRITE);
+		setupShares(PermissionType.WRITE);
 
 		logger.info("Upload a new subfolder 'folder1/subfolder'.");
 		subFolderA = new File(sharedFolderA, "subfolder");

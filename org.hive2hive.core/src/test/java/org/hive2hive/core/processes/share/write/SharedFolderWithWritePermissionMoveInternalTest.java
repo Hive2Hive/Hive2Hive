@@ -16,10 +16,7 @@ import org.hive2hive.core.model.UserPermission;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.processes.share.BaseShareReadWriteTest;
 import org.hive2hive.core.utils.FileTestUtil;
-import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -43,11 +40,12 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 	public static void printIdentifier() throws Exception {
 		testClass = SharedFolderWithWritePermissionMoveInternalTest.class;
 		beforeClass();
+		setupNetwork();
 	}
 
 	@Before
 	public void initTest() throws Exception {
-		setupNetworkAndShares(PermissionType.WRITE);
+		setupShares(PermissionType.WRITE);
 
 		logger.info("Upload a new subfolder 'sharedfolder/subfolder1'.");
 		subFolder1AtA = new File(sharedFolderA, "subfolder1");
@@ -700,18 +698,4 @@ public class SharedFolderWithWritePermissionMoveInternalTest extends BaseShareRe
 			Assert.assertTrue(newIndexAtB.isFile());
 		}
 	}
-
-	@After
-	public void cleanup() throws IOException {
-		FileUtils.deleteDirectory(rootA);
-		FileUtils.deleteDirectory(rootB);
-
-		NetworkTestUtil.shutdownNetwork(network);
-	}
-
-	@AfterClass
-	public static void afterTest() {
-		afterClass();
-	}
-
 }

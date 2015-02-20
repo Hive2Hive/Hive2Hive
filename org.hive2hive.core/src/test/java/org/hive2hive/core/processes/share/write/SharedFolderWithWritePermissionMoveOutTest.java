@@ -38,11 +38,12 @@ public class SharedFolderWithWritePermissionMoveOutTest extends BaseShareReadWri
 	public static void printIdentifier() throws Exception {
 		testClass = SharedFolderWithWritePermissionMoveOutTest.class;
 		beforeClass();
+		setupNetwork();
 	}
 
 	@Before
 	public void initTest() throws Exception {
-		setupNetworkAndShares(PermissionType.WRITE);
+		setupShares(PermissionType.WRITE);
 
 		logger.info("Upload a new subfolder 'sharedfolder/subfolder'.");
 		subFolderA = new File(sharedFolderA, "subfolder");

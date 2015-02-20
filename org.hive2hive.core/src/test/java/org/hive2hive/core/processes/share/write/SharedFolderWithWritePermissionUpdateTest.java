@@ -20,6 +20,7 @@ import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -34,9 +35,16 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 	private File subFolderA;
 	private File subFolderB;
 
+	@BeforeClass
+	public static void printIdentifier() throws Exception {
+		testClass = SharedFolderWithWritePermissionUpdateTest.class;
+		beforeClass();
+		setupNetwork();
+	}
+	
 	@Before
 	public void initTest() throws Exception {
-		setupNetworkAndShares(PermissionType.WRITE);
+		setupShares(PermissionType.WRITE);
 
 		subFolderA = new File(sharedFolderA, "subfolder");
 		subFolderA.mkdir();

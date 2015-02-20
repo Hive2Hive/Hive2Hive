@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
@@ -14,7 +15,6 @@ import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestFileEventListener;
 import org.hive2hive.core.utils.UseCaseTestUtil;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 
@@ -23,27 +23,22 @@ public abstract class BaseShareReadWriteTest extends H2HJUnitTest {
 	protected static final int NETWORK_SIZE = 6;
 	protected static final int MAX_NUM_CHUNKS = 2;
 
-	protected List<NetworkManager> network;
-	protected NetworkManager nodeA;
-	protected NetworkManager nodeB;
+	protected static List<NetworkManager> network;
+	protected static NetworkManager nodeA;
+	protected static NetworkManager nodeB;
 
-	protected File rootA;
-	protected File rootB;
+	protected static File rootA;
+	protected static File rootB;
 	protected File sharedFolderA;
 	protected File sharedFolderB;
 
-	protected UserCredentials userA;
-	protected UserCredentials userB;
+	protected static UserCredentials userA;
+	protected static UserCredentials userB;
 
-	protected TestFileEventListener eventsAtA;
-	protected TestFileEventListener eventsAtB;
+	protected static TestFileEventListener eventsAtA;
+	protected static TestFileEventListener eventsAtB;
 
-	/**
-	 * Setup network. Setup two users with each one client, log them in.
-	 * 
-	 * @throws Exception
-	 */
-	protected void setupNetworkAndShares(PermissionType permissionB) throws Exception {
+	protected static void setupNetwork() throws NoPeerConnectionException {
 		logger.info("Setup network.");
 		network = NetworkTestUtil.createNetwork(NETWORK_SIZE);
 
@@ -66,28 +61,32 @@ public abstract class BaseShareReadWriteTest extends H2HJUnitTest {
 
 		eventsAtB = new TestFileEventListener(nodeB);
 		nodeB.getEventBus().subscribe(eventsAtB);
+	}
 
-		logger.info("Upload folder 'sharedfolder' from A.");
-		sharedFolderA = new File(rootA, "sharedfolder");
+	/**
+	 * Setup network. Setup two users with each one client, log them in.
+	 * 
+	 * @throws Exception
+	 */
+	protected void setupShares(PermissionType permissionB) throws Exception {
+		String folderName = "sharedFolder_" + randomString();
+		logger.info("Upload folder '{}' from A.", folderName);
+		sharedFolderA = new File(rootA, folderName);
 		sharedFolderA.mkdirs();
 		UseCaseTestUtil.uploadNewFile(nodeA, sharedFolderA);
 
-		logger.info("Share folder 'sharedfolder' with user B giving permissions: {}.", permissionB);
+		logger.info("Share folder '{}' with user B giving permissions: {}.", folderName, permissionB);
 		UseCaseTestUtil.shareFolder(nodeA, sharedFolderA, userB.getUserId(), permissionB);
-		sharedFolderB = new File(rootB, sharedFolderA.getName());
+		sharedFolderB = new File(rootB, folderName);
 		waitTillSynchronized(sharedFolderB, true);
 	}
 
-	@After
-	public void endTest() throws IOException {
+	@AfterClass
+	public static void afterTest() throws IOException {
 		FileUtils.deleteDirectory(rootA);
 		FileUtils.deleteDirectory(rootB);
-
 		NetworkTestUtil.shutdownNetwork(network);
-	}
 
-	@AfterClass
-	public static void afterTest() {
 		afterClass();
 	}
 

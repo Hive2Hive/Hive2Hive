@@ -40,11 +40,12 @@ public class SharedFolderWithReadPermissionMoveOutTest extends BaseShareReadWrit
 	public static void printIdentifier() throws Exception {
 		testClass = SharedFolderWithReadPermissionMoveOutTest.class;
 		beforeClass();
+		setupNetwork();
 	}
 
 	@Before
 	public void initTest() throws Exception {
-		setupNetworkAndShares(PermissionType.READ);
+		setupShares(PermissionType.READ);
 
 		subFolderA = new File(sharedFolderA, "subfolder");
 		subFolderA.mkdir();
