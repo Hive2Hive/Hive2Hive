@@ -153,8 +153,8 @@ public class Connection implements IPeerHolder {
 	}
 
 	/**
-	 * Create a local peer. Bootstrap to local master peer. <b>Important:</b> This is only for testing
-	 * purposes!
+	 * Create a local peer. Bootstrap to local master peer. Replication is not started!<br>
+	 * <b>Important:</b> This is only for testing purposes!
 	 * 
 	 * @param nodeId the id of the network node (should be unique among the network)
 	 * @param masterPeer
@@ -185,9 +185,6 @@ public class Connection implements IPeerHolder {
 
 		// attach a reply handler for messages
 		peerDHT.peer().objectDataReply(new MessageReplyHandler(networkManager, serializer));
-
-		// setup replication
-		startReplication();
 
 		if (masterPeer != null) {
 			// bootstrap to master peer
@@ -233,22 +230,6 @@ public class Connection implements IPeerHolder {
 				.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig);
 	}
 
-	private void startReplication() {
-		IndirectReplication replication = new IndirectReplication(peerDHT);
-		// set replication factor
-		replication.replicationFactor(H2HConstants.REPLICATION_FACTOR);
-		// set replication frequency
-		replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL_MS);
-		// set kind of replication, default is 0Root
-		if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
-			replication.nRoot();
-		}
-		// set flag to keep data, even when peer looses replication responsibility
-		replication.keepData(true);
-		// start the indirect replication
-		replication.start();
-	}
-
 	private boolean createPeer(String nodeId, int port) {
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
@@ -268,6 +249,22 @@ public class Connection implements IPeerHolder {
 
 		logger.debug("Peer successfully created and connected.");
 		return true;
+	}
+
+	private void startReplication() {
+		IndirectReplication replication = new IndirectReplication(peerDHT);
+		// set replication factor
+		replication.replicationFactor(H2HConstants.REPLICATION_FACTOR);
+		// set replication frequency
+		replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL_MS);
+		// set kind of replication, default is 0Root
+		if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
+			replication.nRoot();
+		}
+		// set flag to keep data, even when peer looses replication responsibility
+		replication.keepData(true);
+		// start the indirect replication
+		replication.start();
 	}
 
 	/**
