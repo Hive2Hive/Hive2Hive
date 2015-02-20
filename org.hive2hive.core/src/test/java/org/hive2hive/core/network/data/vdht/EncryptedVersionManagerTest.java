@@ -30,6 +30,7 @@ import org.hive2hive.core.security.H2HDefaultEncryption;
 import org.hive2hive.core.security.IH2HEncryption;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.serializer.FSTSerializer;
+import org.hive2hive.core.serializer.IH2HSerialize;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -176,17 +177,23 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 	@Test(expected = GetFailedException.class)
 	public void testGetVersionFork() throws Exception {
 		try {
+			IH2HSerialize serializer = network.get(0).getDataManager().getSerializer();
+
 			H2HTestData version0A = new H2HTestData("version0A");
 			version0A.generateVersionKey();
+
 			H2HTestData version0B = new H2HTestData("version0B");
 			version0B.generateVersionKey();
 
 			EncryptedNetworkContent encryptedVersion0A = NetworkTestUtil.getRandomNode(network).getDataManager()
 					.getEncryption().encryptAES(version0A, encryptionKey);
 			encryptedVersion0A.setVersionKey(version0A.getVersionKey());
+			Data data0A = new Data(serializer.serialize(encryptedVersion0A)).addBasedOn(Number160.ZERO);
+
 			EncryptedNetworkContent encryptedVersion0B = NetworkTestUtil.getRandomNode(network).getDataManager()
 					.getEncryption().encryptAES(version0B, encryptionKey);
 			encryptedVersion0B.setVersionKey(version0B.getVersionKey());
+			Data data0B = new Data(serializer.serialize(encryptedVersion0B)).addBasedOn(Number160.ZERO);
 
 			String locationKey = randomString();
 			String contentKey = randomString();
@@ -194,10 +201,10 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 			NavigableMap<Number640, Data> manipulatedMap = new TreeMap<Number640, Data>();
 			manipulatedMap.put(
 					new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-							version0A.getVersionKey()), new Data(encryptedVersion0A).addBasedOn(Number160.ZERO));
+							version0A.getVersionKey()), data0A);
 			manipulatedMap.put(
 					new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-							version0B.getVersionKey()), new Data(encryptedVersion0B).addBasedOn(Number160.ZERO));
+							version0B.getVersionKey()), data0B);
 
 			for (int i = 0; i < networkSize; i++) {
 				H2HStorageMemory storage = (H2HStorageMemory) network.get(i).getConnection().getPeer().storageLayer();
@@ -379,6 +386,7 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 		// remove version0 and version1 with correct protection keys
 		Assert.assertTrue(node.getDataManager().remove(
 				new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setProtectionKeys(protectionKeys)));
+
 		// verify successful remove
 		Assert.assertNull(node.getDataManager().getVersion(parameters0));
 		Assert.assertNull(node.getDataManager().getVersion(parameters1));

@@ -22,6 +22,7 @@ import org.hive2hive.core.network.H2HStorageMemory.StorageMemoryGetMode;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.DataManager.H2HPutStatus;
 import org.hive2hive.core.network.data.parameters.Parameters;
+import org.hive2hive.core.serializer.IH2HSerialize;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -165,10 +166,15 @@ public class VersionManagerTest extends H2HJUnitTest {
 	@Test(expected = GetFailedException.class)
 	public void testGetVersionFork() throws Exception {
 		try {
+			IH2HSerialize serializer = network.get(0).getDataManager().getSerializer();
+
 			H2HTestData version0A = new H2HTestData("version0A");
 			version0A.generateVersionKey();
+			Data data0A = new Data(serializer.serialize(version0A)).addBasedOn(Number160.ZERO);
+
 			H2HTestData version0B = new H2HTestData("version0B");
 			version0B.generateVersionKey();
+			Data data0B = new Data(serializer.serialize(version0B)).addBasedOn(Number160.ZERO);
 
 			String locationKey = randomString();
 			String contentKey = randomString();
@@ -176,10 +182,10 @@ public class VersionManagerTest extends H2HJUnitTest {
 			NavigableMap<Number640, Data> manipulatedMap = new TreeMap<Number640, Data>();
 			manipulatedMap.put(
 					new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-							version0A.getVersionKey()), new Data(version0A).addBasedOn(Number160.ZERO));
+							version0A.getVersionKey()), data0A);
 			manipulatedMap.put(
 					new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
-							version0B.getVersionKey()), new Data(version0B).addBasedOn(Number160.ZERO));
+							version0B.getVersionKey()), data0B);
 
 			for (int i = 0; i < networkSize; i++) {
 				H2HStorageMemory storage = (H2HStorageMemory) network.get(i).getConnection().getPeer().storageLayer();
@@ -310,8 +316,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 				.setVersionKey(version1.getVersionKey());
 
 		// try to remove version0 and version1 without protection keys
-		Assert.assertEquals(false,
-				node.getDataManager().remove(new Parameters().setLocationKey(locationKey).setContentKey(contentKey)));
+		Assert.assertFalse(node.getDataManager().remove(
+				new Parameters().setLocationKey(locationKey).setContentKey(contentKey)));
 		// verify that nothing changed
 		Assert.assertEquals(version0.getTestString(),
 				((H2HTestData) node.getDataManager().getVersion(parameters0)).getTestString());
@@ -319,11 +325,9 @@ public class VersionManagerTest extends H2HJUnitTest {
 				((H2HTestData) node.getDataManager().getVersion(parameters1)).getTestString());
 
 		// try to remove version0 and version1 with wrong protection keys
-		Assert.assertEquals(
-				false,
-				node.getDataManager().remove(
-						new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-								.setProtectionKeys(otherProtectionKeys)));
+		Assert.assertFalse(node.getDataManager().remove(
+				new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
+						.setProtectionKeys(otherProtectionKeys)));
 		// verify that nothing changed
 		Assert.assertEquals(version0.getTestString(),
 				((H2HTestData) node.getDataManager().getVersion(parameters0)).getTestString());
@@ -331,11 +335,8 @@ public class VersionManagerTest extends H2HJUnitTest {
 				((H2HTestData) node.getDataManager().getVersion(parameters1)).getTestString());
 
 		// remove version0 and version1 with correct protection keys
-		Assert.assertEquals(
-				true,
-				node.getDataManager().remove(
-						new Parameters().setLocationKey(locationKey).setContentKey(contentKey)
-								.setProtectionKeys(protectionKeys)));
+		Assert.assertTrue(node.getDataManager().remove(
+				new Parameters().setLocationKey(locationKey).setContentKey(contentKey).setProtectionKeys(protectionKeys)));
 		// verify successful remove
 		Assert.assertNull(node.getDataManager().getVersion(parameters0));
 		Assert.assertNull(node.getDataManager().getVersion(parameters1));
@@ -363,19 +364,19 @@ public class VersionManagerTest extends H2HJUnitTest {
 				.setVersionKey(version1.getVersionKey());
 
 		// try to remove version1 without protection keys
-		Assert.assertEquals(false, node.getDataManager().removeVersion(parameters));
+		Assert.assertFalse(node.getDataManager().removeVersion(parameters));
 		// verify that nothing changed
 		Assert.assertEquals(version1.getTestString(),
 				((H2HTestData) node.getDataManager().getVersion(parameters)).getTestString());
 
 		// try to remove version1 with wrong protection keys
-		Assert.assertEquals(false, node.getDataManager().removeVersion(parameters.setProtectionKeys(otherProtectionKeys)));
+		Assert.assertFalse(node.getDataManager().removeVersion(parameters.setProtectionKeys(otherProtectionKeys)));
 		// verify that nothing changed
 		Assert.assertEquals(version1.getTestString(),
 				((H2HTestData) node.getDataManager().getVersion(parameters)).getTestString());
 
 		// remove version1 with correct protection keys
-		Assert.assertEquals(true, node.getDataManager().removeVersion(parameters.setProtectionKeys(protectionKeys)));
+		Assert.assertTrue(node.getDataManager().removeVersion(parameters.setProtectionKeys(protectionKeys)));
 		// verify successful remove
 		Assert.assertNull(node.getDataManager().getVersion(parameters));
 	}
