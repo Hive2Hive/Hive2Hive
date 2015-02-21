@@ -1,5 +1,5 @@
-# ![Hive2Hive logo](http://hive2hive.com/wp-content/uploads/2014/04/Hive2Hive_Icon-e1398611873118.png) Hive2Hive 
-master: [![Build Status](https://travis-ci.org/Hive2Hive/Hive2Hive.svg?branch=master)](https://travis-ci.org/Hive2Hive/Hive2Hive) dev: [![Build Status](https://travis-ci.org/Hive2Hive/Hive2Hive.svg?branch=dev)](https://travis-ci.org/Hive2Hive/Hive2Hive)
+# ![Hive2Hive logo](http://hive2hive.com/wp-content/uploads/2014/04/Hive2Hive_Icon-e1398611873118.png) Hive2Hive
+[![Build Status](https://travis-ci.org/Hive2Hive/Hive2Hive.svg?branch=master)](https://travis-ci.org/Hive2Hive/Hive2Hive)
 
 [Hive2Hive](https://github.com/Hive2Hive/Hive2Hive/wiki) is an open-source library, written in Java, for secure, distributed, P2P-based file synchronization and sharing. It is built on top of [TomP2P](https://github.com/tomp2p/TomP2P), an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
 
