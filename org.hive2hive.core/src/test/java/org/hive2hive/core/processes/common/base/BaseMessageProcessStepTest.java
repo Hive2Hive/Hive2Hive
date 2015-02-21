@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.util.List;
-import java.util.Random;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -46,7 +45,6 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 2;
-	private static Random random = new Random();
 	private static FSTSerializer serializer;
 
 	@BeforeClass

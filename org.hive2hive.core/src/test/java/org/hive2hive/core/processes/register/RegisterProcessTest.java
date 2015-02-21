@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
@@ -32,7 +31,6 @@ import org.junit.Test;
 public class RegisterProcessTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
