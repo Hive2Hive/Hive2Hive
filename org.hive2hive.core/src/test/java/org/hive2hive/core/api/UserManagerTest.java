@@ -27,6 +27,7 @@ import org.junit.Test;
 public class UserManagerTest extends H2HJUnitTest {
 
 	private static List<IH2HNode> network;
+	private static final Random rnd = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -42,7 +43,7 @@ public class UserManagerTest extends H2HJUnitTest {
 	@Before
 	public void before() {
 		beforeMethod();
-		network = NetworkTestUtil.createH2HNetwork(5);
+		network = NetworkTestUtil.createH2HNetwork(3);
 	}
 
 	@After
@@ -58,20 +59,18 @@ public class UserManagerTest extends H2HJUnitTest {
 		String userId = userCredentials.getUserId();
 
 		// all nodes must have same result: false
-		for (int i = 0; i < network.size(); i++) {
-			boolean isRegistered = network.get(i).getUserManager().isRegistered(userId);
-			assertFalse(isRegistered);
+		for (IH2HNode client : network) {
+			assertFalse(client.getUserManager().isRegistered(userId));
 		}
 
 		// registering from random node
-		IUserManager userManager = network.get(new Random().nextInt(network.size())).getUserManager();
+		IUserManager userManager = network.get(rnd.nextInt(network.size())).getUserManager();
 		IProcessComponent<Void> registerProcess = userManager.createRegisterProcess(userCredentials);
 		registerProcess.execute();
 
 		// all nodes must have same result: true
-		for (int i = 0; i < network.size(); i++) {
-			boolean isRegistered = network.get(i).getUserManager().isRegistered(userId);
-			assertTrue(isRegistered);
+		for (IH2HNode client : network) {
+			assertTrue(client.getUserManager().isRegistered(userId));
 		}
 
 		// TODO test after unregistering
@@ -85,45 +84,44 @@ public class UserManagerTest extends H2HJUnitTest {
 		TestFileAgent fileAgent = new TestFileAgent();
 
 		// all nodes must have same result: false
-		for (int i = 0; i < network.size(); i++) {
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
-			assertFalse(isLoggedIn);
+		for (IH2HNode client : network) {
+			assertFalse(client.getUserManager().isLoggedIn());
 		}
 
 		// before registering: login all nodes and check again
 		IProcessComponent<Void> loginProcess;
-		for (int i = 0; i < network.size(); i++) {
-			loginProcess = network.get(i).getUserManager().createLoginProcess(userCredentials, fileAgent);
+		for (IH2HNode client : network) {
+			loginProcess = client.getUserManager().createLoginProcess(userCredentials, fileAgent);
 			try {
 				loginProcess.execute();
 				Assert.fail("Should fail to login when user is not registered");
 			} catch (ProcessExecutionException e) {
 				// expected
 			}
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
-			assertFalse(isLoggedIn);
+
+			assertFalse(client.getUserManager().isLoggedIn());
 		}
 
 		// registering from random node
-		IProcessComponent<Void> registerProcess = network.get(new Random().nextInt(network.size())).getUserManager()
+		IProcessComponent<Void> registerProcess = network.get(rnd.nextInt(network.size())).getUserManager()
 				.createRegisterProcess(userCredentials);
 		registerProcess.execute();
 
 		// after registering: login all nodes and check again
-		for (int i = 0; i < network.size(); i++) {
-			loginProcess = network.get(i).getUserManager().createLoginProcess(userCredentials, fileAgent);
+		for (IH2HNode client : network) {
+			loginProcess = client.getUserManager().createLoginProcess(userCredentials, fileAgent);
 			loginProcess.execute();
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
-			assertTrue(isLoggedIn);
+
+			assertTrue(client.getUserManager().isLoggedIn());
 		}
 
 		// logout
 		IProcessComponent<Void> logoutProcess;
-		for (int i = 0; i < network.size(); i++) {
-			logoutProcess = network.get(i).getUserManager().createLogoutProcess();
+		for (IH2HNode client : network) {
+			logoutProcess = client.getUserManager().createLogoutProcess();
 			logoutProcess.execute();
-			boolean isLoggedIn = network.get(i).getUserManager().isLoggedIn();
-			assertFalse(isLoggedIn);
+
+			assertFalse(client.getUserManager().isLoggedIn());
 		}
 
 		// TODO test after unregister

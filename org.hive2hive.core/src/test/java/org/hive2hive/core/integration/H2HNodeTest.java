@@ -34,7 +34,7 @@ import org.junit.Test;
  */
 public class H2HNodeTest extends H2HJUnitTest {
 
-	private static final int NETWORK_SIZE = 5;
+	private static final int NETWORK_SIZE = 3;
 	private static List<IH2HNode> network;
 	private final Random random = new Random();
 
