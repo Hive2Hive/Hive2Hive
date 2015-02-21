@@ -114,7 +114,6 @@ public class PasswordUtilTest extends H2HJUnitTest {
 
 	@Test
 	public void generateHashTest() {
-
 		// test various passwords
 		char[][] password = new char[5][];
 		for (int i = 0; i < password.length; i++) {
@@ -134,12 +133,12 @@ public class PasswordUtilTest extends H2HJUnitTest {
 			logger.debug("Generated Salt: {}.", EncryptionUtil.byteToHex(hash));
 
 			// test if hash outcome stays always the same with the same password and salt
-			for (int j = 0; j < 10; j++) {
+			for (int j = 0; j < 5; j++) {
 				assertTrue(Arrays.equals(hash, PasswordUtil.generateHash(password[i], salt)));
 			}
 
 			// test if hash outcome changes with other password or salt
-			for (int j = 0; j < 10; j++) {
+			for (int j = 0; j < 5; j++) {
 
 				// assure new parameters
 				char[] otherPW;
@@ -160,9 +159,8 @@ public class PasswordUtilTest extends H2HJUnitTest {
 
 	@Test
 	public void validatePasswordTest() {
-
 		// test various passwords
-		char[][] password = new char[20][];
+		char[][] password = new char[10][];
 		for (int i = 0; i < password.length; i++) {
 
 			// set a random password and salt
@@ -194,8 +192,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 				} while (Arrays.equals(otherSalt, salt));
 				byte[] otherHash = null;
 				do {
-					otherHash = PasswordUtil.generateHash(randomString(20).toCharArray(),
-							PasswordUtil.generateRandomSalt());
+					otherHash = PasswordUtil.generateHash(randomString(20).toCharArray(), PasswordUtil.generateRandomSalt());
 				} while (Arrays.equals(otherHash, hash));
 
 				assertFalse(PasswordUtil.validatePassword(otherPW, salt, hash));
