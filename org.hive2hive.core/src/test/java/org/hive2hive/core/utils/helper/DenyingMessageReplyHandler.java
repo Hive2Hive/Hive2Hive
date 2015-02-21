@@ -18,7 +18,7 @@ public class DenyingMessageReplyHandler implements ObjectDataReply {
 
 	@Override
 	public Object reply(PeerAddress sender, Object request) throws Exception {
-		logger.warn(String.format("Denying a message. Sender = '{}'.", sender));
+		logger.warn("Denying a message. Sender = '{}'.", sender);
 		return AcceptanceReply.FAILURE;
 	}
 }

@@ -75,7 +75,9 @@ class PutQueueEntry extends QueueEntry {
 
 	@Override
 	public boolean equals(Object otherPid) {
-		if (otherPid instanceof String) {
+		if (otherPid == null) {
+			return false;
+		} else if (otherPid instanceof String) {
 			String pidString = (String) otherPid;
 			return getPid().equals(pidString);
 		} else if (otherPid instanceof PutQueueEntry) {

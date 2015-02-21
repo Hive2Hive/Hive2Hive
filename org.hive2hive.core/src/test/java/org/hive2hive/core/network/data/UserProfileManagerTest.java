@@ -53,6 +53,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static final int networkSize = 10;
+	private static final Random rnd = new Random();
 
 	private UserCredentials userCredentials;
 	private NetworkManager client;
@@ -162,7 +163,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 		for (IProcessComponent<Future<Void>> process : processes) {
 			process.execute();
 			// sleep for random time
-			Thread.sleep(Math.abs(new Random().nextLong() % 100));
+			Thread.sleep(Math.abs(rnd.nextLong() % 100));
 		}
 
 		H2HWaiter waiter = new H2HWaiter(60);
@@ -219,10 +220,8 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	public void testStress() throws NoSessionException, GetFailedException, PutFailedException, IOException,
 			NoPeerConnectionException, AbortModifyException {
 		UserProfileManager profileManager = new UserProfileManager(client.getDataManager(), userCredentials);
-		final Random random = new Random();
-
 		for (int i = 0; i < 10; i++) {
-			final boolean isFolder = random.nextBoolean();
+			final boolean isFolder = rnd.nextBoolean();
 
 			final File file = new File(root, randomString());
 			if (!isFolder) {
@@ -239,9 +238,9 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 					public void modifyUserProfile(UserProfile userProfile) {
 						List<FolderIndex> indexes = getIndexList(userProfile.getRoot());
 						if (isFolder) {
-							new FolderIndex(indexes.get(random.nextInt(indexes.size())), fileKeys, randomString());
+							new FolderIndex(indexes.get(rnd.nextInt(indexes.size())), fileKeys, randomString());
 						} else {
-							new FileIndex(indexes.get(random.nextInt(indexes.size())), fileKeys, file.getName(), md5Hash);
+							new FileIndex(indexes.get(rnd.nextInt(indexes.size())), fileKeys, file.getName(), md5Hash);
 						}
 					}
 				});

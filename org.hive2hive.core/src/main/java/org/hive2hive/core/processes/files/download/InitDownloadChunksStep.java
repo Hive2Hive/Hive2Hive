@@ -73,7 +73,7 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 			}
 
 			// verify destination before downloading
-			if (destination != null && destination.exists()) {
+			if (destination.exists()) {
 				// can be cast because only files are downloaded
 				FileIndex fileIndex = (FileIndex) context.consumeIndex();
 				try {

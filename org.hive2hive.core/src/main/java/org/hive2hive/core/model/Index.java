@@ -243,7 +243,9 @@ public abstract class Index implements Comparable<Index>, Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof String) {
+		if (obj == null) {
+			return false;
+		} else if (obj instanceof String) {
 			String otherPath = (String) obj;
 			return getFullPath().equals(otherPath);
 		} else if (obj instanceof KeyPair) {

@@ -74,7 +74,7 @@ public class TimeToLiveStore {
 	 */
 	public static int convertDaysToSeconds(int days) {
 		assert days > 0;
-		if (days > Long.MAX_VALUE / DAY_SECOND_FACTOR) {
+		if (DAY_SECOND_FACTOR > Long.MAX_VALUE / days) {
 			// it will overflow, return the max value
 			return Integer.MAX_VALUE;
 		}

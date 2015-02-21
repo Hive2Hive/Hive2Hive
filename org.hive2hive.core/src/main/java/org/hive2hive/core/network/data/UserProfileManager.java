@@ -31,6 +31,7 @@ public class UserProfileManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserProfileManager.class);
 	private static final long MAX_MODIFICATION_TIME = 1000;
+	private static final long FAILOVER_TIMEOUT = 5 * 60 * 1000;
 	private static final int FORK_LIMIT = 2;
 
 	private final EncryptedVersionManager<UserProfile> versionManager;
@@ -194,7 +195,8 @@ public class UserProfileManager {
 				if (modifyQueue.isEmpty() && readOnlyQueue.isEmpty()) {
 					synchronized (queueWaiter) {
 						try {
-							queueWaiter.wait();
+							// timeout to prevent queues to live forever because of invalid shutdown
+							queueWaiter.wait(FAILOVER_TIMEOUT);
 						} catch (InterruptedException e) {
 							// interrupted, go to next iteration, probably the thread was stopped
 							continue;

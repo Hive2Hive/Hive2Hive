@@ -78,7 +78,7 @@ public class RemoveUserProfileTaskStep extends ProcessStep<Void> {
 			dataManager = networkManager.getDataManager();
 		} catch (NoPeerConnectionException ex) {
 			throw new ProcessRollbackException(this, ex, String.format(
-					"Rollback of remove user profile task failed. No connection. User ID = '{}', Content key = '{}'.",
+					"Rollback of remove user profile task failed. No connection. User ID = '%s', Content key = '%s'.",
 					userId, upTask.getContentKey()));
 		}
 

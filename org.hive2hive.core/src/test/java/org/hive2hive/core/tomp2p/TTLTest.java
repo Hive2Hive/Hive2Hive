@@ -146,8 +146,12 @@ public class TTLTest extends H2HJUnitTest {
 			Assert.assertTrue(futureGet.isSuccess());
 			Assert.assertNull(futureGet.data());
 		} finally {
-			p1.shutdown().awaitUninterruptibly();
-			p2.shutdown().awaitUninterruptibly();
+			if (p1 != null) {
+				p1.shutdown().awaitUninterruptibly();
+			}
+			if (p2 != null) {
+				p2.shutdown().awaitUninterruptibly();
+			}
 		}
 	}
 

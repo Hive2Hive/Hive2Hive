@@ -48,7 +48,6 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 			latch.await(H2HConstants.AWAIT_NETWORK_OPERATION_MS, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Latch to wait for the get was interrupted.");
-			return null;
 		}
 		return result;
 	}

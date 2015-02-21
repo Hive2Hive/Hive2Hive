@@ -94,7 +94,7 @@ public abstract class PutUserProfileTaskStep extends ProcessStep<Void> {
 			setRequiresRollback(false);
 		} else {
 			throw new ProcessRollbackException(this, String.format(
-					"Rollback of user profile put failed. Remove failed. User = '{}', Content Key = '{}'.", userId,
+					"Rollback of user profile put failed. Remove failed. User = '%s', Content Key = '%s'.", userId,
 					contentKey));
 		}
 
