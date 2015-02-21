@@ -29,7 +29,7 @@ public class FuturePutTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = FuturePutTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
+		network = NetworkTestUtil.createNetwork(6);
 	}
 
 	@Test

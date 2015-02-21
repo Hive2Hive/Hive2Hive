@@ -9,14 +9,6 @@ public final class TestExecutionUtil {
 
 	public static final int MAX_PROCESS_WAIT_TIME = 120;
 
-	public static void wait(int ms) {
-		try {
-			Thread.sleep(ms);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
 	public static void waitTillSucceded(TestProcessComponentListener listener, int maxSeconds) {
 		H2HWaiter waiter = new H2HWaiter(maxSeconds);
 		do {
