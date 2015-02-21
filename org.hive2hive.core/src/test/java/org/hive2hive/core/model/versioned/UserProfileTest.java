@@ -1,10 +1,12 @@
-package org.hive2hive.core.model;
+package org.hive2hive.core.model.versioned;
 
 import java.io.File;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
+import org.hive2hive.core.model.FileIndex;
+import org.hive2hive.core.model.FolderIndex;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.utils.FileTestUtil;

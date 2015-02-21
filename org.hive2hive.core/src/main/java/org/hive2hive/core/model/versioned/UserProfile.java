@@ -61,7 +61,7 @@ public class UserProfile extends BaseVersionedNetworkContent {
 
 	@Override
 	protected int getContentHash() {
-		return userId.hashCode() + 11 * encryptionKeys.hashCode() + 23 * root.hashCode();
+		return userId.hashCode() + 21 * encryptionKeys.hashCode();
 	}
 
 	public Index getFileById(PublicKey fileId) {
