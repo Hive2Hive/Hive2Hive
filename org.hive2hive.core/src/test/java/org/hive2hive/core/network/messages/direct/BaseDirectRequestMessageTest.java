@@ -33,7 +33,7 @@ import org.junit.Test;
 public class BaseDirectRequestMessageTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
+	private static final int networkSize = 2;
 
 	@BeforeClass
 	public static void initTest() throws Exception {

@@ -38,8 +38,6 @@ import org.junit.Test;
  */
 public class DownloadSmallFileTest extends H2HJUnitTest {
 
-	private final static int networkSize = 6;
-
 	private static List<NetworkManager> network;
 	private static NetworkManager uploader;
 	private static NetworkManager downloader;
@@ -57,7 +55,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 		testClass = DownloadSmallFileTest.class;
 		beforeClass();
 		// setup a network
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		uploader = network.get(0);
 		downloader = network.get(1);
 

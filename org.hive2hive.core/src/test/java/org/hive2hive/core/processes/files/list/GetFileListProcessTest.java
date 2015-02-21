@@ -34,7 +34,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 		beforeClass();
 
 		// network
-		network = NetworkTestUtil.createNetwork(6);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		UserCredentials credentials = generateRandomCredentials();
 
 		root = FileTestUtil.getTempDirectory();

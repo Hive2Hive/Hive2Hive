@@ -52,7 +52,6 @@ import org.junit.Test;
 public class UserProfileManagerTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
 	private static final Random rnd = new Random();
 
 	private UserCredentials userCredentials;
@@ -69,7 +68,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = UserProfileManagerTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 	}
 
 	@AfterClass

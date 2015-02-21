@@ -32,7 +32,6 @@ import org.junit.Test;
  */
 public class LoginTest extends H2HJUnitTest {
 
-	private static final int networkSize = 10;
 	private static List<NetworkManager> network;
 	private static UserCredentials userCredentials;
 	private static TestFileAgent fileAgent;
@@ -42,7 +41,7 @@ public class LoginTest extends H2HJUnitTest {
 		testClass = LoginTest.class;
 		beforeClass();
 
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		userCredentials = generateRandomCredentials();
 
 		UseCaseTestUtil.register(userCredentials, network.get(0));

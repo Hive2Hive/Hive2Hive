@@ -29,13 +29,12 @@ import org.junit.Test;
 public class DataManagerTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = DataManagerTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 	}
 
 	@Test

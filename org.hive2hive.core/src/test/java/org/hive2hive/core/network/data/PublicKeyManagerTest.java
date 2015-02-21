@@ -35,7 +35,6 @@ import org.junit.Test;
 public class PublicKeyManagerTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
 	private static Random random = new Random();
 
 	private PublicKeyManager publicKeyManager;
@@ -46,7 +45,7 @@ public class PublicKeyManagerTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = PublicKeyManagerTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 	}
 
 	@Before

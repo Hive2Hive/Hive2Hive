@@ -25,7 +25,7 @@ import org.junit.Test;
  */
 public class BaseGetProcessStepTest extends H2HJUnitTest {
 
-	private final static int networkSize = 10;
+	private final static int networkSize = 2;
 	private static List<NetworkManager> network;
 
 	@BeforeClass

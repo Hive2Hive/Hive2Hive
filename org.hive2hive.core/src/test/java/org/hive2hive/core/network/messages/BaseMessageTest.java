@@ -30,7 +30,7 @@ import org.junit.Test;
 public class BaseMessageTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private final static int networkSize = 10;
+	private final static int networkSize = 5;
 	private Random random = new Random();
 
 	@BeforeClass

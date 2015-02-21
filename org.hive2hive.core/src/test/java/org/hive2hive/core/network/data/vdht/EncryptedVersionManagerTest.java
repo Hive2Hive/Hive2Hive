@@ -43,7 +43,6 @@ import org.junit.Test;
 public class EncryptedVersionManagerTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
 
 	// can be reused
 	private static final Random random = new Random();
@@ -55,7 +54,7 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = EncryptedVersionManagerTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 	}
 
 	@Test
@@ -206,8 +205,8 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 					new Number640(Number160.createHash(locationKey), Number160.ZERO, Number160.createHash(contentKey),
 							version0B.getVersionKey()), data0B);
 
-			for (int i = 0; i < networkSize; i++) {
-				H2HStorageMemory storage = (H2HStorageMemory) network.get(i).getConnection().getPeer().storageLayer();
+			for (NetworkManager client : network) {
+				H2HStorageMemory storage = (H2HStorageMemory) client.getConnection().getPeer().storageLayer();
 				storage.setGetMode(StorageMemoryGetMode.MANIPULATED);
 				storage.setManipulatedMap(manipulatedMap);
 			}
@@ -218,8 +217,8 @@ public class EncryptedVersionManagerTest extends H2HJUnitTest {
 			// should trigger a get failed exception (version fork)
 			versionManager.get();
 		} finally {
-			for (int i = 0; i < networkSize; i++) {
-				H2HStorageMemory storage = (H2HStorageMemory) network.get(i).getConnection().getPeer().storageLayer();
+			for (NetworkManager client : network) {
+				H2HStorageMemory storage = (H2HStorageMemory) client.getConnection().getPeer().storageLayer();
 				storage.setGetMode(StorageMemoryGetMode.STANDARD);
 				storage.setManipulatedMap(null);
 			}

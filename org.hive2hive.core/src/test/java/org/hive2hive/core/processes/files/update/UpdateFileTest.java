@@ -43,8 +43,6 @@ import org.junit.Test;
  */
 public class UpdateFileTest extends H2HJUnitTest {
 
-	private final static int networkSize = 6;
-
 	private static List<NetworkManager> network;
 	private static UserCredentials userCredentials;
 	private static File uploaderRoot;
@@ -57,7 +55,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		testClass = UpdateFileTest.class;
 		beforeClass();
 
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(3);
 		NetworkManager registrer = network.get(0);
 		uploader = network.get(1);
 		downloader = network.get(2);

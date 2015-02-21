@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.util.List;
-import java.util.Random;
 
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.H2HTestData;
@@ -37,8 +36,7 @@ import org.junit.Test;
 public class BaseRequestMessageTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
-	private static Random random = new Random();
+	private static final int networkSize = 2;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
@@ -66,9 +64,9 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	@Test
 	public void testSendingAnAsynchronousMessageWithReply() throws ClassNotFoundException, IOException,
 			NoPeerConnectionException, NoSessionException {
-		// select two random nodes
-		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		NetworkManager nodeA = network.get(0);
+		NetworkManager nodeB = network.get(1);
+
 		// receiver nodes should already know the public key of the senders
 		nodeA.getSession().getKeyManager().putPublicKey(nodeB.getUserId(), getPublicKey(nodeB));
 		nodeB.getSession().getKeyManager().putPublicKey(nodeA.getUserId(), getPublicKey(nodeA));
@@ -113,9 +111,9 @@ public class BaseRequestMessageTest extends H2HJUnitTest {
 	@Test
 	public void testSendingAnAsynchronousMessageWithNoReplyMaxTimesRequestingNode() throws ClassNotFoundException,
 			IOException, NoPeerConnectionException, NoSessionException {
-		// select two random nodes
-		NetworkManager nodeA = network.get(random.nextInt(networkSize / 2));
-		NetworkManager nodeB = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		NetworkManager nodeA = network.get(0);
+		NetworkManager nodeB = network.get(1);
+
 		// receiver nodes should already know the public key of the senders
 		nodeA.getSession().getKeyManager().putPublicKey(nodeB.getUserId(), getPublicKey(nodeB));
 		nodeB.getSession().getKeyManager().putPublicKey(nodeA.getUserId(), getPublicKey(nodeA));

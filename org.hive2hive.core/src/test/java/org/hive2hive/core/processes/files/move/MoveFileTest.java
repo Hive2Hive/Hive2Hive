@@ -28,8 +28,6 @@ import org.junit.Test;
  */
 public class MoveFileTest extends H2HJUnitTest {
 
-	private final static int networkSize = 6;
-
 	private static List<NetworkManager> network;
 	private static NetworkManager client;
 	private static UserCredentials userCredentials;
@@ -41,7 +39,7 @@ public class MoveFileTest extends H2HJUnitTest {
 		beforeClass();
 
 		// setup a network
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		client = network.get(1);
 
 		// create a user

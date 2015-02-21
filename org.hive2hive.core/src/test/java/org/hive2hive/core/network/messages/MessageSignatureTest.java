@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.security.PublicKey;
 import java.util.List;
-import java.util.Random;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
@@ -26,8 +25,7 @@ import org.junit.Test;
  */
 public class MessageSignatureTest extends H2HJUnitTest {
 
-	private static final int networkSize = 10;
-	private static Random random = new Random();
+	private static final int networkSize = 2;
 	private static List<NetworkManager> network;
 
 	@BeforeClass
@@ -45,8 +43,8 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	public void testMessageWithSignatureSameUser() throws NoPeerConnectionException, NoSessionException {
 		NetworkTestUtil.setSameSession(network);
 		// select two random nodes
-		NetworkManager sender = network.get(random.nextInt(networkSize / 2));
-		NetworkManager receiver = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		NetworkManager sender = network.get(0);
+		NetworkManager receiver = network.get(1);
 
 		// putting of the public key is not necessary
 
@@ -63,8 +61,8 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	@Test
 	public void testMessageWithSignatureDifferentUser() throws NoPeerConnectionException, NoSessionException {
 		NetworkTestUtil.setDifferentSessions(network);
-		NetworkManager sender = network.get(random.nextInt(networkSize / 2));
-		NetworkManager receiver = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		NetworkManager sender = network.get(0);
+		NetworkManager receiver = network.get(1);
 
 		// put the public key of the sender into the cache
 		receiver.getSession().getKeyManager().putPublicKey(sender.getUserId(), getPublicKey(sender));
@@ -82,8 +80,8 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	@Test
 	public void testMessageWithWrongSignature() throws NoPeerConnectionException, NoSessionException {
 		NetworkTestUtil.setDifferentSessions(network);
-		NetworkManager sender = network.get(random.nextInt(networkSize / 2));
-		NetworkManager receiver = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		NetworkManager sender = network.get(0);
+		NetworkManager receiver = network.get(1);
 
 		// put a wrong public key of the sender into the cache
 		receiver.getSession().getKeyManager()

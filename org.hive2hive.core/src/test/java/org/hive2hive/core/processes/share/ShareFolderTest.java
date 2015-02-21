@@ -32,7 +32,6 @@ import org.junit.Test;
  */
 public class ShareFolderTest extends H2HJUnitTest {
 
-	private static final int networkSize = 6;
 	private static List<NetworkManager> network;
 
 	private static File rootA;
@@ -51,7 +50,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 		testClass = ShareFolderTest.class;
 		beforeClass();
 
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		rootA = FileTestUtil.getTempDirectory();
 		userA = generateRandomCredentials();
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);

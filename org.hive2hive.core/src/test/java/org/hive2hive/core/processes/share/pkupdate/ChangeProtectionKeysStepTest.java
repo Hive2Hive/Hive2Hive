@@ -43,7 +43,6 @@ import org.junit.Test;
  */
 public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 
-	private static final int networkSize = 6;
 	private static List<NetworkManager> network;
 	private static H2HDummyEncryption dummyEncryption;
 
@@ -51,7 +50,7 @@ public class ChangeProtectionKeysStepTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = ChangeProtectionKeysStepTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		dummyEncryption = new H2HDummyEncryption();
 	}
 

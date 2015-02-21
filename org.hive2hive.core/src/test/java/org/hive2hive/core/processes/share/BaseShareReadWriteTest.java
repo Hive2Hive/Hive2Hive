@@ -20,7 +20,6 @@ import org.junit.Assert;
 
 public abstract class BaseShareReadWriteTest extends H2HJUnitTest {
 
-	protected static final int NETWORK_SIZE = 6;
 	protected static final int MAX_NUM_CHUNKS = 2;
 
 	protected static List<NetworkManager> network;
@@ -40,7 +39,7 @@ public abstract class BaseShareReadWriteTest extends H2HJUnitTest {
 
 	protected static void setupNetwork() throws NoPeerConnectionException {
 		logger.info("Setup network.");
-		network = NetworkTestUtil.createNetwork(NETWORK_SIZE);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 
 		logger.info("Create user A.");
 		rootA = FileTestUtil.getTempDirectory();

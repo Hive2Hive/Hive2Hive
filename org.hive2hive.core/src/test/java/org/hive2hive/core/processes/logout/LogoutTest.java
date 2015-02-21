@@ -32,7 +32,6 @@ import org.junit.Test;
  */
 public class LogoutTest extends H2HJUnitTest {
 
-	private static final int networkSize = 10;
 	private static List<NetworkManager> network;
 	private static UserCredentials userCredentials;
 
@@ -41,7 +40,7 @@ public class LogoutTest extends H2HJUnitTest {
 		testClass = LogoutTest.class;
 		beforeClass();
 
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		userCredentials = generateRandomCredentials();
 
 		UseCaseTestUtil.registerAndLogin(userCredentials, network.get(0), FileTestUtil.getTempDirectory());

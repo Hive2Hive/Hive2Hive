@@ -51,13 +51,12 @@ public class UserProfileTaskQueueTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
 	private static TestFileAgent fileAgent;
-	private static final int networkSize = 10;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = UserProfileTaskQueueTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		fileAgent = new TestFileAgent();
 	}
 

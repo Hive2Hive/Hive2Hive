@@ -32,21 +32,20 @@ import org.junit.Test;
 public class BasePutProcessStepTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = BasePutProcessStepTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 	}
 
 	@Test
 	public void testPutProcessSuccess() throws ClassNotFoundException, IOException, NoPeerConnectionException {
 		NetworkManager putter = NetworkTestUtil.getRandomNode(network);
-		NetworkManager proxy = NetworkTestUtil.getRandomNode(network);
+		NetworkManager target = NetworkTestUtil.getRandomNode(network);
 
-		String locationKey = proxy.getNodeId();
+		String locationKey = target.getNodeId();
 		String contentKey = randomString();
 		String data = randomString();
 
@@ -57,7 +56,7 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 
 		assertEquals(
 				data,
-				((H2HTestData) proxy.getDataManager().get(
+				((H2HTestData) target.getDataManager().get(
 						new Parameters().setLocationKey(locationKey).setContentKey(contentKey))).getTestString());
 	}
 
@@ -65,13 +64,13 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 	public void testPutProcessFailure() throws NoPeerConnectionException, InvalidProcessStateException {
 		try {
 			NetworkManager putter = NetworkTestUtil.getRandomNode(network);
-			NetworkManager proxy = NetworkTestUtil.getRandomNode(network);
+			NetworkManager target = NetworkTestUtil.getRandomNode(network);
 
-			for (int i = 0; i < networkSize; i++) {
-				((H2HStorageMemory) network.get(i).getConnection().getPeer().storageLayer())
+			for (NetworkManager client : network) {
+				((H2HStorageMemory) client.getConnection().getPeer().storageLayer())
 						.setPutMode(StorageMemoryPutMode.DENY_ALL);
 			}
-			String locationKey = proxy.getNodeId();
+			String locationKey = target.getNodeId();
 			String contentKey = randomString();
 			String data = randomString();
 
@@ -80,10 +79,10 @@ public class BasePutProcessStepTest extends H2HJUnitTest {
 					putter.getDataManager());
 			TestExecutionUtil.executeProcessTillFailed(putStep);
 
-			assertNull(proxy.getDataManager().get(new Parameters().setLocationKey(locationKey).setContentKey(contentKey)));
+			assertNull(target.getDataManager().get(new Parameters().setLocationKey(locationKey).setContentKey(contentKey)));
 		} finally {
-			for (int i = 0; i < networkSize; i++) {
-				((H2HStorageMemory) network.get(i).getConnection().getPeer().storageLayer())
+			for (NetworkManager client : network) {
+				((H2HStorageMemory) client.getConnection().getPeer().storageLayer())
 						.setPutMode(StorageMemoryPutMode.STANDARD);
 			}
 		}

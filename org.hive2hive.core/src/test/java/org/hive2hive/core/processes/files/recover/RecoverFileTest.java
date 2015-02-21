@@ -34,7 +34,6 @@ import org.junit.Test;
  */
 public class RecoverFileTest extends H2HJUnitTest {
 
-	private static final int networkSize = 6;
 	private static List<NetworkManager> network;
 
 	private NetworkManager client;
@@ -47,7 +46,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 		testClass = RecoverFileTest.class;
 		beforeClass();
 
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 	}
 
 	@Before

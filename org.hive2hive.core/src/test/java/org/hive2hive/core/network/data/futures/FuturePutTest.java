@@ -24,13 +24,12 @@ import org.junit.Test;
 public class FuturePutTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 6;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = FuturePutTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 	}
 
 	@Test

@@ -22,6 +22,7 @@ public class H2HJUnitTest {
 	private static final String START_STRING = "Start ";
 	private static final String END_STRING = "End ";
 
+	protected static final int DEFAULT_NETWORK_SIZE = 3;
 	protected static Class<? extends H2HJUnitTest> testClass;
 	protected static Logger logger;
 

@@ -47,11 +47,6 @@ public class NetworkTestUtil {
 	 * @return list containing all nodes where the first one is the bootstrapping node (initial)
 	 */
 	public static List<NetworkManager> createNetwork(int numberOfNodes) {
-		if (numberOfNodes < H2HConstants.REPLICATION_FACTOR) {
-			throw new IllegalArgumentException(String.format("Network size must be at least %s (replication factor).",
-					H2HConstants.REPLICATION_FACTOR));
-		}
-
 		IFileConfiguration fileConfig = new TestFileConfiguration();
 		List<NetworkManager> nodes = new ArrayList<NetworkManager>(numberOfNodes);
 

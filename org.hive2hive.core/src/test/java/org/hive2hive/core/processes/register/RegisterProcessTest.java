@@ -32,14 +32,13 @@ import org.junit.Test;
 public class RegisterProcessTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
 	private static final Random random = new Random();
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = RegisterProcessTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createNetwork(networkSize);
+		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 	}
 
 	@AfterClass
@@ -51,8 +50,8 @@ public class RegisterProcessTest extends H2HJUnitTest {
 	@Test
 	public void testRegisterProcessSuccess() throws InvalidProcessStateException, ClassNotFoundException, IOException,
 			GetFailedException, NoPeerConnectionException {
-		NetworkManager client = network.get(random.nextInt(networkSize / 2));
-		NetworkManager otherClient = network.get(random.nextInt(networkSize / 2) + networkSize / 2);
+		NetworkManager client = network.get(0);
+		NetworkManager otherClient = network.get(1);
 
 		UserCredentials credentials = generateRandomCredentials();
 		UseCaseTestUtil.register(credentials, client);

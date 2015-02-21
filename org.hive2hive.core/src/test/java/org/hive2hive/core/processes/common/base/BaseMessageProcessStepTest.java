@@ -45,7 +45,7 @@ import org.junit.Test;
 public class BaseMessageProcessStepTest extends H2HJUnitTest {
 
 	private static List<NetworkManager> network;
-	private static final int networkSize = 10;
+	private static final int networkSize = 2;
 	private static Random random = new Random();
 	private static FSTSerializer serializer;
 
@@ -70,9 +70,9 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	@Test
 	public void routedMessageProcessStepTestOnSuccess() throws ClassNotFoundException, IOException,
 			NoPeerConnectionException {
-		// select two random nodes
-		NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
-		final NetworkManager nodeB = network.get(random.nextInt(network.size() / 2) + network.size() / 2);
+		NetworkManager nodeA = network.get(0);
+		final NetworkManager nodeB = network.get(1);
+
 		// generate random data and content key
 		String data = randomString();
 		String contentKey = randomString();
@@ -125,9 +125,9 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void routedMessageProcessStepTestOnFailure() throws NoPeerConnectionException, InvalidProcessStateException {
-		// select two random nodes
-		NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
-		final NetworkManager nodeB = network.remove(random.nextInt(network.size() / 2) + network.size() / 2);
+		NetworkManager nodeA = network.get(0);
+		final NetworkManager nodeB = network.get(1);
+
 		try {
 			// generate random data and content key
 			String data = randomString();
@@ -183,9 +183,9 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	@Test
 	public void routedMessageProcessStepTestWithARequestMessage() throws ClassNotFoundException, IOException,
 			NoPeerConnectionException {
-		// select two random nodes
-		final NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
-		final NetworkManager nodeB = network.get(random.nextInt(network.size() / 2) + network.size() / 2);
+		final NetworkManager nodeA = network.get(0);
+		final NetworkManager nodeB = network.get(1);
+
 		// generate a random content key
 		final String contentKey = randomString();
 		final Parameters parametersA = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey);
@@ -252,9 +252,9 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	@Test
 	public void directMessageProcessStepTestOnSuccess() throws ClassNotFoundException, IOException,
 			NoPeerConnectionException {
-		// select two random nodes
-		NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
-		final NetworkManager nodeB = network.get(random.nextInt(network.size() / 2) + network.size() / 2);
+		NetworkManager nodeA = network.get(0);
+		final NetworkManager nodeB = network.get(1);
+
 		// generate random data and content key
 		String data = randomString();
 		String contentKey = randomString();
@@ -307,9 +307,9 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	 */
 	@Test
 	public void directMessageProcessStepTestOnFailure() throws NoPeerConnectionException, InvalidProcessStateException {
-		// select two random nodes
-		NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
-		final NetworkManager nodeB = network.remove(random.nextInt(network.size() / 2) + network.size() / 2);
+		NetworkManager nodeA = network.get(0);
+		final NetworkManager nodeB = network.get(1);
+
 		try {
 			// generate random data and content key
 			String data = randomString();
@@ -364,9 +364,9 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	@Test
 	public void directMessageProcessStepTestWithARequestMessage() throws ClassNotFoundException, IOException,
 			NoPeerConnectionException {
-		// select two random nodes
-		final NetworkManager nodeA = network.get(random.nextInt(network.size() / 2));
-		final NetworkManager nodeB = network.get(random.nextInt(network.size() / 2) + network.size() / 2);
+		final NetworkManager nodeA = network.get(0);
+		final NetworkManager nodeB = network.get(1);
+
 		// generate a random content key
 		final String contentKey = randomString();
 		final Parameters parametersA = new Parameters().setLocationKey(nodeA.getNodeId()).setContentKey(contentKey);
