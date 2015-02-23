@@ -29,9 +29,9 @@ import org.hive2hive.core.security.IH2HEncryption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EncryptedVersionManager<T extends BaseVersionedNetworkContent> extends BaseVersionManager<T> {
+public class AESEncryptedVersionManager<T extends BaseVersionedNetworkContent> extends BaseVersionManager<T> {
 
-	private static final Logger logger = LoggerFactory.getLogger(EncryptedVersionManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(AESEncryptedVersionManager.class);
 
 	private final IH2HEncryption encryption;
 	private final SecretKey encryptionKey;
@@ -39,11 +39,11 @@ public class EncryptedVersionManager<T extends BaseVersionedNetworkContent> exte
 	// additional cache for encrypted data
 	private Cache<EncryptedNetworkContent> encryptedContentCache = new Cache<EncryptedNetworkContent>();
 
-	public EncryptedVersionManager(DataManager dataManager, SecretKey encryptionKey, String locationKey, String contentKey) {
+	public AESEncryptedVersionManager(DataManager dataManager, SecretKey encryptionKey, String locationKey, String contentKey) {
 		this(dataManager, dataManager.getEncryption(), encryptionKey, locationKey, contentKey);
 	}
 
-	public EncryptedVersionManager(DataManager dataManager, IH2HEncryption encryption, SecretKey encryptionKey,
+	public AESEncryptedVersionManager(DataManager dataManager, IH2HEncryption encryption, SecretKey encryptionKey,
 			String locationKey, String contentKey) {
 		super(dataManager, locationKey, contentKey);
 		this.encryption = encryption;
@@ -185,7 +185,6 @@ public class EncryptedVersionManager<T extends BaseVersionedNetworkContent> exte
 	 */
 	public void put(T networkContent, KeyPair protectionKeys) throws PutFailedException {
 		try {
-			logger.trace("Encrypting with 256bit AES.");
 			EncryptedNetworkContent encrypted = encryption.encryptAES(networkContent, encryptionKey);
 			encrypted.setBasedOnKey(networkContent.getBasedOnKey());
 			encrypted.setVersionKey(networkContent.getVersionKey());

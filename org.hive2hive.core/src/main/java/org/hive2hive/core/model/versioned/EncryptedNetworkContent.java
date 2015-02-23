@@ -1,6 +1,7 @@
 package org.hive2hive.core.model.versioned;
 
-import org.bouncycastle.util.Arrays;
+import java.util.Arrays;
+
 import org.hive2hive.core.TimeToLiveStore;
 
 /**

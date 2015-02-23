@@ -14,7 +14,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.versioned.UserProfile;
-import org.hive2hive.core.network.data.vdht.EncryptedVersionManager;
+import org.hive2hive.core.network.data.vdht.AESEncryptedVersionManager;
 import org.hive2hive.core.security.PasswordUtil;
 import org.hive2hive.core.security.UserCredentials;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class UserProfileManager {
 	private static final long FAILOVER_TIMEOUT = 5 * 60 * 1000;
 	private static final int FORK_LIMIT = 2;
 
-	private final EncryptedVersionManager<UserProfile> versionManager;
+	private final AESEncryptedVersionManager<UserProfile> versionManager;
 	private final UserCredentials credentials;
 
 	private final Object queueWaiter = new Object();
@@ -52,7 +52,7 @@ public class UserProfileManager {
 
 		SecretKey passwordKey = PasswordUtil.generateAESKeyFromPassword(credentials.getPassword(), credentials.getPin(),
 				H2HConstants.KEYLENGTH_USER_PROFILE);
-		this.versionManager = new EncryptedVersionManager<UserProfile>(dataManager, passwordKey,
+		this.versionManager = new AESEncryptedVersionManager<UserProfile>(dataManager, passwordKey,
 				credentials.getProfileLocationKey(), H2HConstants.USER_PROFILE);
 		startQueueWorker();
 	}
