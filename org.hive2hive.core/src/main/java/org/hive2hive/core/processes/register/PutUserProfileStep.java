@@ -11,12 +11,15 @@ import org.hive2hive.core.processes.common.base.BasePutProcessStep;
 import org.hive2hive.core.processes.context.RegisterProcessContext;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Seppi
  */
 public class PutUserProfileStep extends BasePutProcessStep {
 
+	private static final Logger logger = LoggerFactory.getLogger(PutUserProfileStep.class);
 	private final RegisterProcessContext context;
 
 	public PutUserProfileStep(RegisterProcessContext context, DataManager dataManager) {
@@ -28,17 +31,21 @@ public class PutUserProfileStep extends BasePutProcessStep {
 	@Override
 	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		try {
+			logger.debug("Start encrypting the user profile of the new user {}", context.consumeUserId());
 			EncryptedNetworkContent encrypted = dataManager.getEncryption().encryptAES(context.consumeUserProfile(),
 					context.consumeUserProfileEncryptionKeys());
 			encrypted.generateVersionKey();
+			logger.debug("User profile successfully encrypted. Start putting it...");
 			put(context.consumeUserProflieLocationKey(), H2HConstants.USER_PROFILE, encrypted,
 					context.consumeUserProfileProtectionKeys());
-		} catch (PutFailedException ex) {
-			throw new ProcessExecutionException(this, ex);
+			return null;
 		} catch (GeneralSecurityException | IllegalStateException | IOException ex) {
-			throw new ProcessExecutionException(this, ex, String.format("Cannot encrypt the user profile."));
+			logger.error("Cannot encrypt the user profile of the new user {}", context.consumeUserId());
+			throw new ProcessExecutionException(this, ex, "Cannot encrypt the user profile.");
+		} catch (PutFailedException ex) {
+			logger.error("Cannot put the user profile of the new user {}", context.consumeUserId());
+			throw new ProcessExecutionException(this, ex);
 		}
-		return null;
 	}
 
 }
