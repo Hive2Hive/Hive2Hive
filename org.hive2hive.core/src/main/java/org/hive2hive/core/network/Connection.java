@@ -268,7 +268,7 @@ public class Connection implements IPeerHolder {
 		// set flag to keep data, even when peer looses replication responsibility
 		replication.keepData(true);
 		// start the indirect replication
-		replication.start();
+		// replication.start();
 	}
 
 	/**
