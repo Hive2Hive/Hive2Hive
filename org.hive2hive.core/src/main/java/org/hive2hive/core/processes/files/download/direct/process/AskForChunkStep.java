@@ -126,7 +126,7 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 					context.getTempDestination());
 
 			// finalize the sub-process
-			context.getTask().setDownloaded(context.getMetaChunk().getIndex(), context.getTempDestination());
+			context.getTask().markDownloaded(context.getMetaChunk().getIndex(), context.getTempDestination());
 		} catch (IOException e) {
 			context.getTask().abortDownload("Cannot write the chunk to the temporary file. Reason: " + e.getMessage());
 		}

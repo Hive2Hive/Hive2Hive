@@ -1,6 +1,5 @@
 package org.hive2hive.core.network.data.download;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -103,26 +102,6 @@ public class DownloadManager {
 		for (BaseDownloadTask task : openTasks) {
 			schedule(task);
 		}
-	}
-
-	/**
-	 * Return the task which are currently downloading or waiting for a download slot
-	 */
-	public Set<BaseDownloadTask> getOpenTasks() {
-		return openTasks;
-	}
-
-	/**
-	 * Indicates whether the download manager has already a task to download the given file
-	 */
-	public boolean isDownloading(File file) {
-		for (BaseDownloadTask openTask : openTasks) {
-			if (openTask.getDestination().equals(file)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

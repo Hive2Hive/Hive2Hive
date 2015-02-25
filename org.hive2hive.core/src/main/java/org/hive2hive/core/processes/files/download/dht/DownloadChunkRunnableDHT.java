@@ -83,6 +83,6 @@ public class DownloadChunkRunnableDHT implements Runnable {
 		// TODO verify MD5 hash here
 
 		// notify the task that this file part has been downloaded successfully
-		task.setDownloaded(metaChunk.getIndex(), tempDestination);
+		task.markDownloaded(metaChunk.getIndex(), tempDestination);
 	}
 }

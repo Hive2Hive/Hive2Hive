@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.network.data.PublicKeyManager;
-import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.serializer.FSTSerializer;
 import org.hive2hive.core.utils.helper.TestFileAgent;
@@ -57,13 +56,11 @@ public class FileUtilTest extends H2HJUnitTest {
 
 	@Test
 	public void testReadWriteMetaData() throws IOException, ClassNotFoundException {
-		DownloadManager downloadManager = new DownloadManager(null, null);
 		PublicKeyManager publicKeyManager = new PublicKeyManager("user", generateRSAKeyPair(RSA_KEYLENGTH.BIT_512),
 				generateRSAKeyPair(RSA_KEYLENGTH.BIT_512), null);
-		FileUtil.writePersistentMetaData(fileAgent, publicKeyManager, downloadManager, serializer);
+		FileUtil.writePersistentMetaData(fileAgent, publicKeyManager, serializer);
 		PersistentMetaData persistentMetaData = FileUtil.readPersistentMetaData(fileAgent, serializer);
 		Assert.assertNotNull(persistentMetaData);
-		Assert.assertEquals(0, persistentMetaData.getDownloads().size());
 		Assert.assertEquals(0, persistentMetaData.getPublicKeyCache().size());
 	}
 

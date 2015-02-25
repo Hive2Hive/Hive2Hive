@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.data.PublicKeyManager;
-import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.serializer.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,18 +27,14 @@ public class FileUtil {
 	 * 
 	 * @throws IOException
 	 */
-	public static void writePersistentMetaData(IFileAgent fileAgent, PublicKeyManager keyManager,
-			DownloadManager downloadManager, IH2HSerialize serializer) throws IOException {
+	public static void writePersistentMetaData(IFileAgent fileAgent, PublicKeyManager keyManager, IH2HSerialize serializer)
+			throws IOException {
 		// generate the new persistent meta data
 		PersistentMetaData metaData = new PersistentMetaData();
 
 		// add the public keys
 		if (keyManager != null) {
 			metaData.setPublicKeyCache(keyManager.getCachedPublicKeys());
-		}
-
-		if (downloadManager != null) {
-			metaData.setDownloads(downloadManager.getOpenTasks());
 		}
 
 		byte[] encoded = serializer.serialize(metaData);

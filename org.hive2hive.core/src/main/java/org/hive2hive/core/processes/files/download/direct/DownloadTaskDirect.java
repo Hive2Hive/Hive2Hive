@@ -31,8 +31,8 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 	// users having access to this file
 	private final Set<String> users;
 
-	private transient CountDownLatch locationLocker;
-	private volatile Set<Locations> locations;
+	private final CountDownLatch locationLocker;
+	private Set<Locations> locations;
 
 	public DownloadTaskDirect(List<MetaChunk> metaChunks, File destination, PublicKey fileKey, String ownUserName,
 			PeerAddress ownAddress, Set<String> users, EventBus eventBus, PublicKeyManager keyManager) {
@@ -92,12 +92,4 @@ public class DownloadTaskDirect extends BaseDownloadTask {
 		this.locations = locations;
 		locationLocker.countDown();
 	}
-
-	@Override
-	public void reinitializeAfterDeserialization(EventBus eventBus, PublicKeyManager keyManager) {
-		super.reinitializeAfterDeserialization(eventBus, keyManager);
-		this.locationLocker = new CountDownLatch(1);
-		this.locations = null;
-	}
-
 }
