@@ -144,7 +144,7 @@ public final class NodeMenu extends H2HConsoleMenu {
 	public boolean createNetwork() {
 		if (getNode() == null) {
 			H2HConsoleMenuItem.printPrecondition("You are not connected to a network. Connect to a network first.");
-			open(isExpertMode);
+			open();
 		}
 		return getNode() != null;
 	}
