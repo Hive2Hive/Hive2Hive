@@ -26,11 +26,11 @@ public interface H2HConstants {
 	public static final int H2H_PORT = 4622;
 
 	// standard timeout for discovery
-	public static final long DISCOVERY_TIMEOUT_MS = 10000;
+	public static final long DISCOVERY_TIMEOUT_MS = 20000;
 	// standard timeout for bootstrapping
-	public static final long BOOTSTRAPPING_TIMEOUT_MS = 10000;
+	public static final long BOOTSTRAPPING_TIMEOUT_MS = 20000;
 	// standard timeout for peer disconnection
-	public static final long DISCONNECT_TIMEOUT_MS = 10000;
+	public static final long DISCONNECT_TIMEOUT_MS = 20000;
 
 	// the configuration file name (lying in the root directory of the node)
 	public static final String META_FILE_NAME = "h2h.conf";
