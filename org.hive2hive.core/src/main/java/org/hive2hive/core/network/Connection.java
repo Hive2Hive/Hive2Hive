@@ -227,6 +227,11 @@ public class Connection implements IPeerHolder {
 		serverConfig.signatureFactory(new H2HSignatureFactory());
 		serverConfig.ports(new Ports(bindPort, bindPort));
 
+		// raise timeouts
+		serverConfig.connectionTimeoutTCPMillis(15 * 1000);
+		serverConfig.idleTCPSeconds(15 * 1000);
+		serverConfig.idleUDPSeconds(15 * 1000);
+
 		// listen on any interfaces (see https://github.com/Hive2Hive/Hive2Hive/issues/117)
 		Bindings bindings = new Bindings().listenAny();
 
