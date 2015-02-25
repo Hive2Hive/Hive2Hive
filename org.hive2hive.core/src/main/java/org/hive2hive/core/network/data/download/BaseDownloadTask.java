@@ -96,10 +96,15 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	}
 
 	public void abortDownload(String reason) {
-		logger.error("Download of file {} aborted. Reason: {}", getDestinationName(), reason);
+		if (aborted.get()) {
+			// already aborted
+			return;
+		} else {
+			aborted.set(true);
+		}
 
+		logger.error("Download of file {} aborted. Reason: {}", getDestinationName(), reason);
 		this.reason = reason;
-		aborted.set(true);
 
 		// notify listeners
 		for (IDownloadListener listener : listeners) {

@@ -27,6 +27,8 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 	private final DownloadDirectContext context;
 	private final IFileConfiguration config;
 
+	private ProcessExecutionException responseException;
+
 	public AskForChunkStep(DownloadDirectContext context, IMessageManager messageManager, IFileConfiguration config) {
 		super(messageManager);
 		this.setName(getClass().getName());
@@ -57,7 +59,13 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 			send(request, receiverPublicKey);
 		} catch (SendFailedException e) {
 			logger.error("Cannot send message to {}", context.getSelectedPeer(), e);
-			rerunProcess(true);
+			removeLocation();
+			throw new ProcessExecutionException(this, e, "Message cannot be sent");
+		}
+
+		if (responseException != null) {
+			// an exception in the response message occurred
+			throw responseException;
 		}
 
 		return null;
@@ -70,7 +78,8 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 		// check the response
 		if (responseMessage.getContent() == null) {
 			logger.error("Peer {} did not send the chunk {}", context.getSelectedPeer(), metaChunk.getIndex());
-			rerunProcess(true);
+			responseException = new ProcessExecutionException(this, "Empty response message received");
+			removeLocation();
 			return;
 		}
 
@@ -78,13 +87,14 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 		switch (response.getAnswerType()) {
 			case DECLINED:
 				logger.error("Peer {} declined to send chunk {}", context.getSelectedPeer(), metaChunk.getIndex());
-				rerunProcess(true);
+				responseException = new ProcessExecutionException(this, "Peer declined to send the chunk");
+				removeLocation();
 				break;
 			case ASK_LATER:
 				logger.error("Peer {} is alive but cannot send chunk {} at the moment", context.getSelectedPeer(),
 						metaChunk.getIndex());
+				responseException = new ProcessExecutionException(this, "Chunk could not be provided. Probably ask later");
 				sleepRandomTime();
-				rerunProcess(false);
 				break;
 			case OK:
 				verifyAndWriteChunk(metaChunk, response.getChunk());
@@ -92,8 +102,7 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 			default:
 				logger.error("Invaid response type when downloading chunk {}: {}", context.getMetaChunk().getIndex(),
 						response.getAnswerType());
-				rerunProcess(false);
-				break;
+				responseException = new ProcessExecutionException(this, "Invalid response received");
 		}
 	}
 
@@ -115,7 +124,8 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 					metaChunk.getIndex());
 		} else {
 			logger.error("Peer {} sent an invalid content for chunk {}.", context.getSelectedPeer(), metaChunk.getIndex());
-			rerunProcess(true);
+			responseException = new ProcessExecutionException(this, "Invalid chunk received");
+			removeLocation();
 			return;
 		}
 
@@ -135,16 +145,9 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 	/**
 	 * Restarts the whole process, removing the currently selected peer from the candidate list
 	 */
-	private void rerunProcess(boolean removeLastSelection) {
-		if (removeLastSelection) {
-			logger.debug("Removing peer address {} from the candidate list", context.getSelectedPeer());
-			// remove invalid peer
-			context.getTask().removeAddress(context.getSelectedPeer());
-		}
-
-		// select another peer
-		logger.debug("Re-run the process: select another peer and ask him for chunk {}", context.getMetaChunk().getIndex());
-		getParent().add(new SelectPeerForDownloadStep(context));
-		getParent().add(new AskForChunkStep(context, messageManager, config));
+	private void removeLocation() {
+		logger.debug("Removing peer address {} from the candidate list", context.getSelectedPeer());
+		// remove invalid peer
+		context.getTask().removeAddress(context.getSelectedPeer());
 	}
 }

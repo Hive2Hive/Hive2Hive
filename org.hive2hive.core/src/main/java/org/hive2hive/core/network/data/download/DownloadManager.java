@@ -15,7 +15,6 @@ import org.hive2hive.core.processes.files.download.dht.DownloadChunkRunnableDHT;
 import org.hive2hive.core.processes.files.download.dht.DownloadTaskDHT;
 import org.hive2hive.core.processes.files.download.direct.DownloadChunkRunnableDirect;
 import org.hive2hive.core.processes.files.download.direct.DownloadTaskDirect;
-import org.hive2hive.core.processes.files.download.direct.GetLocationsList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,9 +65,7 @@ public class DownloadManager {
 		if (task.isDirectDownload()) {
 			// first get the locations of all users having access to this file
 			DownloadTaskDirect directTask = (DownloadTaskDirect) task;
-			// Hint: Run it in a separate thread (not in the thread pool) because the executor does not
-			// guarantee the in-order processing.
-			new Thread(new GetLocationsList(directTask, networkManager.getDataManager())).start();
+			directTask.startFetchLocations(networkManager.getDataManager());
 
 			// then download all chunks in separate threads
 			for (MetaChunk chunk : task.getOpenChunks()) {
