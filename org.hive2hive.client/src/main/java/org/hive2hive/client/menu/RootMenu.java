@@ -21,7 +21,7 @@ public final class RootMenu extends H2HConsoleMenu {
 	protected void addMenuItems() {
 		add(new H2HConsoleMenuItem("Connect") {
 			protected void execute() {
-				menus.getNodeMenu().open(isExpertMode);
+				menus.getNodeMenu().open();
 			}
 		});
 
@@ -36,7 +36,7 @@ public final class RootMenu extends H2HConsoleMenu {
 					printAbortion(displayText, "User credentials not specified.");
 					return false;
 				}
-				if (!menus.getFileMenu().createRootDirectory()) {
+				if (!menus.getUserMenu().createRootDirectory()) {
 					printAbortion(displayText, "Root directory not specified.");
 					return false;
 				}
@@ -48,7 +48,7 @@ public final class RootMenu extends H2HConsoleMenu {
 			}
 
 			protected void execute() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException {
-				ConsoleFileAgent fileAgent = new ConsoleFileAgent(menus.getFileMenu().getRootDirectory());
+				ConsoleFileAgent fileAgent = new ConsoleFileAgent(menus.getUserMenu().getRootDirectory());
 				IProcessComponent<Void> loginProcess = menus.getNodeMenu().getNode().getUserManager()
 						.createLoginProcess(menus.getUserMenu().getUserCredentials(), fileAgent);
 
@@ -79,7 +79,7 @@ public final class RootMenu extends H2HConsoleMenu {
 			}
 
 			protected void execute() throws Exception {
-				menus.getFileMenu().open(isExpertMode);
+				menus.getFileMenu().open();
 			}
 		});
 	}

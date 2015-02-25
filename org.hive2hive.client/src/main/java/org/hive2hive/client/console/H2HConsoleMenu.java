@@ -16,9 +16,8 @@ public abstract class H2HConsoleMenu extends ConsoleMenu {
 		this.config = ConfigFactory.load("client.conf");
 	}
 
-	public void open(boolean isExpertMode) {
+	public void setExpertMode(boolean isExpertMode) {
 		this.isExpertMode = isExpertMode;
-		open();
 	}
 
 	public void reset() {

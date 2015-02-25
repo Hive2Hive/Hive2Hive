@@ -26,13 +26,15 @@ public class IntroMenu extends ConsoleMenu {
 		add(new H2HConsoleMenuItem("Basic Mode (Recommended)") {
 			@Override
 			protected void execute() throws Exception {
-				menus.getRootMenu().open(false);
+				menus.setExpertMode(false);
+				menus.getRootMenu().open();
 			}
 		});
 		add(new H2HConsoleMenuItem("Expert Mode") {
 			@Override
 			protected void execute() throws Exception {
-				menus.getRootMenu().open(true);
+				menus.setExpertMode(true);
+				menus.getRootMenu().open();
 			}
 		});
 	}

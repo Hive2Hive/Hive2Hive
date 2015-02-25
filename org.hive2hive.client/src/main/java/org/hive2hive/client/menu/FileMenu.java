@@ -2,14 +2,10 @@ package org.hive2hive.client.menu;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.commons.io.FileUtils;
-import org.hive2hive.client.console.ConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.console.SelectionMenu;
@@ -27,55 +23,15 @@ import org.hive2hive.processframework.interfaces.IProcessComponent;
 
 public class FileMenu extends H2HConsoleMenu {
 
-	private H2HConsoleMenuItem createRootDirectory;
-	private File rootDirectory;
-
 	public FileMenu(MenuContainer menus) {
 		super(menus);
-	}
-
-	@Override
-	protected void createItems() {
-		createRootDirectory = new H2HConsoleMenuItem("Create Root Directory") {
-			protected void execute() throws Exception {
-
-				rootDirectory = new File(FileUtils.getUserDirectory(), "H2H_"
-						+ menus.getUserMenu().getUserCredentials().getUserId() + "_" + System.currentTimeMillis());
-
-				if (isExpertMode) {
-					print(String.format("Please specify the root directory path or enter 'ok' if you agree with '%s'.",
-							rootDirectory.toPath()));
-
-					String input = awaitStringParameter();
-
-					if (!"ok".equalsIgnoreCase(input)) {
-						while (!Files.exists(new File(input).toPath(), LinkOption.NOFOLLOW_LINKS)) {
-							printError("This directory does not exist. Please retry.");
-							input = awaitStringParameter();
-						}
-					}
-				}
-
-				if (!Files.exists(rootDirectory.toPath(), LinkOption.NOFOLLOW_LINKS)) {
-					try {
-						FileUtils.forceMkdir(rootDirectory);
-						print(String.format("Root directory '%s' created.", rootDirectory));
-					} catch (Exception e) {
-						printError(String
-								.format("Exception on creating the root directory %s: " + e, rootDirectory.toPath()));
-					}
-				} else {
-					print(String.format("Existing root directory '%s' will be used.", rootDirectory));
-				}
-			}
-		};
 	}
 
 	@Override
 	protected void addMenuItems() {
 		add(new H2HConsoleMenuItem("Add File") {
 			protected boolean checkPreconditions() {
-				return createRootDirectory();
+				return menus.getUserMenu().createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
@@ -94,7 +50,7 @@ public class FileMenu extends H2HConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Update File") {
 			protected boolean checkPreconditions() {
-				return createRootDirectory();
+				return menus.getUserMenu().createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
@@ -112,7 +68,7 @@ public class FileMenu extends H2HConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Download File") {
 			protected boolean checkPreconditions() {
-				return createRootDirectory();
+				return menus.getUserMenu().createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
@@ -130,7 +86,7 @@ public class FileMenu extends H2HConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Move File") {
 			protected boolean checkPreconditions() {
-				return createRootDirectory();
+				return menus.getUserMenu().createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
@@ -154,7 +110,7 @@ public class FileMenu extends H2HConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Delete File") {
 			protected boolean checkPreconditions() {
-				return createRootDirectory();
+				return menus.getUserMenu().createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
@@ -172,7 +128,7 @@ public class FileMenu extends H2HConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Recover File") {
 			protected boolean checkPreconditions() {
-				return createRootDirectory();
+				return menus.getUserMenu().createRootDirectory();
 			}
 
 			protected void execute() throws Hive2HiveException, FileNotFoundException, InterruptedException,
@@ -210,7 +166,7 @@ public class FileMenu extends H2HConsoleMenu {
 
 		add(new H2HConsoleMenuItem("Share File") {
 			protected boolean checkPreconditions() {
-				return createRootDirectory();
+				return menus.getUserMenu().createRootDirectory();
 			}
 
 			protected void execute() throws NoSessionException, NoPeerConnectionException, InvalidProcessStateException,
@@ -254,11 +210,11 @@ public class FileMenu extends H2HConsoleMenu {
 
 		add(new H2HConsoleMenuItem("File Observer") {
 			protected boolean checkPreconditions() {
-				return createRootDirectory();
+				return menus.getUserMenu().createRootDirectory();
 			}
 
 			protected void execute() {
-				menus.getFileObserverMenu().open(isExpertMode);
+				menus.getFileObserverMenu().open();
 			}
 		});
 	}
@@ -285,24 +241,6 @@ public class FileMenu extends H2HConsoleMenu {
 		return "Select a file operation:";
 	}
 
-	public File getRootDirectory() {
-		return rootDirectory;
-	}
-
-	@Override
-	public void reset() {
-		rootDirectory = null;
-		ConsoleMenu.print("Root directory path has been reset.");
-	}
-
-	public boolean createRootDirectory() {
-		while (getRootDirectory() == null) {
-			createRootDirectory.invoke();
-		}
-		// at this point, a root directory has always been specified
-		return true;
-	}
-
 	private File askForFile(boolean expectExistence) {
 		return askForFile("Specify the relative path to the root directory '%s'.", expectExistence);
 	}
@@ -321,6 +259,7 @@ public class FileMenu extends H2HConsoleMenu {
 		// TODO be more flexible with inputs, e.g. files with whitespaces in
 		// name
 
+		File rootDirectory = menus.getUserMenu().getRootDirectory();
 		File file = null;
 		do {
 			print(String.format(msg.concat(expectExistence ? String.format(" The %s at this path must exist.",

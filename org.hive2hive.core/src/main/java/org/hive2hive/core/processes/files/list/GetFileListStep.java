@@ -65,7 +65,7 @@ public class GetFileListStep extends ProcessStep<FileNode> {
 			parent.getChildren().add(node);
 		}
 
-		if (hash == null) {
+		if (current.isFolder()) {
 			// current is a folder, visit recursively
 			for (Index child : ((FolderIndex) current).getChildren()) {
 				copyTree(child, node);

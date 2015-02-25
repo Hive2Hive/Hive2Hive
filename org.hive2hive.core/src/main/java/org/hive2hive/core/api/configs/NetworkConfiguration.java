@@ -113,6 +113,18 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	}
 
 	/**
+	 * Create network configuration for 'normal' peer with random node id. The bootstrapping happens at the
+	 * default port {@link H2HConstants#H2H_PORT}.
+	 * 
+	 * @param bootstrapAddress the address to bootstrap to. This can be address of the initial peer or any
+	 *            other peer connected to the DHT.
+	 * @return the network configuration
+	 */
+	public static NetworkConfiguration create(InetAddress bootstrapAddress) {
+		return create(UUID.randomUUID().toString(), bootstrapAddress);
+	}
+
+	/**
 	 * Create network configuration for 'normal' peer. The bootstrapping happens at the default port
 	 * {@link H2HConstants#H2H_PORT}.
 	 * 

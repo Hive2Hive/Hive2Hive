@@ -40,4 +40,11 @@ public class MenuContainer {
 		return fileObserverMenu;
 	}
 
+	public void setExpertMode(boolean expertMode) {
+		rootMenu.setExpertMode(expertMode);
+		nodeMenu.setExpertMode(expertMode);
+		userMenu.setExpertMode(expertMode);
+		fileMenu.setExpertMode(expertMode);
+		fileObserverMenu.setExpertMode(expertMode);
+	}
 }
