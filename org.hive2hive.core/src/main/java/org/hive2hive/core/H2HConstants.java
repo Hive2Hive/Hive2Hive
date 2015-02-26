@@ -127,7 +127,7 @@ public interface H2HConstants {
 	 * Download Manager
 	 */
 	// the number of concurrent downloads
-	public static final int CONCURRENT_DOWNLOADS = 25;
+	public static final int CONCURRENT_DOWNLOADS = 5;
 	// the interval where a download fetches the locations of all users that possibly could have the file
 	public static final int DOWNLOAD_LOCATIONS_INTERVAL_S = 120;
 	// the maximum count the download of a chunk is retried
