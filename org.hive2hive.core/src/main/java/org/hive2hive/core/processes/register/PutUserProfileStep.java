@@ -40,10 +40,10 @@ public class PutUserProfileStep extends BasePutProcessStep {
 					context.consumeUserProfileProtectionKeys());
 			return null;
 		} catch (GeneralSecurityException | IllegalStateException | IOException ex) {
-			logger.error("Cannot encrypt the user profile of the new user {}", context.consumeUserId());
+			logger.error("Cannot encrypt the user profile of the new user {}", context.consumeUserId(), ex);
 			throw new ProcessExecutionException(this, ex, "Cannot encrypt the user profile.");
 		} catch (PutFailedException ex) {
-			logger.error("Cannot put the user profile of the new user {}", context.consumeUserId());
+			logger.error("Cannot put the user profile of the new user {}", context.consumeUserId(), ex);
 			throw new ProcessExecutionException(this, ex);
 		}
 	}
