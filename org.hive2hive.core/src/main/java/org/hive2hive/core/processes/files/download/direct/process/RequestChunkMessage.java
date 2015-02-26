@@ -44,7 +44,7 @@ public class RequestChunkMessage extends DirectRequestMessage {
 
 	@Override
 	public void run() {
-		logger.debug("Received request for a chunk from peer {}", senderAddress);
+		logger.debug("Received request for a chunk {} from peer {}", chunkNumber, senderAddress);
 
 		// check for free heap space before reading the file
 		long freeMemory = Runtime.getRuntime().freeMemory();
