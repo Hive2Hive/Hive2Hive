@@ -1,7 +1,5 @@
 package org.hive2hive.core.network.data.futures;
 
-import io.netty.buffer.ByteBuf;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -18,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A future listener for a get. It can be blocked until the result is here. Then, it returns the desired
  * content or <code>null</code> if the get fails or the content doesn't exist.
- * 
+ *
  * @author Seppi, Nico
  */
 public class FutureGetListener implements BaseFutureListener<FutureGet> {
@@ -40,7 +38,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 
 	/**
 	 * Waits (blocking) until the operation is done
-	 * 
+	 *
 	 * @return returns the content from the DHT
 	 */
 	public BaseNetworkContent awaitAndGet() {
@@ -59,10 +57,8 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 			logger.debug("Got null. '{}'", parameters.toString());
 		} else {
 			// set the result
-			ByteBuf byteBuf = future.data().buffer();
-			if (byteBuf.isReadable()) {
-				byte[] buffer = new byte[byteBuf.readableBytes()];
-				byteBuf.readBytes(buffer);
+			byte[] buffer = future.data().toBytes();
+			if (buffer != null && buffer.length> 0) {
 				result = (BaseNetworkContent) serializer.deserialize(buffer);
 				logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(), parameters.toString());
 			} else {

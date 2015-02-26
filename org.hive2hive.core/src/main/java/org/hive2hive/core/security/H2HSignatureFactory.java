@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The signature is done with SHA1withRSA.
- * 
+ *
  * @author Seppi
  * @author Nico
  */
