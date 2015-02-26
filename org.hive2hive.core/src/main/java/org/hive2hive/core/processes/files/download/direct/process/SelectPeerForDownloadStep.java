@@ -33,7 +33,7 @@ public class SelectPeerForDownloadStep extends ProcessStep<Void> {
 	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
 		DownloadTaskDirect task = context.getTask();
 		logger.debug("Getting the locations to download {} in a blocking manner.", task.getDestinationName());
-		List<Locations> locations = task.consumeLocationsBlocking();
+		List<Locations> locations = task.getLocations();
 		logger.debug("Got the locations to download {}.", task.getDestinationName());
 
 		if (task.isAborted()) {

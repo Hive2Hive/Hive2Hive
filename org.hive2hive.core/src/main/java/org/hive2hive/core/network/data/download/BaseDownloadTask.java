@@ -31,13 +31,13 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	private final List<MetaChunk> metaChunks;
 	private final File destination;
 	private final File tempFolder;
+	private final PublicKeyManager keyManager;
+	protected final EventBus eventBus;
 
-	private final File[] downloadedParts;
+	private final File[] downloadedChunks;
 	// when the download has finished
-	private transient CountDownLatch finishedLatch;
-	private transient Set<IDownloadListener> listeners;
-	private transient PublicKeyManager keyManager;
-	protected transient EventBus eventBus;
+	private final CountDownLatch finishedLatch;
+	private final Set<IDownloadListener> listeners;
 
 	private final AtomicBoolean aborted;
 	private String reason;
@@ -52,9 +52,9 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 		this.eventBus = eventBus;
 
 		// init array as null
-		this.downloadedParts = new File[metaChunks.size()];
-		for (int i = 0; i < downloadedParts.length; i++) {
-			downloadedParts[i] = null;
+		this.downloadedChunks = new File[metaChunks.size()];
+		for (int i = 0; i < downloadedChunks.length; i++) {
+			downloadedChunks[i] = null;
 		}
 
 		// create the download folder
@@ -73,7 +73,7 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	public List<MetaChunk> getOpenChunks() {
 		List<MetaChunk> openChunks = new ArrayList<MetaChunk>();
 		for (MetaChunk metaChunk : metaChunks) {
-			if (downloadedParts[metaChunk.getIndex()] == null || !downloadedParts[metaChunk.getIndex()].exists()) {
+			if (downloadedChunks[metaChunk.getIndex()] == null || !downloadedChunks[metaChunk.getIndex()].exists()) {
 				openChunks.add(metaChunk);
 			}
 		}
@@ -96,10 +96,15 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	}
 
 	public void abortDownload(String reason) {
-		logger.error("Download of file {} aborted. Reason: {}", getDestinationName(), reason);
+		if (aborted.get()) {
+			// already aborted
+			return;
+		} else {
+			aborted.set(true);
+		}
 
+		logger.error("Download of file {} aborted. Reason: {}", getDestinationName(), reason);
 		this.reason = reason;
-		aborted.set(true);
 
 		// notify listeners
 		for (IDownloadListener listener : listeners) {
@@ -115,8 +120,8 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	}
 
 	private boolean isDone() {
-		for (int i = 0; i < downloadedParts.length; i++) {
-			if (downloadedParts[i] == null) {
+		for (int i = 0; i < downloadedChunks.length; i++) {
+			if (downloadedChunks[i] == null) {
 				return false;
 			}
 		}
@@ -130,9 +135,9 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	 * @param chunkIndex the index of the chunk (unique number)
 	 * @param filePart the file holding the content of the chunk
 	 */
-	public synchronized void setDownloaded(int chunkIndex, File filePart) {
+	public synchronized void markDownloaded(int chunkIndex, File filePart) {
 		logger.debug("Successfully downloaded chunk {} of file {}", chunkIndex, getDestinationName());
-		downloadedParts[chunkIndex] = filePart;
+		downloadedChunks[chunkIndex] = filePart;
 
 		if (isAborted()) {
 			// no need for further processing
@@ -149,7 +154,7 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 			logger.debug("All parts of file {} are downloaded, reassembling them...", getDestinationName());
 			try {
 				// reassembly
-				List<File> fileParts = Arrays.asList(downloadedParts);
+				List<File> fileParts = Arrays.asList(downloadedChunks);
 				FileChunkUtil.reassembly(fileParts, destination);
 				logger.debug("File {} has successfully been reassembled", getDestinationName());
 
@@ -168,21 +173,6 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 			} catch (IOException e) {
 				abortDownload(String.format("Cannot reassembly the file parts. Reason: %s.", reason + e.getMessage()));
 			}
-		}
-	}
-
-	/**
-	 * Re-initialize transient variables after the serialization
-	 */
-	public void reinitializeAfterDeserialization(EventBus eventBus, PublicKeyManager keyManager) {
-		this.eventBus = eventBus;
-		this.keyManager = keyManager;
-
-		this.listeners = new HashSet<IDownloadListener>();
-		if (!isAborted() && !isDone()) {
-			finishedLatch = new CountDownLatch(1);
-		} else {
-			finishedLatch = new CountDownLatch(0);
 		}
 	}
 

@@ -14,7 +14,6 @@ import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
-import org.hive2hive.core.network.data.download.BaseDownloadTask;
 import org.hive2hive.core.network.data.download.DownloadManager;
 import org.hive2hive.core.network.data.vdht.VersionManager;
 import org.hive2hive.core.processes.context.LoginProcessContext;
@@ -70,12 +69,6 @@ public class SessionCreationStep extends ProcessStep<Void> {
 
 			// create the download manager
 			DownloadManager downloadManager = networkManager.getDownloadManager();
-
-			// read the cached downloads and add them to the download manager
-			for (BaseDownloadTask task : metaData.getDownloads()) {
-				task.reinitializeAfterDeserialization(networkManager.getEventBus(), keyManager);
-				downloadManager.submit(task);
-			}
 			params.setDownloadManager(downloadManager);
 
 			// create session
