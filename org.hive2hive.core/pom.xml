@@ -20,7 +20,7 @@
 			<!-- Hive2Hive Process Framework -->
 			<groupId>org.hive2hive</groupId>
 			<artifactId>org.hive2hive.processframework</artifactId>
-			<version>1.0</version>
+			<version>1.1-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
