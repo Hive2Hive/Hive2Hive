@@ -6,8 +6,7 @@ import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.PutFailedException;
 import org.hive2hive.core.exceptions.VersionForkAfterPutException;
 import org.hive2hive.core.model.versioned.Locations;
-import org.hive2hive.core.network.data.PublicKeyManager;
-import org.hive2hive.core.network.data.vdht.VersionManager;
+import org.hive2hive.core.network.data.vdht.LocationsManager;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.hive2hive.processframework.exceptions.ProcessExecutionException;
@@ -26,12 +25,10 @@ public abstract class BaseModifyLocationsStep extends ProcessStep<Void> {
 	private static final Logger logger = LoggerFactory.getLogger(BaseModifyLocationsStep.class);
 	private static final int FORK_LIMIT = 2;
 
-	private final VersionManager<Locations> locationsManager;
-	private final PublicKeyManager keyManager;
+	private final LocationsManager locationsManager;
 
-	public BaseModifyLocationsStep(VersionManager<Locations> locationsManager, PublicKeyManager keyManager) {
+	public BaseModifyLocationsStep(LocationsManager locationsManager) {
 		this.locationsManager = locationsManager;
-		this.keyManager = keyManager;
 	}
 
 	/**
@@ -65,7 +62,7 @@ public abstract class BaseModifyLocationsStep extends ProcessStep<Void> {
 		int forkWaitTime = new Random().nextInt(1000) + 500;
 		while (retryPut) {
 			try {
-				locationsManager.put(locations, keyManager.getDefaultProtectionKeyPair());
+				locationsManager.put(locations);
 				setRequiresRollback(true);
 			} catch (VersionForkAfterPutException ex) {
 				if (forkCounter++ > FORK_LIMIT) {

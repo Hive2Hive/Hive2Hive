@@ -60,8 +60,7 @@ public class SendNotificationsMessageStep extends BaseMessageProcessStep {
 			logger.debug("Need to cleanup {} unreachable peers of own user", unreachablePeers.size());
 			try {
 				H2HSession session = networkManager.getSession();
-				getParent().add(
-						new RemoveUnreachableStep(unreachablePeers, session.getLocationsManager(), session.getKeyManager()));
+				getParent().add(new RemoveUnreachableStep(unreachablePeers, session.getLocationsManager()));
 			} catch (NoSessionException e) {
 				logger.error("Cannot cleanup unreachable peers because no session");
 			}

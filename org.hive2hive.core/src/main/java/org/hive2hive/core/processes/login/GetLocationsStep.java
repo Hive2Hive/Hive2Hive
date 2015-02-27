@@ -2,9 +2,8 @@ package org.hive2hive.core.processes.login;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
-import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.network.data.vdht.VersionManager;
+import org.hive2hive.core.network.data.vdht.LocationsManager;
 import org.hive2hive.core.processes.context.LoginProcessContext;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -23,7 +22,7 @@ public class GetLocationsStep extends ProcessStep<Void> {
 
 	@Override
 	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
-		VersionManager<Locations> locationsManager;
+		LocationsManager locationsManager;
 		try {
 			locationsManager = networkManager.getSession().getLocationsManager();
 		} catch (NoSessionException ex) {
@@ -31,8 +30,7 @@ public class GetLocationsStep extends ProcessStep<Void> {
 		}
 
 		try {
-			Locations locations = locationsManager.get();
-			context.provideLocations(locations);
+			context.provideLocations(locationsManager.get());
 		} catch (GetFailedException ex) {
 			throw new ProcessExecutionException(this, ex);
 		}

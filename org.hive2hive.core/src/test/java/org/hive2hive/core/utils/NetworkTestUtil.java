@@ -16,12 +16,11 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
-import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
-import org.hive2hive.core.network.data.vdht.VersionManager;
+import org.hive2hive.core.network.data.vdht.LocationsManager;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.security.UserCredentials;
@@ -102,8 +101,8 @@ public class NetworkTestUtil {
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeyPair,
 					node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node, new TestFileConfiguration());
-			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
-					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
+			LocationsManager locationsManager = new LocationsManager(node.getDataManager(), userCredentials.getUserId(),
+					protectionKeyPair);
 
 			SessionParameters params = new SessionParameters(new TestFileAgent());
 			params.setDownloadManager(downloadManager);
@@ -131,8 +130,8 @@ public class NetworkTestUtil {
 			PublicKeyManager keyManager = new PublicKeyManager(userCredentials.getUserId(), keyPair, protectionKeys,
 					node.getDataManager());
 			DownloadManager downloadManager = new DownloadManager(node, new TestFileConfiguration());
-			VersionManager<Locations> locationsManager = new VersionManager<>(node.getDataManager(),
-					userCredentials.getUserId(), H2HConstants.USER_LOCATIONS);
+			LocationsManager locationsManager = new LocationsManager(node.getDataManager(), userCredentials.getUserId(),
+					protectionKeys);
 
 			SessionParameters params = new SessionParameters(new TestFileAgent());
 			params.setDownloadManager(downloadManager);

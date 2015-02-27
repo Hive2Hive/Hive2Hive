@@ -4,18 +4,17 @@ import java.io.File;
 import java.security.KeyPair;
 
 import org.hive2hive.core.file.IFileAgent;
-import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
-import org.hive2hive.core.network.data.vdht.VersionManager;
+import org.hive2hive.core.network.data.vdht.LocationsManager;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.security.UserCredentials;
 
 public class H2HSession {
 
 	private final UserProfileManager profileManager;
-	private final VersionManager<Locations> locationsManager;
+	private final LocationsManager locationsManager;
 	private final PublicKeyManager keyManager;
 	private final DownloadManager downloadManager;
 	private final IFileAgent fileAgent;
@@ -32,7 +31,7 @@ public class H2HSession {
 		return profileManager;
 	}
 
-	public VersionManager<Locations> getLocationsManager() {
+	public LocationsManager getLocationsManager() {
 		return locationsManager;
 	}
 

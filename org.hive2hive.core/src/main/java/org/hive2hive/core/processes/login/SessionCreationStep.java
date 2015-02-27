@@ -3,19 +3,17 @@ package org.hive2hive.core.processes.login;
 import java.security.PublicKey;
 import java.util.Map;
 
-import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.file.PersistentMetaData;
-import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.data.download.DownloadManager;
-import org.hive2hive.core.network.data.vdht.VersionManager;
+import org.hive2hive.core.network.data.vdht.LocationsManager;
 import org.hive2hive.core.processes.context.LoginProcessContext;
 import org.hive2hive.processframework.ProcessStep;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -45,11 +43,10 @@ public class SessionCreationStep extends ProcessStep<Void> {
 
 			// load user profile
 			UserProfile userProfile = userProfileManager.readUserProfile();
-			context.provideUserProfile(userProfile);
 
 			// create the locations manager
-			VersionManager<Locations> locationsManager = new VersionManager<Locations>(networkManager.getDataManager(),
-					context.consumeUserId(), H2HConstants.USER_LOCATIONS);
+			LocationsManager locationsManager = new LocationsManager(networkManager.getDataManager(),
+					context.consumeUserId(), userProfile.getProtectionKeys());
 			params.setLocationsManager(locationsManager);
 
 			// get the persistently cached items

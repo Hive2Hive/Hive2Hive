@@ -11,7 +11,7 @@ public class RemoveOwnLocationsStep extends BaseModifyLocationsStep {
 	private final NetworkManager networkManager;
 
 	public RemoveOwnLocationsStep(NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException {
-		super(networkManager.getSession().getLocationsManager(), networkManager.getSession().getKeyManager());
+		super(networkManager.getSession().getLocationsManager());
 		this.setName(getClass().getName());
 		this.networkManager = networkManager;
 	}
