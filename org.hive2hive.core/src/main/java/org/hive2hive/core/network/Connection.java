@@ -22,6 +22,7 @@ import net.tomp2p.replication.IndirectReplication;
 import net.tomp2p.replication.SlowReplicationFilter;
 
 import org.hive2hive.core.H2HConstants;
+import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
 import org.hive2hive.core.security.H2HSignatureFactory;
 import org.hive2hive.core.serializer.IH2HSerialize;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 public class Connection implements IPeerHolder {
 
 	private static final Logger logger = LoggerFactory.getLogger(Connection.class);
-	private static final int MAX_PORT = 65535;
 
 	private final MessageReplyHandler messageReplyHandler;
 	private PeerDHT peerDHT;
@@ -47,47 +47,69 @@ public class Connection implements IPeerHolder {
 	}
 
 	/**
-	 * Creates a peer and connects it to the network.
+	 * Creates a peer and connects it to the network
 	 * 
-	 * @param nodeID the id of the network node (should be unique among the network)
-	 * @param port the port to bind to (or negative to bind automatically a default port)
+	 * @param networkConfiguration the network configuration
 	 * @return <code>true</code>, if the peer creation and connection was successful, otherwise
 	 *         <code>false</code>
 	 */
-	public boolean connect(String nodeID, int port) {
+	public boolean connect(INetworkConfiguration networkConfiguration) {
 		if (isConnected()) {
 			logger.warn("Peer is already connected.");
 			return false;
 		}
 
-		return createPeer(nodeID, port);
+		if (networkConfiguration.isLocal()) {
+			return connectInternal(networkConfiguration.getNodeID(), networkConfiguration.getPort(),
+					networkConfiguration.getBootstapPeer());
+		} else {
+			boolean success = createPeer(networkConfiguration);
+			// bootstrap if not initial peer
+			if (success && !networkConfiguration.isInitial()) {
+				success = bootstrap(networkConfiguration.getBootstrapAddress(), networkConfiguration.getBootstrapPort());
+			}
+
+			return success;
+		}
 	}
 
-	/**
-	 * Uses the given peer and does not bootstrap any further
-	 * 
-	 * @param peer the peer
-	 * @param startReplication whether replication should be started
-	 * @return <code>true</code> if the given peer is valid, otherwise <code>false</code>.
-	 */
-	public boolean connect(PeerDHT peer, boolean startReplication) {
-		if (isConnected()) {
-			logger.warn("Peer is already connected.");
-			return false;
-		} else if (peer.peer().isShutdown()) {
-			logger.warn("Peer is already shut down.");
+	private boolean createPeer(INetworkConfiguration networkConfiguration) {
+		try {
+			H2HStorageMemory storageMemory = new H2HStorageMemory();
+			peerDHT = new PeerBuilderDHT(
+					preparePeerBuilder(networkConfiguration.getNodeID(), networkConfiguration.getPort()).start())
+					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
+					.storageLayer(storageMemory).start();
+		} catch (IOException e) {
+			logger.error("Exception while creating a peer: ", e);
 			return false;
 		}
-		this.peerDHT = peer;
 
 		// attach a reply handler for messages
 		peerDHT.peer().objectDataReply(messageReplyHandler);
 
-		if (startReplication) {
-			startReplication();
-		}
+		// setup replication
+		startReplication();
 
+		logger.debug("Peer successfully created and connected.");
 		return true;
+	}
+
+	private PeerBuilder preparePeerBuilder(String nodeID, int port) {
+		int bindPort = port < 0 ? NetworkUtils.searchFreePort() : port;
+
+		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
+		clientConfig.signatureFactory(new H2HSignatureFactory());
+
+		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
+		serverConfig.signatureFactory(new H2HSignatureFactory());
+		serverConfig.ports(new Ports(bindPort, bindPort));
+
+		// listen on any interfaces (see https://github.com/Hive2Hive/Hive2Hive/issues/117)
+		Bindings bindings = new Bindings().listenAny();
+
+		return new PeerBuilder(Number160.createHash(nodeID)).ports(bindPort).bindings(bindings)
+				.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig);
 	}
 
 	/**
@@ -97,12 +119,7 @@ public class Connection implements IPeerHolder {
 	 * @param port Bootstrap port.
 	 * @return <code>true</code>, if bootstrapping was successful, <code>false</code> otherwise.
 	 */
-	public boolean bootstrap(InetAddress bootstrapAddress, int port) {
-		if (!isConnected()) {
-			logger.warn("Build peer first!");
-			return false;
-		}
-
+	private boolean bootstrap(InetAddress bootstrapAddress, int port) {
 		FutureDiscover futureDiscover = peerDHT.peer().discover().inetAddress(bootstrapAddress).ports(port).start();
 		futureDiscover.awaitUninterruptibly(H2HConstants.DISCOVERY_TIMEOUT_MS);
 
@@ -125,29 +142,24 @@ public class Connection implements IPeerHolder {
 		}
 	}
 
-	/**
-	 * Disconnects a peer from the network.
-	 * 
-	 * @return <code>true</code>, if disconnection was successful, <code>false</code> otherwise.
-	 */
-	public boolean disconnect() {
-		boolean isDisconnected = true;
-		if (isConnected()) {
-			// notify neighbors about shutdown
-			peerDHT.peer().announceShutdown().start().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
-			// shutdown the peer, giving a certain timeout
-			isDisconnected = peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
-
-			if (isDisconnected) {
-				logger.debug("Peer successfully disconnected.");
-			} else {
-				logger.warn("Peer disconnection failed.");
-			}
-		} else {
-			logger.warn("Peer disconnection failed. Peer is not connected.");
+	private void startReplication() {
+		IndirectReplication replication = new IndirectReplication(peerDHT);
+		// set replication factor
+		replication.replicationFactor(H2HConstants.REPLICATION_FACTOR);
+		// set replication frequency
+		replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL_MS);
+		// set kind of replication, default is 0Root
+		if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
+			replication.nRoot();
 		}
-
-		return isDisconnected;
+		// replicate to slow peers or add a filter
+		if (!H2HConstants.REPLICATE_TO_SLOW_PEERS) {
+			replication.addReplicationFilter(new SlowReplicationFilter());
+		}
+		// set flag to keep data, even when peer looses replication responsibility
+		replication.keepData(true);
+		// start the indirect replication
+		replication.start();
 	}
 
 	/**
@@ -160,7 +172,7 @@ public class Connection implements IPeerHolder {
 	 *            create a new network.
 	 * @return <code>true</code> if everything went ok, <code>false</code> otherwise
 	 */
-	public boolean connectInternal(String nodeId, int port, Peer masterPeer) {
+	private boolean connectInternal(String nodeId, int port, Peer masterPeer) {
 		// disable peer verification (faster mutual acceptance)
 		PeerMapConfiguration peerMapConfiguration = new PeerMapConfiguration(Number160.createHash(nodeId));
 		peerMapConfiguration.peerVerification(false);
@@ -202,6 +214,58 @@ public class Connection implements IPeerHolder {
 		}
 	}
 
+	/**
+	 * Uses the given peer and does not bootstrap any further
+	 * 
+	 * @param peer the peer
+	 * @param startReplication whether replication should be started
+	 * @return <code>true</code> if the given peer is valid, otherwise <code>false</code>.
+	 */
+	public boolean connect(PeerDHT peer, boolean startReplication) {
+		if (isConnected()) {
+			logger.warn("Peer is already connected.");
+			return false;
+		} else if (peer.peer().isShutdown()) {
+			logger.warn("Peer is already shut down.");
+			return false;
+		}
+		this.peerDHT = peer;
+
+		// attach a reply handler for messages
+		peerDHT.peer().objectDataReply(messageReplyHandler);
+
+		if (startReplication) {
+			startReplication();
+		}
+
+		return true;
+	}
+
+	/**
+	 * Disconnects a peer from the network.
+	 * 
+	 * @return <code>true</code>, if disconnection was successful, <code>false</code> otherwise.
+	 */
+	public boolean disconnect() {
+		boolean isDisconnected = true;
+		if (isConnected()) {
+			// notify neighbors about shutdown
+			peerDHT.peer().announceShutdown().start().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
+			// shutdown the peer, giving a certain timeout
+			isDisconnected = peerDHT.shutdown().awaitUninterruptibly(H2HConstants.DISCONNECT_TIMEOUT_MS);
+
+			if (isDisconnected) {
+				logger.debug("Peer successfully disconnected.");
+			} else {
+				logger.warn("Peer disconnection failed.");
+			}
+		} else {
+			logger.warn("Peer disconnection failed. Peer is not connected.");
+		}
+
+		return isDisconnected;
+	}
+
 	public boolean isConnected() {
 		return peerDHT != null && !peerDHT.peer().isShutdown();
 	}
@@ -216,85 +280,5 @@ public class Connection implements IPeerHolder {
 	 */
 	public MessageReplyHandler getMessageReplyHandler() {
 		return messageReplyHandler;
-	}
-
-	private PeerBuilder preparePeerBuilder(String nodeID, int port) {
-		int bindPort = port < 0 ? searchFreePort() : port;
-
-		ChannelClientConfiguration clientConfig = PeerBuilder.createDefaultChannelClientConfiguration();
-		clientConfig.signatureFactory(new H2HSignatureFactory());
-
-		ChannelServerConfiguration serverConfig = PeerBuilder.createDefaultChannelServerConfiguration();
-		serverConfig.signatureFactory(new H2HSignatureFactory());
-		serverConfig.ports(new Ports(bindPort, bindPort));
-
-		// raise timeouts
-		serverConfig.connectionTimeoutTCPMillis(15 * 1000);
-		serverConfig.idleTCPSeconds(15 * 1000);
-		serverConfig.idleUDPSeconds(15 * 1000);
-
-		// listen on any interfaces (see https://github.com/Hive2Hive/Hive2Hive/issues/117)
-		Bindings bindings = new Bindings().listenAny();
-
-		return new PeerBuilder(Number160.createHash(nodeID)).ports(bindPort).bindings(bindings)
-				.channelClientConfiguration(clientConfig).channelServerConfiguration(serverConfig);
-	}
-
-	private boolean createPeer(String nodeId, int port) {
-		try {
-			H2HStorageMemory storageMemory = new H2HStorageMemory();
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId, port).start())
-					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
-					.storageLayer(storageMemory).start();
-		} catch (IOException e) {
-			logger.error("Exception while creating a peer: ", e);
-			return false;
-		}
-
-		// attach a reply handler for messages
-		peerDHT.peer().objectDataReply(messageReplyHandler);
-
-		// setup replication
-		startReplication();
-
-		logger.debug("Peer successfully created and connected.");
-		return true;
-	}
-
-	private void startReplication() {
-		IndirectReplication replication = new IndirectReplication(peerDHT);
-		// set replication factor
-		replication.replicationFactor(H2HConstants.REPLICATION_FACTOR);
-		// set replication frequency
-		replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL_MS);
-		// set kind of replication, default is 0Root
-		if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
-			replication.nRoot();
-		}
-		// set flag to keep data, even when peer looses replication responsibility
-		replication.keepData(true);
-		// add replication filter for slow peers
-		replication.addReplicationFilter(new SlowReplicationFilter());
-		// start the indirect replication
-		replication.start();
-	}
-
-	/**
-	 * Searches for open ports, starting at {@link H2HConstants#H2H_PORT}.
-	 * 
-	 * @return the free port or -1 if none was found.
-	 */
-	private int searchFreePort() {
-		int port = H2HConstants.H2H_PORT;
-		while (!NetworkUtils.isPortAvailable(port)) {
-			if (port > MAX_PORT) {
-				logger.error("Could not find any free port");
-				return -1;
-			}
-
-			port++;
-		}
-		logger.debug("Found free port {}.", port);
-		return port;
 	}
 }

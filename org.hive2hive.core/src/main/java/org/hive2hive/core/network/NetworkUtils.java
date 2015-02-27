@@ -9,10 +9,36 @@ import java.util.List;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class NetworkUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(NetworkUtils.class);
+	private static final int MAX_PORT = 65535;
 
 	private NetworkUtils() {
 		// only static methods
+	}
+
+	/**
+	 * Searches for open ports, starting at {@link H2HConstants#H2H_PORT}.
+	 * 
+	 * @return the free port or -1 if none was found.
+	 */
+	public static int searchFreePort() {
+		int port = H2HConstants.H2H_PORT;
+		while (!isPortAvailable(port)) {
+			if (port > MAX_PORT) {
+				logger.error("Could not find any free port");
+				return -1;
+			}
+
+			port++;
+		}
+		logger.debug("Found free port {}.", port);
+		return port;
 	}
 
 	/**
