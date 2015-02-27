@@ -27,8 +27,6 @@ import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.serializer.FSTSerializer;
 import org.hive2hive.core.utils.helper.TestFileAgent;
 
-// TODO test classes using a test network should inherit from the same test class that handles instantiation and shutdown of network, all in the same way
-
 /**
  * Helper class for testing. Provides methods for creating, shutdown nodes and some random generators.
  * 
