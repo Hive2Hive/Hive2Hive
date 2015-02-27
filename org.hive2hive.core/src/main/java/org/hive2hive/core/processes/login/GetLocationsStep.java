@@ -2,6 +2,7 @@ package org.hive2hive.core.processes.login;
 
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.data.vdht.LocationsManager;
 import org.hive2hive.core.processes.context.LoginProcessContext;
@@ -32,7 +33,14 @@ public class GetLocationsStep extends ProcessStep<Void> {
 		try {
 			context.provideLocations(locationsManager.get());
 		} catch (GetFailedException ex) {
-			throw new ProcessExecutionException(this, ex);
+			Locations locations = locationsManager.repairLocations();
+			if (locations == null) {
+				// even repairing failed
+				throw new ProcessExecutionException(this, ex);
+			} else {
+				// repairing was successful
+				context.provideLocations(locations);
+			}
 		}
 		return null;
 	}
