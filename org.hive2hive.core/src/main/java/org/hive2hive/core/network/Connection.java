@@ -19,6 +19,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerMap;
 import net.tomp2p.peers.PeerMapConfiguration;
 import net.tomp2p.replication.IndirectReplication;
+import net.tomp2p.replication.SlowReplicationFilter;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
@@ -272,6 +273,8 @@ public class Connection implements IPeerHolder {
 		}
 		// set flag to keep data, even when peer looses replication responsibility
 		replication.keepData(true);
+		// add replication filter for slow peers
+		replication.addReplicationFilter(new SlowReplicationFilter());
 		// start the indirect replication
 		replication.start();
 	}
