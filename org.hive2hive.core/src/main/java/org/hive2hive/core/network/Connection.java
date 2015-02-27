@@ -19,6 +19,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerMap;
 import net.tomp2p.peers.PeerMapConfiguration;
 import net.tomp2p.replication.IndirectReplication;
+import net.tomp2p.replication.SlowReplicationFilter;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
@@ -62,7 +63,7 @@ public class Connection implements IPeerHolder {
 			return connectInternal(networkConfiguration.getNodeID(), networkConfiguration.getPort(),
 					networkConfiguration.getBootstapPeer());
 		} else {
-			boolean success = createPeer(networkConfiguration.getNodeID(), networkConfiguration.getPort());
+			boolean success = createPeer(networkConfiguration);
 			// bootstrap if not initial peer
 			if (success && !networkConfiguration.isInitial()) {
 				success = bootstrap(networkConfiguration.getBootstrapAddress(), networkConfiguration.getBootstrapPort());
@@ -72,10 +73,11 @@ public class Connection implements IPeerHolder {
 		}
 	}
 
-	private boolean createPeer(String nodeId, int port) {
+	private boolean createPeer(INetworkConfiguration networkConfiguration) {
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId, port).start())
+			peerDHT = new PeerBuilderDHT(
+					preparePeerBuilder(networkConfiguration.getNodeID(), networkConfiguration.getPort()).start())
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 		} catch (IOException e) {
@@ -149,6 +151,10 @@ public class Connection implements IPeerHolder {
 		// set kind of replication, default is 0Root
 		if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
 			replication.nRoot();
+		}
+		// replicate to slow peers or add a filter
+		if (!H2HConstants.REPLICATE_TO_SLOW_PEERS) {
+			replication.addReplicationFilter(new SlowReplicationFilter());
 		}
 		// set flag to keep data, even when peer looses replication responsibility
 		replication.keepData(true);

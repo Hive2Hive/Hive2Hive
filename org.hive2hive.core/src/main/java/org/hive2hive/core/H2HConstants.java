@@ -24,6 +24,8 @@ public interface H2HConstants {
 
 	// standard port for the Hive2Hive network
 	public static final int H2H_PORT = 4622;
+	// store data onto slow peers (e.g. Android devices) or not
+	public static final boolean STORE_DATA_SLOW_PEERS = false;
 
 	// standard timeout for discovery
 	public static final long DISCOVERY_TIMEOUT_MS = 10000;
@@ -76,10 +78,6 @@ public interface H2HConstants {
 	// default key used in the TomP2P framework
 	public static final Number160 TOMP2P_DEFAULT_KEY = Number160.ZERO;
 
-	// number of threads that netty / tomp2p are allowed to have. Too few threads can lead to slow response
-	// times, too many threads can exceed the available memory
-	public static final int NUM_OF_NETWORK_THREADS = 16;
-
 	/**
 	 * Encryption Key Management
 	 */
@@ -107,6 +105,7 @@ public interface H2HConstants {
 	public static final int REPLICATION_FACTOR = 5;
 	public static final int REPLICATION_INTERVAL_MS = 300000;
 	public static final String REPLICATION_STRATEGY = "nRoot"; // or 0Root
+	public static final boolean REPLICATE_TO_SLOW_PEERS = STORE_DATA_SLOW_PEERS;
 
 	/**
 	 * TTL of Data in Network
