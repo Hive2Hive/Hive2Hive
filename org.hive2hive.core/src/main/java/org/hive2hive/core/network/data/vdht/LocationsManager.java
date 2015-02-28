@@ -64,10 +64,10 @@ public class LocationsManager {
 				.setVersionKey(locations.getVersionKey()).setBasedOnKey(locations.getBasedOnKey())
 				.setNetworkContent(locations).setProtectionKeys(protectionKeys).setTTL(locations.getTimeToLive());
 		if (dataManager.put(addParams) == H2HPutStatus.OK) {
-			logger.debug("Successfully repaired the locations");
+			logger.debug("Successfully repaired the locations of user {}", userId);
 			return locations;
 		} else {
-			logger.warn("Could not put the repaired locations");
+			logger.warn("Could not put the repaired locations of user {}", userId);
 			return null;
 		}
 	}

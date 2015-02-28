@@ -12,13 +12,12 @@ import org.hive2hive.core.security.IH2HEncryption;
 public class ShareFolderNotificationMessageFactory extends BaseNotificationMessageFactory {
 
 	private final FolderIndex fileNode;
-	private final UserPermission addedFriend;
+	private final UserPermission addedSharer;
 
-	public ShareFolderNotificationMessageFactory(IH2HEncryption encryption, FolderIndex fileNode,
-			UserPermission userPermission) {
+	public ShareFolderNotificationMessageFactory(IH2HEncryption encryption, FolderIndex fileNode, UserPermission addedSharer) {
 		super(encryption);
 		this.fileNode = fileNode;
-		this.addedFriend = userPermission;
+		this.addedSharer = addedSharer;
 	}
 
 	@Override
@@ -29,6 +28,6 @@ public class ShareFolderNotificationMessageFactory extends BaseNotificationMessa
 
 	@Override
 	public UserProfileTask createUserProfileTask(String sender) {
-		return new ShareFolderUserProfileTask(sender, generateProtectionKeys(), fileNode, addedFriend);
+		return new ShareFolderUserProfileTask(sender, generateProtectionKeys(), fileNode, addedSharer);
 	}
 }
