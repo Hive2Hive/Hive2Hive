@@ -81,7 +81,7 @@ public class InitializeChunksStep extends ProcessStep<Void> {
 		// init the large file chunks
 		IFileConfiguration config = context.consumeFileConfiguration();
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
-		logger.trace(String.format("%s chunks for large file '%s'.", Integer.toString(chunks), file.getName()));
+		logger.trace("{} chunks for large file '{}'.", Integer.toString(chunks), file.getName());
 
 		// TODO Hashing is slow --> do this in multiple threads to speedup the initialization.
 

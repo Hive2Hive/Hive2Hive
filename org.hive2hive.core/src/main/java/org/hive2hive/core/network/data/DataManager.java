@@ -84,22 +84,6 @@ public class DataManager {
 			data.ttlSeconds(parameters.getTTL());
 		}
 
-		// // sign the data
-		// try {
-		// // encrypt hash with new key pair to get the new signature (without having the data object)
-		// Cipher rsa = Cipher.getInstance("RSA");
-		// rsa.init(Cipher.ENCRYPT_MODE, parameters.getNewProtectionKeys().getPrivate());
-		// byte[] newSignature = rsa.doFinal(parameters.getHash());
-		//
-		// // create new data signature
-		// data = data.signature(signatureCodec.decode(newSignature));
-		// } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-		// | IllegalBlockSizeException | BadPaddingException e) {
-		// logger.error(String.format("Change protection key failed. %s exception = '%s'",
-		// parameters.toString(), e.getMessage()));
-		// return null;
-		// }
-
 		// create meta data
 		data = data.duplicateMeta();
 
