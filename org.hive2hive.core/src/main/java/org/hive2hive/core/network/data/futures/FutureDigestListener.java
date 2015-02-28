@@ -68,8 +68,7 @@ public class FutureDigestListener implements BaseFutureListener<FutureDigest> {
 
 	@Override
 	public void exceptionCaught(Throwable t) throws Exception {
-		logger.error(String.format("Exception caught during get digest. %s reason = '{}'", parameters.toString()),
-				t.getMessage());
+		logger.error("Exception caught during get digest. {} reason = '{}'", parameters.toString(), t.getMessage());
 		operationComplete(null);
 	}
 
