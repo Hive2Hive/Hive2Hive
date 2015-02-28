@@ -134,6 +134,10 @@ public class H2HJUnitTest {
 		return new UserCredentials(randomString(), randomString(), randomString());
 	}
 
+	public static UserCredentials generateRandomCredentials(String userName) {
+		return new UserCredentials(userName, randomString(), randomString());
+	}
+
 	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH size) {
 		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
 			Security.addProvider(new BouncyCastleProvider());

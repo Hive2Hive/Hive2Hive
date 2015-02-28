@@ -118,7 +118,6 @@ public interface H2HConstants {
 	 */
 	// delay in milliseconds before first ttl refreshment task is to be executed
 	public static final int TTL_REFRESHMENT_DELAY = 500;
-
 	// period in milliseconds between successive ttl refreshment task executions
 	public static final int TTL_REFRESHMENT_PERIOD = 1000;
 

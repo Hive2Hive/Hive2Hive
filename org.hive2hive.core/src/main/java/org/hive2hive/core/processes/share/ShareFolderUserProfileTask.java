@@ -30,13 +30,13 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 	private static final Logger logger = LoggerFactory.getLogger(ShareFolderUserProfileTask.class);
 
 	private final FolderIndex sharedIndex;
-	private final UserPermission addedFriend;
+	private final UserPermission addedSharer;
 
 	public ShareFolderUserProfileTask(String sender, KeyPair protectionKeys, FolderIndex sharedIndex,
-			UserPermission addedFriend) {
+			UserPermission addedSharer) {
 		super(sender, protectionKeys);
 		this.sharedIndex = sharedIndex;
-		this.addedFriend = addedFriend;
+		this.addedSharer = addedSharer;
 	}
 
 	@Override
@@ -64,13 +64,15 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 		try {
 			profileManager.modifyUserProfile(getId(), this);
 		} catch (Hive2HiveException e) {
-			logger.error("Cannot execute the task.", e);
+			logger.error("Cannot execute the share user profile task.", e);
+			return;
 		}
 
 		/** Case when shared with me: Notify others that files are available */
-		if (networkManager.getUserId().equals(addedFriend.getUserId())) {
+		if (networkManager.getUserId().equals(addedSharer.getUserId())) {
 			// trigger event that file has been shared
-			IFileShareEvent shareEvent = new FileShareEvent(sharedIndex.asFile(session.getRootFile()), addedFriend, sender);
+			IFileShareEvent shareEvent = new FileShareEvent(sharedIndex.asFile(session.getRootFile()),
+					sharedIndex.getUserPermissions(), sender);
 			networkManager.getEventBus().publish(shareEvent);
 
 			List<Index> sharedFiles = Index.getIndexList(sharedIndex);
@@ -95,12 +97,12 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 
 	@Override
 	public void modifyUserProfile(UserProfile userProfile) throws AbortModifyException {
-		if (networkManager.getUserId().equals(addedFriend.getUserId())) {
+		if (networkManager.getUserId().equals(addedSharer.getUserId())) {
 			// I'm the new sharer
 			processSharedWithMe(userProfile);
 		} else {
 			// New sharer, but I have the file already
-			logger.debug("Other user shared folder with new user '{}'.", addedFriend);
+			logger.debug("Other user shared folder with new user '{}'.", addedSharer);
 			processSharedWithOther(userProfile);
 		}
 	}
@@ -118,6 +120,6 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 			throw new AbortModifyException("I'm not the newly shared user but don't have the shared folder");
 		}
 
-		index.addUserPermissions(addedFriend);
+		index.addUserPermissions(addedSharer);
 	}
 }

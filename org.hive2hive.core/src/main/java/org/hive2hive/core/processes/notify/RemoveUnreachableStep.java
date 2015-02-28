@@ -5,8 +5,7 @@ import java.util.Set;
 import net.tomp2p.peers.PeerAddress;
 
 import org.hive2hive.core.model.versioned.Locations;
-import org.hive2hive.core.network.data.PublicKeyManager;
-import org.hive2hive.core.network.data.vdht.VersionManager;
+import org.hive2hive.core.network.data.vdht.LocationsManager;
 import org.hive2hive.core.processes.common.base.BaseModifyLocationsStep;
 
 /**
@@ -18,9 +17,8 @@ public class RemoveUnreachableStep extends BaseModifyLocationsStep {
 
 	private final Set<PeerAddress> unreachablePeers;
 
-	public RemoveUnreachableStep(Set<PeerAddress> unreachablePeers, VersionManager<Locations> locationsManager,
-			PublicKeyManager keyManager) {
-		super(locationsManager, keyManager);
+	public RemoveUnreachableStep(Set<PeerAddress> unreachablePeers, LocationsManager locationsManager) {
+		super(locationsManager);
 		this.unreachablePeers = unreachablePeers;
 		this.setName(getClass().getName());
 	}

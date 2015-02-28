@@ -52,11 +52,11 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		rootA = FileTestUtil.getTempDirectory();
-		userA = generateRandomCredentials();
+		userA = generateRandomCredentials("userA");
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
 		rootB = FileTestUtil.getTempDirectory();
-		userB = generateRandomCredentials();
+		userB = generateRandomCredentials("userB");
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
 
 		eventB = new TestFileEventListener();
@@ -88,7 +88,8 @@ public class ShareFolderTest extends H2HJUnitTest {
 		File sharedFolderAtB = new File(rootB, folderToShare.getName());
 		IFileShareEvent shared = waitTillShared(sharedFolderAtB);
 		Assert.assertEquals(userA.getUserId(), shared.getInvitedBy());
-		Assert.assertEquals(PermissionType.WRITE, shared.getUserPermission().getPermission());
+		Assert.assertEquals(PermissionType.WRITE, shared.getUserPermission(userB.getUserId()).getPermission());
+		Assert.assertEquals(2, shared.getUserPermissions().size());
 
 		IFileAddEvent added = waitTillAdded(sharedFolderAtB);
 		Assert.assertTrue(added.isFolder());
@@ -125,7 +126,8 @@ public class ShareFolderTest extends H2HJUnitTest {
 		File sharedFolderAtB = new File(rootB, sharedFolderAtA.getName());
 		IFileShareEvent shared = waitTillShared(sharedFolderAtB);
 		Assert.assertEquals(userA.getUserId(), shared.getInvitedBy());
-		Assert.assertEquals(PermissionType.WRITE, shared.getUserPermission().getPermission());
+		Assert.assertEquals(PermissionType.WRITE, shared.getUserPermission(userB.getUserId()).getPermission());
+		Assert.assertEquals(2, shared.getUserPermissions().size());
 
 		IFileAddEvent added = waitTillAdded(sharedFolderAtB);
 		Assert.assertTrue(added.isFolder());
