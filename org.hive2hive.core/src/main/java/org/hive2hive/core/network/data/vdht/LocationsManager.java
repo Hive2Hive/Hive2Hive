@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class LocationsManager {
-	private static final Logger logger = LoggerFactory.getLogger(VersionManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(LocationsManager.class);
 
 	private final KeyPair protectionKeys;
 	private final VersionManager<Locations> versionManager;
@@ -30,7 +30,7 @@ public class LocationsManager {
 		this.dataManager = dataManager;
 		this.userId = userId;
 		this.protectionKeys = protectionKeys;
-		versionManager = new VersionManager<Locations>(dataManager, H2HConstants.USER_LOCATIONS, userId);
+		versionManager = new VersionManager<Locations>(dataManager, userId, H2HConstants.USER_LOCATIONS);
 	}
 
 	public void put(Locations locations) throws PutFailedException {
@@ -51,10 +51,11 @@ public class LocationsManager {
 	public Locations repairLocations() {
 		Parameters removeParams = new Parameters().setContentKey(H2HConstants.USER_LOCATIONS).setLocationKey(userId)
 				.setProtectionKeys(protectionKeys);
+		logger.info("Start repairing the locations of user {}", userId);
 		if (dataManager.remove(removeParams)) {
-			logger.debug("Removed old locations");
+			logger.debug("Removed old locations of user {}", userId);
 		} else {
-			logger.warn("Failed to remove the old locations");
+			logger.warn("Failed to remove the old locations of user {}", userId);
 		}
 
 		Locations locations = new Locations(userId);
