@@ -64,7 +64,8 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 		try {
 			profileManager.modifyUserProfile(getId(), this);
 		} catch (Hive2HiveException e) {
-			logger.error("Cannot execute the task.", e);
+			logger.error("Cannot execute the share user profile task.", e);
+			return;
 		}
 
 		/** Case when shared with me: Notify others that files are available */
