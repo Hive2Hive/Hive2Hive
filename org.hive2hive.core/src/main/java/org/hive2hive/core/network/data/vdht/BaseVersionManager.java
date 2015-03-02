@@ -82,12 +82,13 @@ public abstract class BaseVersionManager<T extends BaseVersionedNetworkContent> 
 				for (Number640 key : tmp.keySet()) {
 					try {
 						byte[] buffer = tmp.get(key).toBytes();
-						if (buffer!=null && buffer.length > 0) {
+						if (buffer != null && buffer.length > 0) {
 							T object = (T) dataManager.getSerializer().deserialize(buffer);
 							dataMap.put(key.versionKey(), object);
 						} else {
-							logger.warn("Received unreadable buffer object = '{}'", tmp.get(key).object().getClass()
-									.getSimpleName());
+							logger.warn(
+									"Received unreadable buffer object = '{}'",
+									tmp.get(key).object().getClass().getSimpleName());
 						}
 					} catch (IOException e) {
 						logger.warn("Could not deserialize the data. Data could be null. Reason = '{}'", e.getMessage());

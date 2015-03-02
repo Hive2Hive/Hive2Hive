@@ -58,7 +58,7 @@ public class FutureGetListener implements BaseFutureListener<FutureGet> {
 		} else {
 			// set the result
 			byte[] buffer = future.data().toBytes();
-			if (buffer != null && buffer.length> 0) {
+			if (buffer != null && buffer.length > 0) {
 				result = (BaseNetworkContent) serializer.deserialize(buffer);
 				logger.debug("Got result = '{}'. '{}'", result.getClass().getSimpleName(), parameters.toString());
 			} else {
