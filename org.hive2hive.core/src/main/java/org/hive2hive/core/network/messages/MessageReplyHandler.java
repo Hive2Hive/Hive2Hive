@@ -88,6 +88,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 			message = serializer.deserialize(decryptedMessage);
 		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Message could not be deserialized.", e);
+			return null;
 		}
 
 		if (message != null && message instanceof BaseMessage) {
