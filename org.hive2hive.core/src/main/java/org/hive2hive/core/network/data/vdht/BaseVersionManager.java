@@ -1,7 +1,5 @@
 package org.hive2hive.core.network.data.vdht;
 
-import io.netty.buffer.ByteBuf;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -83,15 +81,14 @@ public abstract class BaseVersionManager<T extends BaseVersionedNetworkContent> 
 			} else {
 				for (Number640 key : tmp.keySet()) {
 					try {
-						ByteBuf byteBuf = tmp.get(key).buffer();
-						if (byteBuf.isReadable()) {
-							byte[] buffer = new byte[byteBuf.readableBytes()];
-							byteBuf.readBytes(buffer);
+						byte[] buffer = tmp.get(key).toBytes();
+						if (buffer != null && buffer.length > 0) {
 							T object = (T) dataManager.getSerializer().deserialize(buffer);
 							dataMap.put(key.versionKey(), object);
 						} else {
-							logger.warn("Received unreadable buffer object = '{}'", tmp.get(key).object().getClass()
-									.getSimpleName());
+							logger.warn(
+									"Received unreadable buffer object = '{}'",
+									tmp.get(key).object().getClass().getSimpleName());
 						}
 					} catch (IOException e) {
 						logger.warn("Could not deserialize the data. Data could be null. Reason = '{}'", e.getMessage());

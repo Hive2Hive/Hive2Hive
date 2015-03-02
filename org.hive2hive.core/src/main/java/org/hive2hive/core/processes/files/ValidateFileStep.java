@@ -4,6 +4,8 @@ import java.io.File;
 import java.math.BigInteger;
 
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
+import org.hive2hive.core.exceptions.AbortModificationCode;
+import org.hive2hive.core.exceptions.AbortModifyException;
 import org.hive2hive.core.file.FileUtil;
 import org.hive2hive.core.processes.context.interfaces.IUploadContext;
 import org.hive2hive.processframework.ProcessStep;
@@ -45,7 +47,8 @@ public class ValidateFileStep extends ProcessStep<Void> {
 		if (BigInteger.valueOf(FileUtil.getFileSize(file)).compareTo(config.getMaxFileSize()) == 1) {
 			logger.debug("File {} is a 'large file'.", file.getName());
 			if (!context.allowLargeFile()) {
-				throw new ProcessExecutionException(this, String.format("Large files are not allowed (%s).", file.getName()));
+				throw new ProcessExecutionException(this, new AbortModifyException(AbortModificationCode.LARGE_FILE_UPDATE, String.format("Large files are not allowed (%s).", file.getName())));
+			
 			}
 			context.setLargeFile(true);
 		} else {
