@@ -16,7 +16,7 @@ public abstract class RoutedRequestMessage extends BaseMessage implements IReque
 
 	private static final long serialVersionUID = 4510609215735076075L;
 
-	private IResponseCallBackHandler handler;
+	private transient IResponseCallBackHandler handler;
 
 	public RoutedRequestMessage(String targetKey) {
 		super(targetKey);

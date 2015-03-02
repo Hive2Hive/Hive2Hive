@@ -19,7 +19,6 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
-import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.network.messages.futures.FutureDirectListener;
 import org.hive2hive.core.network.messages.futures.FutureRoutedListener;
 import org.hive2hive.core.network.messages.request.IRequestMessage;
@@ -148,7 +147,17 @@ public final class MessageManager implements IMessageManager {
 	private void prepareMessage(BaseMessage message) {
 		message.setSenderAddress(networkManager.getConnection().getPeer().peerAddress());
 		configureCallbackHandlerIfNeeded(message);
-		setSenderPublicKeyIfNeeded(message);
+
+		// Sets the public key of the sender if message is a {@link IRequestMessage} so that the responding
+		// node can easily encrypt the {@link ResponseMessage}.
+		if (message instanceof IRequestMessage) {
+			try {
+				message.setSenderPublicKey(networkManager.getSession().getKeyPair().getPublic());
+			} catch (NoSessionException e) {
+				logger.error("Could not set the sender's public key.");
+				message.setSenderPublicKey(null);
+			}
+		}
 	}
 
 	private RequestP2PConfiguration createSendingConfiguration() {
@@ -160,24 +169,6 @@ public final class MessageManager implements IMessageManager {
 			IRequestMessage requestMessage = (IRequestMessage) message;
 			callBackHandlers.put(message.getMessageID(), requestMessage.getCallBackHandler());
 			requestMessage.setCallBackHandler(null);
-		}
-	}
-
-	/**
-	 * Sets the public key of the sender if message is a {@link IRequestMessage} so that the responding node
-	 * can easily encrypt the {@link ResponseMessage}.
-	 * 
-	 * @param message
-	 *            message which will be send
-	 */
-	private void setSenderPublicKeyIfNeeded(BaseMessage message) {
-		if (message instanceof IRequestMessage) {
-			try {
-				message.setSenderPublicKey(networkManager.getSession().getKeyPair().getPublic());
-			} catch (NoSessionException e) {
-				logger.error("Could not set the sender's public key.");
-				message.setSenderPublicKey(null);
-			}
 		}
 	}
 

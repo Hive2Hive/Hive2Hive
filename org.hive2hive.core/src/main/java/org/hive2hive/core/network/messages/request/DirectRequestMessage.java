@@ -18,7 +18,7 @@ public abstract class DirectRequestMessage extends BaseDirectMessage implements 
 
 	private static final long serialVersionUID = -8363641962924723518L;
 
-	private IResponseCallBackHandler handler;
+	private transient IResponseCallBackHandler handler;
 
 	public DirectRequestMessage(PeerAddress targetPeerAddress) {
 		super(targetPeerAddress);

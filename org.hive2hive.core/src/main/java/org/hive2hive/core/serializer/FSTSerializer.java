@@ -88,7 +88,7 @@ public final class FSTSerializer implements IH2HSerialize {
 		try {
 			return fst.asByteArray(object);
 		} catch (Throwable e) {
-			logger.error("Exception while serializing object:", e);
+			logger.error("Exception while serializing object {}", object, e);
 			throw e;
 		}
 	}

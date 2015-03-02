@@ -40,8 +40,8 @@ public abstract class BaseMessage implements Runnable, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(BaseMessage.class);
 
-	protected NetworkManager networkManager;
-	protected MessageManager messageManager;
+	protected transient NetworkManager networkManager;
+	protected transient MessageManager messageManager;
 	protected PublicKey senderPublicKey;
 
 	protected final String messageID;
@@ -50,7 +50,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 
 	protected PeerAddress senderAddress;
 
-	private int routedSendingCounter = 0;
+	private transient int routedSendingCounter = 0;
 
 	/**
 	 * Constructor for an asynchronous message.
@@ -137,15 +137,6 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 */
 	public int getSendingCounter() {
 		return routedSendingCounter;
-	}
-
-	/**
-	 * Getter
-	 * 
-	 * @return the {@link SendingBehavior} for this message
-	 */
-	public SendingBehavior getSendingBehavior() {
-		return sendingBehavior;
 	}
 
 	/**
