@@ -6,7 +6,7 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 
 /**
  * File configuration for fast test execution
- * 
+ *
  * @author Nico
  *
  */

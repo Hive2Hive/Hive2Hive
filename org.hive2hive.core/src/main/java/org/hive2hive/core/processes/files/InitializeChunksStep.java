@@ -65,7 +65,7 @@ public class InitializeChunksStep extends ProcessStep<Void> {
 		// create put chunks steps
 		IFileConfiguration config = context.consumeFileConfiguration();
 		int chunks = FileChunkUtil.getNumberOfChunks(file, config.getChunkSize());
-		logger.trace("{} chunks to upload for file '{}'.", Integer.toString(chunks), file.getName());
+		logger.trace("{} chunks to upload for file '{}'.", chunks, file.getName());
 		IProcessComponent<Void> prev = this;
 		for (int i = 0; i < chunks; i++) {
 			String chunkId = UUID.randomUUID().toString();

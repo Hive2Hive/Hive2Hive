@@ -8,7 +8,8 @@ public enum AbortModificationCode implements ErrorCode {
 	FILE_INDEX_NOT_FOUND(203),
 	NON_EMPTY_DIR(204),
 	FOLDER_UPDATE(205),
-	ROOT_DELETE_ATTEMPT(206);
+	ROOT_DELETE_ATTEMPT(206),
+	LARGE_FILE_UPDATE(207);
 
 	private final int number;
 
