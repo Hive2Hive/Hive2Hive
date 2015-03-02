@@ -6,14 +6,14 @@ import org.hive2hive.core.api.interfaces.IFileConfiguration;
 
 /**
  * File configuration for fast test execution
- * 
+ *
  * @author Nico
  *
  */
 public class TestFileConfiguration implements IFileConfiguration {
 
 	// for fast access
-	public static final int CHUNK_SIZE = 1000 * 1000 * 25;
+	public static final int CHUNK_SIZE = 64;
 
 	@Override
 	public BigInteger getMaxFileSize() {
