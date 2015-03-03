@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-android</artifactId>
-			<version>5.0-Beta5-SNAPSHOT</version>
+			<version>5.0-Beta5</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
