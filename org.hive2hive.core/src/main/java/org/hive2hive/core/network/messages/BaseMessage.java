@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * Messages are sent by the {@link MessageManager}. For more details please have
  * a look at {@link MessageManager#send(BaseMessage, PublicKey)}.
  * 
- * @author Nendor, Seppi
+ * @author Nendor, Seppi, Nico
  * 
  */
 public abstract class BaseMessage implements Runnable, Serializable {
@@ -128,15 +128,6 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 */
 	public PublicKey getSenderPublicKey() {
 		return senderPublicKey;
-	}
-
-	/**
-	 * Getter
-	 * 
-	 * @return the current value of this messages sending counter
-	 */
-	public int getSendingCounter() {
-		return routedSendingCounter;
 	}
 
 	/**

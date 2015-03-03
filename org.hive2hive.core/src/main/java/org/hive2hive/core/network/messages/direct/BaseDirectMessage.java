@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
  * <li>The parameter needsRedirectedSend in the constructor enables the fall back mechanism in case sending
  * failed. The direct message is then sent like a {@link BaseMessage} which gets routed to the next
  * responsible peer.</li>
- * <li>Besides the {@link BaseDirectMessage#getSendingCounter()} counter there is a
- * {@link BaseDirectMessage#getDirectSendingCounter()}. The {@link MessageManager} increments the direct
- * counter so that in case of a fail the direct message gets re-send according the
+ * <li>Besides the {@link BaseDirectMessage#directSendingCounter} counter there is a
+ * {@link BaseDirectMessage#directSendingCounter}. The {@link MessageManager} increments the direct counter so
+ * that in case of a fail the direct message gets re-send according the
  * {@link H2HConstants#MAX_MESSAGE_SENDING_DIRECT} constant.</li>
  * <li>For further details see also {@link BaseMessage}</li>
  * </ul>
@@ -40,7 +40,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	private final PeerAddress targetAddress;
 	private final boolean needsRedirectedSend;
 
-	private int directSendingCounter = 0;
+	private transient int directSendingCounter = 0;
 
 	/**
 	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.
@@ -104,10 +104,6 @@ public abstract class BaseDirectMessage extends BaseMessage {
 
 	public PeerAddress getTargetAddress() {
 		return targetAddress;
-	}
-
-	public int getDirectSendingCounter() {
-		return directSendingCounter;
 	}
 
 	/**
