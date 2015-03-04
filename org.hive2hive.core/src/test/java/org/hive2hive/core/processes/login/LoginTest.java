@@ -53,16 +53,20 @@ public class LoginTest extends H2HJUnitTest {
 			NoPeerConnectionException {
 		NetworkManager client = NetworkTestUtil.getRandomNode(network);
 
-		// login with valid credentials
-		UseCaseTestUtil.login(userCredentials, client, fileAgent);
+		try {
+			// login with valid credentials
+			UseCaseTestUtil.login(userCredentials, client, fileAgent);
 
-		Assert.assertNotNull(client.getSession());
-		Assert.assertEquals(userCredentials.getUserId(), client.getUserId());
+			Assert.assertNotNull(client.getSession());
+			Assert.assertEquals(userCredentials.getUserId(), client.getUserId());
 
-		// verify the locations map
-		Locations locations = (Locations) client.getDataManager().get(
-				new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
-		Assert.assertEquals(1, locations.getPeerAddresses().size());
+			// verify the locations map
+			Locations locations = (Locations) client.getDataManager().get(
+					new Parameters().setLocationKey(userCredentials.getUserId()).setContentKey(H2HConstants.USER_LOCATIONS));
+			Assert.assertEquals(1, locations.getPeerAddresses().size());
+		} finally {
+			UseCaseTestUtil.logout(client);
+		}
 	}
 
 	@Test(expected = NoSessionException.class)
@@ -92,8 +96,8 @@ public class LoginTest extends H2HJUnitTest {
 		loginAndWaitToFail(wrongCredentials);
 	}
 
-	public H2HSession loginAndWaitToFail(UserCredentials wrongCredentials) throws InvalidProcessStateException,
-			NoSessionException, NoPeerConnectionException {
+	public H2HSession loginAndWaitToFail(UserCredentials wrongCredentials) throws NoSessionException,
+			NoPeerConnectionException {
 		NetworkManager client = NetworkTestUtil.getRandomNode(network);
 		SessionParameters sessionParameters = new SessionParameters(fileAgent);
 		IProcessComponent<Void> loginProcess = ProcessFactory.instance().createLoginProcess(wrongCredentials,
