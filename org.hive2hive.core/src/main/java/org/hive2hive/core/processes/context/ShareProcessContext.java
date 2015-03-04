@@ -24,6 +24,7 @@ public class ShareProcessContext implements IInitializeMetaUpdateContext, INotif
 	private BaseNotificationMessageFactory messageFactory;
 	private Set<String> users;
 	private Index index;
+	private boolean sharedBefore;
 
 	public ShareProcessContext(File folder, UserPermission permission) {
 		this.folder = folder;
@@ -60,14 +61,7 @@ public class ShareProcessContext implements IInitializeMetaUpdateContext, INotif
 		return oldProtectionKeys;
 	}
 
-	public KeyPair consumeProtectionKeys() {
-		return oldProtectionKeys;
-	}
-
-	/**
-	 * Note that these are the old protection keys
-	 */
-	public void provideProtectionKeys(KeyPair protectionKeys) {
+	public void provideOldProtectionKeys(KeyPair protectionKeys) {
 		this.oldProtectionKeys = protectionKeys;
 	}
 
@@ -108,5 +102,17 @@ public class ShareProcessContext implements IInitializeMetaUpdateContext, INotif
 	@Override
 	public Index consumeIndex() {
 		return index;
+	}
+
+	@Override
+	public boolean isSharedBefore() {
+		return sharedBefore;
+	}
+
+	/**
+	 * Sets whether the folder was shared before
+	 */
+	public void setSharedBefore(boolean sharedBefore) {
+		this.sharedBefore = sharedBefore;
 	}
 }

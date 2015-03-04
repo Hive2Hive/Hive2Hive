@@ -31,4 +31,10 @@ public class MoveUpdateProtectionKeyContext implements IInitializeMetaUpdateCont
 	public KeyPair consumeOldProtectionKeys() {
 		return oldProtectionKeys;
 	}
+
+	@Override
+	public boolean isSharedBefore() {
+		// TODO verify this
+		return false;
+	}
 }

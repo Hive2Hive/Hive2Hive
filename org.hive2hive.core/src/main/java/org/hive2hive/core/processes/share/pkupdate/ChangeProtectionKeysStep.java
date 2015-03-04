@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Changes the protection key for any data of type {@link BaseNetworkContent}. Use the {@link BasePKUpdateContext}
- * to hand over the required data.
+ * Changes the protection key for any data of type {@link BaseNetworkContent}. Use the
+ * {@link BasePKUpdateContext} to hand over the required data.
  * 
  * @author Nico, Seppi
  */
@@ -42,10 +42,11 @@ public class ChangeProtectionKeysStep extends ProcessStep<Void> {
 		boolean success = dataManager.changeProtectionKey(parameters);
 		setRequiresRollback(success);
 		if (!success) {
-			throw new ProcessExecutionException(this, String.format("Could not change content protection keys. Parameters: %s.",
-					parameters.toString()));
+			throw new ProcessExecutionException(this, String.format(
+					"Could not change content protection keys. Parameters: %s.", parameters.toString()));
 		}
-		
+
+		logger.debug("Successfully changed the protection keys for {}", parameters);
 		return null;
 	}
 
@@ -66,9 +67,10 @@ public class ChangeProtectionKeysStep extends ProcessStep<Void> {
 			logger.debug("Rollback of change protection key succeeded. '{}'", parameters.toString());
 			setRequiresRollback(false);
 		} else {
-			throw new ProcessRollbackException(this, String.format("Rollback of change protection key failed. Remove failed. Parameters; '%s'", parameters.toString()));
+			throw new ProcessRollbackException(this, String.format(
+					"Rollback of change protection key failed. Remove failed. Parameters; '%s'", parameters.toString()));
 		}
-		
+
 		return null;
 	}
 }
