@@ -17,16 +17,17 @@ import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 public class TestResponseMessageMaxSending extends ResponseMessage {
 
 	private static final long serialVersionUID = 9169072033631718522L;
+	private static int numFails;
 
-	public TestResponseMessageMaxSending(String messageID, PeerAddress requesterAddress,
-			Serializable someContent) {
+	public TestResponseMessageMaxSending(String messageID, PeerAddress requesterAddress, Serializable someContent) {
 		super(messageID, requesterAddress, someContent);
+		numFails = 0;
 	}
 
 	@Override
 	public AcceptanceReply accept() {
 		// reject all messages till last try
-		if (getDirectSendingCounter() < H2HConstants.MAX_MESSAGE_SENDING_DIRECT) {
+		if (++numFails < H2HConstants.MAX_MESSAGE_SENDING_DIRECT) {
 			return AcceptanceReply.FAILURE;
 		}
 		return super.accept();

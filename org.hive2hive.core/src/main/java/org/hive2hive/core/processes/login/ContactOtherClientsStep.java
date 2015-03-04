@@ -98,12 +98,14 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 
 	private void sendBlocking(Set<PeerAddress> peerAddresses, final PublicKey ownPublicKey) {
 		waitForResponses = new CountDownLatch(peerAddresses.size());
+		boolean hasSlowPeers = false;
 		for (final PeerAddress address : peerAddresses) {
 			// contact all other clients (exclude self)
 			if (!address.equals(networkManager.getConnection().getPeer().peerAddress())) {
 				logger.debug("Sending contact message to check for aliveness to {}", address);
 				String evidence = UUID.randomUUID().toString();
 				evidences.put(address, evidence);
+				hasSlowPeers = hasSlowPeers || address.isSlow();
 
 				final ContactPeerMessage message = new ContactPeerMessage(address, evidence);
 				message.setCallBackHandler(this);
@@ -121,8 +123,10 @@ public class ContactOtherClientsStep extends ProcessStep<Void> implements IRespo
 		}
 
 		// wait (blocking) until all responses are here or the time's up
+		int waitTime = hasSlowPeers ? H2HConstants.CONTACT_SLOW_PEERS_AWAIT_MS : H2HConstants.CONTACT_PEERS_AWAIT_MS;
 		try {
-			waitForResponses.await(H2HConstants.CONTACT_PEERS_AWAIT_MS, TimeUnit.MILLISECONDS);
+			logger.debug("Waiting for at most {}ms for the response of other clients", waitTime);
+			waitForResponses.await(waitTime, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Could not wait the given time for the clients to respond.", e);
 		}

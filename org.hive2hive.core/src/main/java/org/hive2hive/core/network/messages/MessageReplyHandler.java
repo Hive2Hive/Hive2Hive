@@ -45,7 +45,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 	@Override
 	public Object reply(PeerAddress sender, Object request) {
 		if (!(request instanceof HybridEncryptedContent)) {
-			logger.error("Received unknown object.");
+			logger.error("Received unknown object {}", request);
 			return null;
 		}
 

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.hive2hive</groupId>
 		<artifactId>org.hive2hive.parent</artifactId>
-		<version>1.2.1-SNAPSHOT</version>
+		<version>1.2.1</version>
 	</parent>
 
 	<artifactId>org.hive2hive.client</artifactId>
@@ -19,13 +19,13 @@
 		<dependency>
 			<groupId>org.hive2hive</groupId>
 			<artifactId>org.hive2hive.core</artifactId>
-			<version>1.2.1-SNAPSHOT</version>
+			<version>1.2.1</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-android</artifactId>
-			<version>5.0-Beta5-SNAPSHOT</version>
+			<version>5.0-Beta5</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
