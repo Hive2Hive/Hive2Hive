@@ -67,6 +67,8 @@ public interface H2HConstants {
 	public static final int AWAIT_NETWORK_OPERATION_MS = 60000;
 	// maximum delay to wait until peers have time to answer until they get removed from the locations
 	public static final int CONTACT_PEERS_AWAIT_MS = 10000;
+	// Slow peers need to have more time since they may be dependent on buffered relaying
+	public static final int CONTACT_SLOW_PEERS_AWAIT_MS = 30000;
 
 	// maximum delay to wait until a peer candidate replies whether a direct download is possible or not
 	public static final int DIRECT_DOWNLOAD_AWAIT_MS = 10000;
