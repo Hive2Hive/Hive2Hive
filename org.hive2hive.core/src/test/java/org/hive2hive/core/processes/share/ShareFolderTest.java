@@ -50,7 +50,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 		testClass = ShareFolderTest.class;
 		beforeClass();
 
-		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
+		network = NetworkTestUtil.createNetwork(Math.max(DEFAULT_NETWORK_SIZE, 3));
 		rootA = FileTestUtil.getTempDirectory();
 		userA = generateRandomCredentials("userA");
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
@@ -86,28 +86,28 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 		// check the events at user B
 		File sharedFolderAtB = new File(rootB, folderToShare.getName());
-		IFileShareEvent shared = waitTillShared(sharedFolderAtB);
+		IFileShareEvent shared = waitTillShared(eventB, sharedFolderAtB);
 		Assert.assertEquals(userA.getUserId(), shared.getInvitedBy());
 		Assert.assertEquals(PermissionType.WRITE, shared.getUserPermission(userB.getUserId()).getPermission());
 		Assert.assertEquals(2, shared.getUserPermissions().size());
 
-		IFileAddEvent added = waitTillAdded(sharedFolderAtB);
+		IFileAddEvent added = waitTillAdded(eventB, sharedFolderAtB);
 		Assert.assertTrue(added.isFolder());
 
 		File file1AtB = new File(sharedFolderAtB, file1.getName());
-		added = waitTillAdded(file1AtB);
+		added = waitTillAdded(eventB, file1AtB);
 		Assert.assertTrue(added.isFile());
 
 		File file2AtB = new File(sharedFolderAtB, file2.getName());
-		added = waitTillAdded(file2AtB);
+		added = waitTillAdded(eventB, file2AtB);
 		Assert.assertTrue(added.isFile());
 
 		File subfolderAtB = new File(sharedFolderAtB, subfolder.getName());
-		added = waitTillAdded(subfolderAtB);
+		added = waitTillAdded(eventB, subfolderAtB);
 		Assert.assertTrue(added.isFolder());
 
 		File file3AtB = new File(subfolderAtB, file3.getName());
-		added = waitTillAdded(file3AtB);
+		added = waitTillAdded(eventB, file3AtB);
 		Assert.assertTrue(added.isFile());
 	}
 
@@ -124,29 +124,67 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 		// wait for userB to process the user profile task
 		File sharedFolderAtB = new File(rootB, sharedFolderAtA.getName());
-		IFileShareEvent shared = waitTillShared(sharedFolderAtB);
+		IFileShareEvent shared = waitTillShared(eventB, sharedFolderAtB);
 		Assert.assertEquals(userA.getUserId(), shared.getInvitedBy());
 		Assert.assertEquals(PermissionType.WRITE, shared.getUserPermission(userB.getUserId()).getPermission());
 		Assert.assertEquals(2, shared.getUserPermissions().size());
 
-		IFileAddEvent added = waitTillAdded(sharedFolderAtB);
+		IFileAddEvent added = waitTillAdded(eventB, sharedFolderAtB);
 		Assert.assertTrue(added.isFolder());
 	}
 
-	private static IFileShareEvent waitTillShared(File sharedFolder) {
-		H2HWaiter waiter = new H2HWaiter(30);
-		do {
-			waiter.tickASecond();
-		} while (eventB.getShared(sharedFolder) == null);
-		return eventB.getShared(sharedFolder);
+	@Test
+	public void shareThreeUsers() throws IOException, IllegalArgumentException, NoSessionException, GetFailedException,
+			InterruptedException, NoPeerConnectionException {
+		File rootC = FileTestUtil.getTempDirectory();
+		UserCredentials userC = generateRandomCredentials("userC");
+		UseCaseTestUtil.registerAndLogin(userC, network.get(2), rootC);
+
+		TestFileEventListener eventC = new TestFileEventListener();
+		network.get(2).getEventBus().subscribe(eventC);
+
+		// upload an empty folder
+		File sharedFolderAtA = new File(rootA, randomString());
+		sharedFolderAtA.mkdirs();
+		UseCaseTestUtil.uploadNewFile(network.get(0), sharedFolderAtA);
+
+		// share the empty folder with B and C
+		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderAtA, userB.getUserId(), PermissionType.WRITE);
+		UseCaseTestUtil.shareFolder(network.get(0), sharedFolderAtA, userC.getUserId(), PermissionType.WRITE);
+
+		// wait for userB to process the user profile task
+		File sharedFolderAtB = new File(rootB, sharedFolderAtA.getName());
+		IFileShareEvent sharedB = waitTillShared(eventB, sharedFolderAtB);
+		Assert.assertEquals(userA.getUserId(), sharedB.getInvitedBy());
+		Assert.assertEquals(PermissionType.WRITE, sharedB.getUserPermission(userA.getUserId()).getPermission());
+		Assert.assertEquals(PermissionType.WRITE, sharedB.getUserPermission(userB.getUserId()).getPermission());
+		Assert.assertEquals(PermissionType.WRITE, sharedB.getUserPermission(userC.getUserId()).getPermission());
+		Assert.assertEquals(3, sharedB.getUserPermissions().size());
+
+		// wait for userB to process the user profile task
+		File sharedFolderAtC = new File(rootC, sharedFolderAtA.getName());
+		IFileShareEvent sharedC = waitTillShared(eventC, sharedFolderAtC);
+		Assert.assertEquals(userA.getUserId(), sharedC.getInvitedBy());
+		Assert.assertEquals(PermissionType.WRITE, sharedC.getUserPermission(userA.getUserId()).getPermission());
+		Assert.assertEquals(PermissionType.WRITE, sharedC.getUserPermission(userB.getUserId()).getPermission());
+		Assert.assertEquals(PermissionType.WRITE, sharedC.getUserPermission(userC.getUserId()).getPermission());
+		Assert.assertEquals(3, sharedC.getUserPermissions().size());
 	}
 
-	private static IFileAddEvent waitTillAdded(File addedFile) {
+	private static IFileShareEvent waitTillShared(TestFileEventListener events, File sharedFolder) {
 		H2HWaiter waiter = new H2HWaiter(30);
 		do {
 			waiter.tickASecond();
-		} while (eventB.getAdded(addedFile) == null);
-		return eventB.getAdded(addedFile);
+		} while (events.getShared(sharedFolder) == null);
+		return events.getShared(sharedFolder);
+	}
+
+	private static IFileAddEvent waitTillAdded(TestFileEventListener events, File addedFile) {
+		H2HWaiter waiter = new H2HWaiter(30);
+		do {
+			waiter.tickASecond();
+		} while (events.getAdded(addedFile) == null);
+		return events.getAdded(addedFile);
 	}
 
 	@AfterClass
