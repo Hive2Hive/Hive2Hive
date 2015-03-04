@@ -2,10 +2,12 @@ package org.hive2hive.client.menu;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.client.console.H2HConsoleMenu;
 import org.hive2hive.client.console.H2HConsoleMenuItem;
 import org.hive2hive.client.console.SelectionMenu;
@@ -90,7 +92,7 @@ public class FileMenu extends H2HConsoleMenu {
 			}
 
 			protected void execute() throws Hive2HiveException, InterruptedException, InvalidProcessStateException,
-					ProcessExecutionException, ExecutionException {
+					ProcessExecutionException, ExecutionException, IOException {
 				File source = askForFile("Specify the relative path of the source file to the root directory '%s'.", true);
 				if (source == null) {
 					return;
@@ -105,6 +107,13 @@ public class FileMenu extends H2HConsoleMenu {
 				IProcessComponent<Void> moveFileProcess = menus.getNodeMenu().getNode().getFileManager()
 						.createMoveProcess(source, destination);
 				moveFileProcess.execute();
+				if (source.exists()) {
+					if (source.isFile()) {
+						FileUtils.moveFile(source, destination);
+					} else {
+						FileUtils.moveDirectory(source, destination);
+					}
+				}
 			}
 		});
 
@@ -123,6 +132,8 @@ public class FileMenu extends H2HConsoleMenu {
 				IProcessComponent<Void> deleteFileProcess = menus.getNodeMenu().getNode().getFileManager()
 						.createDeleteProcess(file);
 				deleteFileProcess.execute();
+				// finally delete the file
+				file.delete();
 			}
 		});
 

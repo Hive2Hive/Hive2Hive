@@ -74,6 +74,10 @@ public class UpdateUserProfileStep extends BaseModifyUserProfileStep {
 		// store for the notification
 		context.provideIndex(folderIndex);
 
+		// store the old protection key for later change
+		context.provideOldProtectionKeys(folderIndex.getProtectionKeys());
+
+		context.setSharedBefore(folderIndex.getSharedFlag());
 		if (folderIndex.getSharedFlag()) {
 			// this if-clause allows sharing with multiple users and omits the next if-clause
 			logger.debug("Sharing an already shared folder '{}' with friend '{}'.", folderIndex.getName(),
@@ -82,6 +86,7 @@ public class UpdateUserProfileStep extends BaseModifyUserProfileStep {
 		} else {
 			// make the node shared with the new protection keys
 			folderIndex.share(newProtectionKeys);
+
 			// add read/write user permission of friend
 			folderIndex.addUserPermissions(context.getUserPermission());
 			// add write user permission of user itself

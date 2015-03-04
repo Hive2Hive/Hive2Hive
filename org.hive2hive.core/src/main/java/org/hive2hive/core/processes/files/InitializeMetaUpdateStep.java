@@ -42,6 +42,11 @@ public class InitializeMetaUpdateStep extends ProcessStep<Void> {
 
 	@Override
 	protected Void doExecute() throws InvalidProcessStateException, ProcessExecutionException {
+		if (context.isSharedBefore()) {
+			logger.debug("No need to update any protection keys because the file / folder was already shared");
+			return null;
+		}
+
 		Index index = context.consumeIndex();
 
 		try {

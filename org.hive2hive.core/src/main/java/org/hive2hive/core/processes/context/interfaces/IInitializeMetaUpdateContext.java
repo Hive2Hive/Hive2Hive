@@ -6,10 +6,12 @@ import org.hive2hive.core.model.Index;
 
 public interface IInitializeMetaUpdateContext {
 
-	public Index consumeIndex();
+	Index consumeIndex();
 
-	public KeyPair consumeOldProtectionKeys();
+	KeyPair consumeOldProtectionKeys();
 
-	public KeyPair consumeNewProtectionKeys();
+	KeyPair consumeNewProtectionKeys();
+
+	boolean isSharedBefore();
 
 }
