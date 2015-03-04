@@ -84,14 +84,18 @@ public final class UserMenu extends H2HConsoleMenu {
 
 	@Override
 	public void reset() {
-		userCredentials = null;
-		ConsoleMenu.print("User credentials have been reset.");
+		clearCredentials();
 		rootDirectory = null;
 		ConsoleMenu.print("Root directory path has been reset.");
 	}
 
 	public UserCredentials getUserCredentials() {
 		return userCredentials;
+	}
+
+	public void clearCredentials() {
+		userCredentials = null;
+		ConsoleMenu.print("User credentials have been reset.");
 	}
 
 	public boolean createUserCredentials() {

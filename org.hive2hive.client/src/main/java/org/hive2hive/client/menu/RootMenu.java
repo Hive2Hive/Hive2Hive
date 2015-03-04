@@ -69,6 +69,7 @@ public final class RootMenu extends H2HConsoleMenu {
 			protected void execute() throws Exception {
 				IProcessComponent<Void> logoutProcess = menus.getNodeMenu().getNode().getUserManager().createLogoutProcess();
 				logoutProcess.execute();
+				menus.getUserMenu().clearCredentials();
 			}
 		});
 
