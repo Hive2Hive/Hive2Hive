@@ -60,7 +60,7 @@ public abstract class BasePutProcessStep extends ProcessStep<Void> {
 
 		H2HPutStatus status = dataManager.put(parameters);
 		if (!status.equals(H2HPutStatus.OK)) {
-			throw new PutFailedException();
+			throw new PutFailedException("Put failed with return status " + status);
 		}
 		setRequiresRollback(true);
 	}
