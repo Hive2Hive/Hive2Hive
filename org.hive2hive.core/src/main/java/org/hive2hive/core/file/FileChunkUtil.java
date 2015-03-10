@@ -3,6 +3,8 @@ package org.hive2hive.core.file;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -136,13 +138,18 @@ public class FileChunkUtil {
 			}
 		}
 
+		//The file parts are assembled where they are located, then moved to the destination
+		File assembled = new File(fileParts.get(0).getParentFile().toString().concat("_assembled"));
+		logger.trace("Assemble file to {}", assembled.getPath());
 		for (File filePart : fileParts) {
 			// copy file parts to the new location, append
-			FileUtils.writeByteArrayToFile(destination, FileUtils.readFileToByteArray(filePart), true);
+			FileUtils.writeByteArrayToFile(assembled, FileUtils.readFileToByteArray(filePart), true);
 
 			if (!filePart.delete()) {
 				logger.warn("Couldn't delete temporary file part. filePart = '{}'", filePart);
 			}
 		}
+		
+		Files.move(assembled.toPath(), destination.toPath());
 	}
 }
