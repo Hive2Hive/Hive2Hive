@@ -24,6 +24,7 @@ import org.hive2hive.core.processes.context.ShareProcessContext;
 import org.hive2hive.core.processes.context.UpdateFileProcessContext;
 import org.hive2hive.core.processes.context.UserProfileTaskContext;
 import org.hive2hive.core.processes.context.interfaces.INotifyContext;
+import org.hive2hive.core.processes.context.interfaces.LogoutProcessContext;
 import org.hive2hive.core.processes.files.CheckWriteAccessStep;
 import org.hive2hive.core.processes.files.GetFileKeysStep;
 import org.hive2hive.core.processes.files.GetMetaFileStep;
@@ -53,6 +54,7 @@ import org.hive2hive.core.processes.login.SessionCreationStep;
 import org.hive2hive.core.processes.login.SessionParameters;
 import org.hive2hive.core.processes.logout.DeleteSessionStep;
 import org.hive2hive.core.processes.logout.RemoveOwnLocationsStep;
+import org.hive2hive.core.processes.logout.SendLogoutNotificationStep;
 import org.hive2hive.core.processes.logout.StopDownloadsStep;
 import org.hive2hive.core.processes.logout.StopUserQueueWorkerStep;
 import org.hive2hive.core.processes.logout.WritePersistentStep;
@@ -178,17 +180,23 @@ public final class ProcessFactory {
 		H2HSession session = networkManager.getSession();
 
 		// process composition
-		SyncProcess process = new SyncProcess();
+		SyncProcess sessionProcess = new SyncProcess();
 
-		process.add(new RemoveOwnLocationsStep(networkManager));
-		process.add(new StopDownloadsStep(session.getDownloadManager()));
-		process.add(new StopUserQueueWorkerStep(session.getProfileManager()));
-		process.add(new WritePersistentStep(session.getFileAgent(), session.getKeyManager(), networkManager.getDataManager()
-				.getSerializer()));
-		process.add(new DeleteSessionStep(networkManager));
+		LogoutProcessContext context = new LogoutProcessContext();
+		sessionProcess.add(new RemoveOwnLocationsStep(networkManager, context));
+		sessionProcess.add(new SendLogoutNotificationStep(networkManager, context));
+		sessionProcess.add(new DeleteSessionStep(networkManager));
 
-		process.setName("Logout Process");
-		return process;
+		// run the session process concurrently with all other steps
+		SyncProcess parentProcess = new SyncProcess();
+		parentProcess.add(new AsyncComponent<>(sessionProcess));
+		parentProcess.add(new AsyncComponent<>(new StopDownloadsStep(session.getDownloadManager())));
+		parentProcess.add(new AsyncComponent<>(new StopUserQueueWorkerStep(session.getProfileManager())));
+		parentProcess.add(new AsyncComponent<>(new WritePersistentStep(session.getFileAgent(), session.getKeyManager(),
+				networkManager.getDataManager().getSerializer())));
+
+		parentProcess.setName("Logout Process");
+		return parentProcess;
 	}
 
 	/**
