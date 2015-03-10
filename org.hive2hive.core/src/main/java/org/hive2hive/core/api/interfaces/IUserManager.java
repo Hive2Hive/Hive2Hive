@@ -1,5 +1,6 @@
 package org.hive2hive.core.api.interfaces;
 
+import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.file.IFileAgent;
@@ -64,4 +65,12 @@ public interface IUserManager {
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	boolean isLoggedIn() throws NoPeerConnectionException;
+
+	/**
+	 * Subscribe all user event handlers of the given listener instance.
+	 * <strong>Note:</strong> The listener needs to annotate the handlers with the @Handler annotation.
+	 * 
+	 * @param listener implementing the handler methods
+	 */
+	void subscribeFileEvents(IUserEventListener listener);
 }

@@ -146,6 +146,10 @@ public class NetworkManager {
 	}
 
 	public EventBus getEventBus() {
+		if (eventBus == null) {
+			throw new IllegalStateException("No EventBus instance provided.");
+		}
+
 		return eventBus;
 	}
 
