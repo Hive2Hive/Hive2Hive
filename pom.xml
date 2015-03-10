@@ -21,6 +21,7 @@
   	<modules>
 		<module>org.hive2hive.core</module>
 		<module>org.hive2hive.client</module>
+		<module>org.hive2hive.examples</module>
 	</modules>
 	
 	<dependencies>
