@@ -174,7 +174,7 @@ public class Connection implements IPeerHolder {
 		// set flag to keep data, even when peer looses replication responsibility
 		replication.keepData(true);
 		// start the indirect replication
-//		replication.start();
+		replication.start();
 	}
 
 	/**
@@ -209,6 +209,7 @@ public class Connection implements IPeerHolder {
 			//Create the H2HStorageMemory object by using the StorageDisk implementation of TomP2P
 			PeerBuilder peerBuilder = preparePeerBuilder(nodeId, port);
 			SignatureFactory signatureFactory = peerBuilder.channelClientConfiguration().signatureFactory();
+			
 			H2HStorageMemory storageMemory = new H2HStorageMemory(storageFolder, 
 					Number160.createHash(nodeId), signatureFactory);
 			
