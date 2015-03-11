@@ -87,7 +87,7 @@ public final class FSTSerializer implements IH2HSerialize {
 	public byte[] serialize(Serializable object) throws IOException {
 		try {
 			return fst.asByteArray(object);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			logger.error("Exception while serializing object {}", object, e);
 			throw e;
 		}
@@ -102,7 +102,7 @@ public final class FSTSerializer implements IH2HSerialize {
 
 		try {
 			return fst.asObject(bytes);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			logger.error("Exception while deserializing object.");
 			throw e;
 		}
