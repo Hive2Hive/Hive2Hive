@@ -41,7 +41,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 	public static void initTest() throws Exception {
 		testClass = H2HNodeTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createH2HNetwork(DEFAULT_NETWORK_SIZE);
+		network = NetworkTestUtil.createH2HNetwork(5);
 
 		credentials = generateRandomCredentials();
 
