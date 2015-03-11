@@ -8,6 +8,7 @@ import net.tomp2p.connection.Bindings;
 import net.tomp2p.connection.ChannelClientConfiguration;
 import net.tomp2p.connection.ChannelServerConfiguration;
 import net.tomp2p.connection.Ports;
+import net.tomp2p.connection.SignatureFactory;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.dht.StorageMemory;
@@ -77,15 +78,21 @@ public class Connection implements IPeerHolder {
 
 	private boolean createPeer(INetworkConfiguration networkConfiguration) {
 		try {
-			File storageFolder = new File(FileUtils.getUserDirectoryPath().concat(File.separator).concat("replication"));
+			//create a folder in the user's home folder to store the replications
+			File storageFolder = new File(FileUtils.getUserDirectoryPath().
+					concat(File.separator).concat("replication_").concat(networkConfiguration.getNodeID()));
 			if(!storageFolder.exists()){
-				storageFolder.mkdirs();
-				
+				storageFolder.mkdirs();	
 			}
 			
-			H2HStorageMemory storageMemory = new H2HStorageMemory(storageFolder, Number160.createHash(networkConfiguration.getNodeID()));
-			peerDHT = new PeerBuilderDHT(
-					preparePeerBuilder(networkConfiguration.getNodeID(), networkConfiguration.getPort()).start())
+			//Create the H2HStorageMemory object by using the StorageDisk implementation of TomP2P
+			PeerBuilder peerBuilder = preparePeerBuilder(networkConfiguration.getNodeID(), networkConfiguration.getPort());
+			SignatureFactory signatureFactory = peerBuilder.channelClientConfiguration().signatureFactory();
+			
+			H2HStorageMemory storageMemory = new H2HStorageMemory(storageFolder, 
+					Number160.createHash(networkConfiguration.getNodeID()), signatureFactory);
+			
+			peerDHT = new PeerBuilderDHT(peerBuilder.start())
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 		} catch (IOException e) {
@@ -192,13 +199,20 @@ public class Connection implements IPeerHolder {
 		PeerMap peerMap = new PeerMap(peerMapConfiguration);
 
 		try {
-			File storageFolder = new File(FileUtils.getUserDirectoryPath().concat(File.separator).concat("replication"));
+			//create a folder in the user's home folder to store the replications
+			File storageFolder = new File(FileUtils.getUserDirectoryPath().
+					concat(File.separator).concat("replication_").concat(nodeId));
 			if(!storageFolder.exists()){
 				storageFolder.mkdirs();
 				
 			}
-			H2HStorageMemory storageMemory = new H2HStorageMemory(storageFolder, peerDHT.peer().peerID());
-			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId, port).masterPeer(masterPeer).peerMap(peerMap).start())
+			//Create the H2HStorageMemory object by using the StorageDisk implementation of TomP2P
+			PeerBuilder peerBuilder = preparePeerBuilder(nodeId, port);
+			SignatureFactory signatureFactory = peerBuilder.channelClientConfiguration().signatureFactory();
+			H2HStorageMemory storageMemory = new H2HStorageMemory(storageFolder, 
+					Number160.createHash(nodeId), signatureFactory);
+			
+			peerDHT = new PeerBuilderDHT(peerBuilder.masterPeer(masterPeer).peerMap(peerMap).start())
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 		} catch (IOException e) {

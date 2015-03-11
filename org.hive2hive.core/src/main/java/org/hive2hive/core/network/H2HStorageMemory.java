@@ -8,6 +8,7 @@ import java.util.NavigableMap;
 import java.util.Set;
 
 import net.tomp2p.connection.DSASignatureFactory;
+import net.tomp2p.connection.SignatureFactory;
 import net.tomp2p.dht.StorageLayer;
 import net.tomp2p.dht.StorageMemory;
 import net.tomp2p.peers.Number160;
@@ -58,9 +59,11 @@ public class H2HStorageMemory extends StorageLayer {
 		this.getMode = StorageMemoryGetMode.STANDARD;
 	}
 	
-	public H2HStorageMemory(File storageFolder, Number160 peerId){
+	public H2HStorageMemory(File storageFolder, Number160 peerId, 
+			SignatureFactory signatureFactory){
 		
-		super(new StorageDisk(peerId, FileUtils.getUserDirectory(), new DSASignatureFactory()));
+		//where to get 
+		super(new StorageDisk(peerId, FileUtils.getUserDirectory(), signatureFactory));
 		this.putMode = StorageMemoryPutMode.STANDARD;
 		this.getMode = StorageMemoryGetMode.STANDARD;
 	}
