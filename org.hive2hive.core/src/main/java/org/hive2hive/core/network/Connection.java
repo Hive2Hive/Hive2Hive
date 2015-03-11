@@ -16,6 +16,7 @@ import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.DefaultMaintenance;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.peers.PeerMap;
 import net.tomp2p.peers.PeerMapConfiguration;
 import net.tomp2p.replication.IndirectReplication;
@@ -66,7 +67,7 @@ public class Connection implements IPeerHolder {
 			boolean success = createPeer(networkConfiguration);
 			// bootstrap if not initial peer
 			if (success && !networkConfiguration.isInitial()) {
-				success = bootstrap(networkConfiguration.getBootstrapAddress(), networkConfiguration.getBootstrapPort());
+				success = bootstrap(networkConfiguration);
 			}
 
 			return success;
@@ -80,6 +81,10 @@ public class Connection implements IPeerHolder {
 					preparePeerBuilder(networkConfiguration.getNodeID(), networkConfiguration.getPort()).start())
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
+
+			// set the firewall-flag correctly
+			PeerAddress peerAddress = peerDHT.peerAddress().changeFirewalledTCP(networkConfiguration.isFirewalled());
+			peerDHT.peer().peerBean().serverPeerAddress(peerAddress);
 		} catch (IOException e) {
 			logger.error("Exception while creating a peer: ", e);
 			return false;
@@ -115,21 +120,26 @@ public class Connection implements IPeerHolder {
 	/**
 	 * Bootstraps the connected peer to the network
 	 * 
-	 * @param bootstrapAddress Bootstrap IP address.
-	 * @param port Bootstrap port.
+	 * @param config the network configuration
 	 * @return <code>true</code>, if bootstrapping was successful, <code>false</code> otherwise.
 	 */
-	private boolean bootstrap(InetAddress bootstrapAddress, int port) {
-		FutureDiscover futureDiscover = peerDHT.peer().discover().inetAddress(bootstrapAddress).ports(port).start();
+	private boolean bootstrap(INetworkConfiguration config) {
+		InetAddress bootstrapAddress = config.getBootstrapAddress();
+		int bootstrapPort = config.getBootstrapPort();
+
+		FutureDiscover futureDiscover = peerDHT.peer().discover().inetAddress(bootstrapAddress).ports(bootstrapPort).start();
 		futureDiscover.awaitUninterruptibly(H2HConstants.DISCOVERY_TIMEOUT_MS);
 
 		if (futureDiscover.isSuccess()) {
 			logger.debug("Discovery successful. Outside address is '{}'.", futureDiscover.peerAddress().inetAddress());
+		} else if (futureDiscover.isNat() && config.tryUPnP()) {
+			// TODO set up port forwarding using UPnP
 		} else {
 			logger.warn("Discovery failed: {}.", futureDiscover.failedReason());
 		}
 
-		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().inetAddress(bootstrapAddress).ports(port).start();
+		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().inetAddress(bootstrapAddress).ports(bootstrapPort)
+				.start();
 		futureBootstrap.awaitUninterruptibly(H2HConstants.BOOTSTRAPPING_TIMEOUT_MS);
 
 		if (futureBootstrap.isSuccess()) {
