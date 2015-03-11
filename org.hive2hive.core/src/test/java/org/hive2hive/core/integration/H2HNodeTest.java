@@ -3,7 +3,6 @@ package org.hive2hive.core.integration;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
@@ -19,10 +18,8 @@ import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.helper.TestFileAgent;
 import org.hive2hive.processframework.interfaces.IProcessComponent;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -34,19 +31,28 @@ import org.junit.Test;
  */
 public class H2HNodeTest extends H2HJUnitTest {
 
-	private static final int NETWORK_SIZE = 3;
 	private static List<IH2HNode> network;
-	private final Random random = new Random();
 
-	private IH2HNode loggedInNode;
-	private UserCredentials credentials;
-	private TestFileAgent fileAgent;
+	private static IH2HNode loggedInNode;
+	private static UserCredentials credentials;
+	private static TestFileAgent fileAgent;
 
 	@BeforeClass
 	public static void initTest() throws Exception {
 		testClass = H2HNodeTest.class;
 		beforeClass();
-		network = NetworkTestUtil.createH2HNetwork(NETWORK_SIZE);
+		network = NetworkTestUtil.createH2HNetwork(DEFAULT_NETWORK_SIZE);
+
+		credentials = generateRandomCredentials();
+
+		IH2HNode registerNode = network.get(0);
+		IProcessComponent<?> registerProcess = registerNode.getUserManager().createRegisterProcess(credentials);
+		TestExecutionUtil.executeProcessTillSucceded(registerProcess);
+
+		fileAgent = new TestFileAgent();
+		loggedInNode = network.get(1);
+		IProcessComponent<Void> loginProcess = loggedInNode.getUserManager().createLoginProcess(credentials, fileAgent);
+		TestExecutionUtil.executeProcessTillSucceded(loginProcess);
 	}
 
 	@AfterClass
@@ -55,27 +61,13 @@ public class H2HNodeTest extends H2HJUnitTest {
 		afterClass();
 	}
 
-	@Before
-	public void testRegisterLogin() throws IOException, NoPeerConnectionException {
-		credentials = generateRandomCredentials();
-
-		IH2HNode registerNode = network.get(random.nextInt(NETWORK_SIZE));
-		IProcessComponent<?> registerProcess = registerNode.getUserManager().createRegisterProcess(credentials);
-		TestExecutionUtil.executeProcessTillSucceded(registerProcess);
-
-		fileAgent = new TestFileAgent();
-		loggedInNode = network.get(random.nextInt(NETWORK_SIZE / 2));
-		IProcessComponent<?> loginProcess = loggedInNode.getUserManager().createLoginProcess(credentials, fileAgent);
-		TestExecutionUtil.executeProcessTillSucceded(loginProcess);
-	}
-
 	@Test
 	public void testAddDeleteFile() throws IOException, NoSessionException, NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException, NoPeerConnectionException {
-		File testFile = new File(fileAgent.getRoot(), "test-file");
-		FileUtils.write(testFile, "Hello World");
+		File testFile = new File(fileAgent.getRoot(), "test-file1");
+		FileUtils.write(testFile, "Hello World 1");
 
-		IProcessComponent<?> process = loggedInNode.getFileManager().createAddProcess(testFile);
+		IProcessComponent<Void> process = loggedInNode.getFileManager().createAddProcess(testFile);
 		TestExecutionUtil.executeProcessTillSucceded(process);
 
 		// is now added; delete it
@@ -86,8 +78,8 @@ public class H2HNodeTest extends H2HJUnitTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testAddFileWrongDir() throws IOException, NoPeerConnectionException, NoSessionException,
 			IllegalArgumentException {
-		File testFile = new File(FileTestUtil.getTempDirectory(), "test-file");
-		FileUtils.write(testFile, "Hello World");
+		File testFile = new File(FileTestUtil.getTempDirectory(), "test-file2");
+		FileUtils.write(testFile, "Hello World 2");
 
 		loggedInNode.getFileManager().createAddProcess(testFile);
 	}
@@ -100,14 +92,8 @@ public class H2HNodeTest extends H2HJUnitTest {
 		Assert.assertNull(node.getPeer());
 
 		// connected nodes return a peer
-		Assert.assertNotNull(network.get(random.nextInt(NETWORK_SIZE)).getPeer());
-	}
-
-	@After
-	public void logoutAndUnregister() throws NoSessionException, NoPeerConnectionException {
-		IProcessComponent<?> process = loggedInNode.getUserManager().createLogoutProcess();
-		TestExecutionUtil.executeProcessTillSucceded(process);
-
-		// TODO unregister
+		for (IH2HNode connectedNode : network) {
+			Assert.assertNotNull(connectedNode.getPeer());
+		}
 	}
 }
