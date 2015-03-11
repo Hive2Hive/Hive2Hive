@@ -1,5 +1,6 @@
 package org.hive2hive.core.network;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 
@@ -21,6 +22,7 @@ import net.tomp2p.peers.PeerMapConfiguration;
 import net.tomp2p.replication.IndirectReplication;
 import net.tomp2p.replication.SlowReplicationFilter;
 
+import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.INetworkConfiguration;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
@@ -75,7 +77,13 @@ public class Connection implements IPeerHolder {
 
 	private boolean createPeer(INetworkConfiguration networkConfiguration) {
 		try {
-			H2HStorageMemory storageMemory = new H2HStorageMemory();
+			File storageFolder = new File(FileUtils.getUserDirectoryPath().concat(File.separator).concat("replication"));
+			if(!storageFolder.exists()){
+				storageFolder.mkdirs();
+				
+			}
+			
+			H2HStorageMemory storageMemory = new H2HStorageMemory(storageFolder, Number160.createHash(networkConfiguration.getNodeID()));
 			peerDHT = new PeerBuilderDHT(
 					preparePeerBuilder(networkConfiguration.getNodeID(), networkConfiguration.getPort()).start())
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
@@ -159,7 +167,7 @@ public class Connection implements IPeerHolder {
 		// set flag to keep data, even when peer looses replication responsibility
 		replication.keepData(true);
 		// start the indirect replication
-		replication.start();
+//		replication.start();
 	}
 
 	/**
@@ -184,7 +192,12 @@ public class Connection implements IPeerHolder {
 		PeerMap peerMap = new PeerMap(peerMapConfiguration);
 
 		try {
-			H2HStorageMemory storageMemory = new H2HStorageMemory();
+			File storageFolder = new File(FileUtils.getUserDirectoryPath().concat(File.separator).concat("replication"));
+			if(!storageFolder.exists()){
+				storageFolder.mkdirs();
+				
+			}
+			H2HStorageMemory storageMemory = new H2HStorageMemory(storageFolder, peerDHT.peer().peerID());
 			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId, port).masterPeer(masterPeer).peerMap(peerMap).start())
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();

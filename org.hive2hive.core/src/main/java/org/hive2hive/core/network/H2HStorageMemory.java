@@ -1,17 +1,23 @@
 package org.hive2hive.core.network;
 
+import java.io.File;
 import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 
+import net.tomp2p.connection.DSASignatureFactory;
 import net.tomp2p.dht.StorageLayer;
 import net.tomp2p.dht.StorageMemory;
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.rpc.DigestInfo;
 import net.tomp2p.storage.Data;
+import net.tomp2p.storage.StorageDisk;
 
+import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.file.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +54,13 @@ public class H2HStorageMemory extends StorageLayer {
 
 	public H2HStorageMemory() {
 		super(new StorageMemory());
+		this.putMode = StorageMemoryPutMode.STANDARD;
+		this.getMode = StorageMemoryGetMode.STANDARD;
+	}
+	
+	public H2HStorageMemory(File storageFolder, Number160 peerId){
+		
+		super(new StorageDisk(peerId, FileUtils.getUserDirectory(), new DSASignatureFactory()));
 		this.putMode = StorageMemoryPutMode.STANDARD;
 		this.getMode = StorageMemoryGetMode.STANDARD;
 	}
