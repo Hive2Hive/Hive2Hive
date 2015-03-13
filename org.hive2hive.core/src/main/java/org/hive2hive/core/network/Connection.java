@@ -82,9 +82,11 @@ public class Connection implements IPeerHolder {
 					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 
-			// set the firewall-flag correctly
-			PeerAddress peerAddress = peerDHT.peerAddress().changeFirewalledTCP(networkConfiguration.isFirewalled());
-			peerDHT.peer().peerBean().serverPeerAddress(peerAddress);
+			// set the firewall-flag or take the default value if not set
+			if (networkConfiguration.isFirewalled()) {
+				PeerAddress peerAddress = peerDHT.peerAddress().changeFirewalledTCP(true).changeFirewalledUDP(true);
+				peerDHT.peer().peerBean().serverPeerAddress(peerAddress);
+			}
 		} catch (IOException e) {
 			logger.error("Exception while creating a peer: ", e);
 			return false;
