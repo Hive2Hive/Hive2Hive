@@ -155,23 +155,28 @@ public class Connection implements IPeerHolder {
 	}
 
 	private void startReplication() {
-		IndirectReplication replication = new IndirectReplication(peerDHT);
-		// set replication factor
-		replication.replicationFactor(H2HConstants.REPLICATION_FACTOR);
-		// set replication frequency
-		replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL_MS);
-		// set kind of replication, default is 0Root
-		if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
-			replication.nRoot();
+		if (H2HConstants.ENABLE_REPLICATION) {
+			IndirectReplication replication = new IndirectReplication(peerDHT);
+			// set replication factor
+			replication.replicationFactor(H2HConstants.REPLICATION_FACTOR);
+			// set replication frequency
+			replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL_MS);
+			// set kind of replication, default is 0Root
+			if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
+				replication.nRoot();
+			}
+			// replicate to slow peers or add a filter
+			if (!H2HConstants.REPLICATE_TO_SLOW_PEERS) {
+				replication.addReplicationFilter(new SlowReplicationFilter());
+			}
+			// set flag to keep data, even when peer looses replication responsibility
+			replication.keepData(true);
+			// start the indirect replication
+			replication.start();
+
+			logger.trace("Started replication with factor {} and {} strategy.", H2HConstants.REPLICATION_FACTOR,
+					H2HConstants.REPLICATION_STRATEGY);
 		}
-		// replicate to slow peers or add a filter
-		if (!H2HConstants.REPLICATE_TO_SLOW_PEERS) {
-			replication.addReplicationFilter(new SlowReplicationFilter());
-		}
-		// set flag to keep data, even when peer looses replication responsibility
-		replication.keepData(true);
-		// start the indirect replication
-		replication.start();
 	}
 
 	/**

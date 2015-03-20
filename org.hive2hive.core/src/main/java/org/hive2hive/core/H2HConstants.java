@@ -105,8 +105,9 @@ public interface H2HConstants {
 	/**
 	 * Replication
 	 */
+	public static final boolean ENABLE_REPLICATION = true;
 	public static final int REPLICATION_FACTOR = 5;
-	public static final int REPLICATION_INTERVAL_MS = 300000;
+	public static final int REPLICATION_INTERVAL_MS = 30 * 1000;
 	public static final String REPLICATION_STRATEGY = "nRoot"; // or 0Root
 	public static final boolean REPLICATE_TO_SLOW_PEERS = STORE_DATA_SLOW_PEERS;
 
