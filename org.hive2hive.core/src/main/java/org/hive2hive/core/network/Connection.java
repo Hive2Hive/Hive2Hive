@@ -79,7 +79,7 @@ public class Connection implements IPeerHolder {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
 			peerDHT = new PeerBuilderDHT(
 					preparePeerBuilder(networkConfiguration.getNodeID(), networkConfiguration.getPort()).start())
-					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
+					.storage(new StorageMemory(H2HConstants.TTL_CHECK_INTERVAL_MS, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 
 			// set the firewall-flag or take the default value if not set
@@ -198,7 +198,7 @@ public class Connection implements IPeerHolder {
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
 			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId, port).masterPeer(masterPeer).peerMap(peerMap).start())
-					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
+					.storage(new StorageMemory(H2HConstants.TTL_CHECK_INTERVAL_MS, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 		} catch (IOException e) {
 			logger.error("Exception while creating a local peer: ", e);
