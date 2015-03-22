@@ -24,7 +24,7 @@ Check our [GitHub Wiki](https://github.com/Hive2Hive/Hive2Hive/wiki) to learn mo
 
 **Are you looking for a demo application?**
 
-* [PeerBox](https://github.com/Hive2Hive/PeerBox), a Windows-based shell extension à la Dropbox.
+* [PeerWasp](http://www.peerwasp.com/), a Windows-based shell extension à la Dropbox.
 * [H2H Console Client](https://github.com/Hive2Hive/Hive2Hive/tree/master/org.hive2hive.client), an executable `.jar` console application.
 * [Eclipse RCP Client](https://github.com/Hive2Hive/RCP_Client), an RCP-based client.
 
