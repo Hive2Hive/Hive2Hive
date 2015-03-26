@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-android</artifactId>
-			<version>5.0-Beta5</version>
+			<version>5.0-Beta6</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -46,7 +46,7 @@
 			<version>1.2.1</version>
 			<scope>compile</scope>
 		</dependency>
- 		
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -69,7 +69,7 @@
 	<build>
 		<plugins>
 			<plugin>
-				<!-- states the main class and that dependencies are in the separate 
+				<!-- states the main class and that dependencies are in the separate
 					lib folder (see assembly.xml) -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
