@@ -1,13 +1,18 @@
 package org.hive2hive.core.network.messages;
 
+import io.netty.buffer.Unpooled;
+
 import java.io.IOException;
+import java.io.Serializable;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.SignatureException;
 
+import net.tomp2p.message.Buffer;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
+import net.tomp2p.rpc.RawDataReply;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -28,9 +33,11 @@ import org.slf4j.LoggerFactory;
  * the sender node. This design allows a quick and non-blocking message
  * handling.
  * 
- * @author Nendor, Seppi
+ * @author Nendor
+ * @author Seppi
+ * @author Nico
  */
-public class MessageReplyHandler implements ObjectDataReply {
+public class MessageReplyHandler implements RawDataReply, ObjectDataReply {
 
 	private static final Logger logger = LoggerFactory.getLogger(MessageReplyHandler.class);
 
@@ -40,6 +47,21 @@ public class MessageReplyHandler implements ObjectDataReply {
 	public MessageReplyHandler(NetworkManager networkManager, IH2HSerialize serializer) {
 		this.networkManager = networkManager;
 		this.serializer = serializer;
+	}
+
+	@Override
+	public Buffer reply(PeerAddress sender, Buffer requestBuffer, boolean complete) throws Exception {
+		Object request = serializer.deserialize(requestBuffer.buffer().array());
+		Object reply = reply(sender, request);
+		byte[] rawReply;
+		if (reply instanceof Serializable) {
+			rawReply = serializer.serialize((Serializable) reply);
+		} else {
+			logger.error("Cannot serialize the response. It is of kind {}", reply.getClass().getName());
+			rawReply = serializer.serialize(AcceptanceReply.FAILURE);
+		}
+
+		return new Buffer(Unpooled.wrappedBuffer(rawReply));
 	}
 
 	@Override

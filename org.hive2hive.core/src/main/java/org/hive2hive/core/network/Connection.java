@@ -92,8 +92,9 @@ public class Connection implements IPeerHolder {
 			return false;
 		}
 
-		// attach a reply handler for messages
+		// attach the reply handlers for messages
 		peerDHT.peer().objectDataReply(messageReplyHandler);
+		peerDHT.peer().rawDataReply(messageReplyHandler);
 
 		// setup replication
 		startReplication();
