@@ -19,6 +19,7 @@ import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.model.versioned.MetaFileLarge;
 import org.hive2hive.core.model.versioned.MetaFileSmall;
 import org.hive2hive.core.model.versioned.UserProfile;
+import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.direct.ContactPeerMessage;
 import org.hive2hive.core.network.messages.direct.response.ResponseMessage;
 import org.hive2hive.core.security.BCSecurityClassProvider;
@@ -81,6 +82,9 @@ public final class FSTSerializer implements IH2HSerialize {
 
 		// Since PeerAddresses are serialized very often, this is just an efficiency improvement
 		fst.registerSerializer(PeerAddress.class, new FSTPeerAddressSerializer(), false);
+
+		// register the acceptance reply enum
+		fst.registerClass(AcceptanceReply.class);
 	}
 
 	@Override
@@ -107,5 +111,4 @@ public final class FSTSerializer implements IH2HSerialize {
 			throw e;
 		}
 	}
-
 }

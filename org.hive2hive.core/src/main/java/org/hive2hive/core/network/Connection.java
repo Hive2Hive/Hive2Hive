@@ -213,6 +213,7 @@ public class Connection implements IPeerHolder {
 
 		// attach a reply handler for messages
 		peerDHT.peer().objectDataReply(messageReplyHandler);
+		peerDHT.peer().rawDataReply(messageReplyHandler);
 
 		if (masterPeer != null) {
 			// bootstrap to master peer
@@ -251,6 +252,7 @@ public class Connection implements IPeerHolder {
 
 		// attach a reply handler for messages
 		peerDHT.peer().objectDataReply(messageReplyHandler);
+		peerDHT.peer().rawDataReply(messageReplyHandler);
 
 		if (startReplication) {
 			startReplication();

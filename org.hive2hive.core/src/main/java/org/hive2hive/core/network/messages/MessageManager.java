@@ -82,7 +82,7 @@ public final class MessageManager implements IMessageManager {
 				.buffer(buffer).requestP2PConfiguration(createSendingConfiguration()).start();
 
 		// attach a future listener to log, handle and notify events
-		FutureRoutedListener listener = new FutureRoutedListener(message, targetPublicKey, this);
+		FutureRoutedListener listener = new FutureRoutedListener(message, targetPublicKey, this, serializer);
 		futureSend.addListener(listener);
 		boolean success = listener.await();
 
@@ -115,11 +115,20 @@ public final class MessageManager implements IMessageManager {
 			return false;
 		}
 
+		Buffer buffer = null;
+		try {
+			byte[] data = serializer.serialize(encryptedMessage);
+			buffer = new Buffer(Unpooled.wrappedBuffer(data));
+		} catch (IOException e) {
+			logger.error("Cannot serialize the encrypted message", e);
+			return false;
+		}
+
 		// send message directly to the peer with the given peer address
 		FutureDirect futureDirect = networkManager.getConnection().getPeer().peer().sendDirect(message.getTargetAddress())
-				.object(encryptedMessage).start();
+				.buffer(buffer).start();
 		// attach a future listener to log, handle and notify events
-		FutureDirectListener listener = new FutureDirectListener(message, targetPublicKey, this);
+		FutureDirectListener listener = new FutureDirectListener(message, targetPublicKey, this, serializer);
 		futureDirect.addListener(listener);
 		boolean success = listener.await();
 

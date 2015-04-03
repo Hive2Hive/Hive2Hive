@@ -22,6 +22,7 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.serializer.IH2HSerialize;
+import org.hive2hive.core.serializer.SerializerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,9 @@ public class MessageReplyHandler implements RawDataReply, ObjectDataReply {
 
 	@Override
 	public Buffer reply(PeerAddress sender, Buffer requestBuffer, boolean complete) throws Exception {
-		Object request = serializer.deserialize(requestBuffer.buffer().array());
+		byte[] rawRequest = SerializerUtil.convertToByteArray(requestBuffer.buffer());
+		Object request = serializer.deserialize(rawRequest);
+
 		Object reply = reply(sender, request);
 		byte[] rawReply;
 		if (reply instanceof Serializable) {
