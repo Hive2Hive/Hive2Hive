@@ -68,7 +68,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 
 		// workaround that the downloader does not get notified about the newly added file (it will be done
 		// manually)
-		downloader.getConnection().getPeer().peer().objectDataReply(new DenyingMessageReplyHandler());
+		downloader.getConnection().getPeer().peer().rawDataReply(new DenyingMessageReplyHandler());
 	}
 
 	@Before

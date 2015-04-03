@@ -120,9 +120,11 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	 * 
 	 * @throws NoPeerConnectionException
 	 * @throws InvalidProcessStateException
+	 * @throws IOException
 	 */
 	@Test
-	public void routedMessageProcessStepTestOnFailure() throws NoPeerConnectionException, InvalidProcessStateException {
+	public void routedMessageProcessStepTestOnFailure() throws NoPeerConnectionException, InvalidProcessStateException,
+			IOException {
 		NetworkManager nodeA = network.get(0);
 		final NetworkManager nodeB = network.get(1);
 
@@ -136,7 +138,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			assertNull(nodeA.getDataManager().get(parameters));
 
 			// assign a denying message handler at target node
-			nodeB.getConnection().getPeer().peer().objectDataReply(new DenyingMessageReplyHandler());
+			nodeB.getConnection().getPeer().peer().rawDataReply(new DenyingMessageReplyHandler());
 
 			// create a message with target node B
 			final TestMessage message = new TestMessage(nodeB.getNodeId(), contentKey, new H2HTestData(data));
@@ -166,7 +168,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			// check if selected location is still empty
 			assertNull(nodeA.getDataManager().get(parameters));
 		} finally {
-			nodeB.getConnection().getPeer().peer().objectDataReply(new MessageReplyHandler(nodeB, serializer));
+			nodeB.getConnection().getPeer().peer().rawDataReply(new MessageReplyHandler(nodeB, serializer));
 		}
 	}
 
@@ -302,9 +304,11 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 	 * 
 	 * @throws NoPeerConnectionException
 	 * @throws InvalidProcessStateException
+	 * @throws IOException
 	 */
 	@Test
-	public void directMessageProcessStepTestOnFailure() throws NoPeerConnectionException, InvalidProcessStateException {
+	public void directMessageProcessStepTestOnFailure() throws NoPeerConnectionException, InvalidProcessStateException,
+			IOException {
 		NetworkManager nodeA = network.get(0);
 		final NetworkManager nodeB = network.get(1);
 
@@ -318,7 +322,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			assertNull(nodeA.getDataManager().get(parameters));
 
 			// assign a denying message handler at target node
-			nodeB.getConnection().getPeer().peer().objectDataReply(new DenyingMessageReplyHandler());
+			nodeB.getConnection().getPeer().peer().rawDataReply(new DenyingMessageReplyHandler());
 
 			// create a message with target node B
 			final TestDirectMessage message = new TestDirectMessage(nodeB.getNodeId(), nodeB.getConnection().getPeer()
@@ -347,7 +351,7 @@ public class BaseMessageProcessStepTest extends H2HJUnitTest {
 			// check if selected location is still empty
 			assertNull(nodeB.getDataManager().get(parameters));
 		} finally {
-			nodeB.getConnection().getPeer().peer().objectDataReply(new MessageReplyHandler(nodeB, serializer));
+			nodeB.getConnection().getPeer().peer().rawDataReply(new MessageReplyHandler(nodeB, serializer));
 		}
 	}
 

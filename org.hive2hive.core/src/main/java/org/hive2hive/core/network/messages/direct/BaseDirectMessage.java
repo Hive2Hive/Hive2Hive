@@ -141,6 +141,9 @@ public abstract class BaseDirectMessage extends BaseMessage {
 				logger.warn("Message not accepted by the target. Signature is wrong. Peer address = '{}'.",
 						getTargetAddress());
 				return false;
+			case FAILURE_DESERIALIZATION:
+				logger.warn("Message cannot be deserialized by the target. Peer address = '{}'.", getTargetAddress());
+				return canResendDirect();
 			case OK:
 				logger.error("Trying to handle a AcceptanceReply.OK as a failure.");
 				throw new IllegalArgumentException("AcceptanceReply.OK is not a failure.");

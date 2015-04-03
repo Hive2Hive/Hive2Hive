@@ -53,12 +53,22 @@ public class MessageReplyHandler implements RawDataReply, ObjectDataReply {
 	@Override
 	public Buffer reply(PeerAddress sender, Buffer requestBuffer, boolean complete) throws Exception {
 		byte[] rawRequest = SerializerUtil.convertToByteArray(requestBuffer.buffer());
-		Object request = serializer.deserialize(rawRequest);
+
+		Object request;
+		try {
+			request = serializer.deserialize(rawRequest);
+		} catch (IOException | ClassNotFoundException e) {
+			logger.error("Cannot deserialize the raw request from sender {}", sender);
+			return new Buffer(Unpooled.wrappedBuffer(serializer.serialize(AcceptanceReply.FAILURE_DESERIALIZATION)));
+		}
 
 		Object reply = reply(sender, request);
 		byte[] rawReply;
 		if (reply instanceof Serializable) {
 			rawReply = serializer.serialize((Serializable) reply);
+		} else if (reply == null) {
+			logger.error("The reply is null.");
+			return null;
 		} else {
 			logger.error("Cannot serialize the response. It is of kind {}", reply.getClass().getName());
 			rawReply = serializer.serialize(AcceptanceReply.FAILURE);
@@ -113,7 +123,7 @@ public class MessageReplyHandler implements RawDataReply, ObjectDataReply {
 			message = serializer.deserialize(decryptedMessage);
 		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Message could not be deserialized.", e);
-			return null;
+			return AcceptanceReply.FAILURE_DESERIALIZATION;
 		}
 
 		if (message != null && message instanceof BaseMessage) {

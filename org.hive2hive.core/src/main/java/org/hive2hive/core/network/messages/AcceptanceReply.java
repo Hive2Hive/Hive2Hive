@@ -20,6 +20,8 @@ public enum AcceptanceReply {
 	FAILURE_DECRYPTION,
 	/** When signature is wrong */
 	FAILURE_SIGNATURE,
+	/** When the deserialization failed */
+	FAILURE_DESERIALIZATION,
 	/**
 	 * It indicates that there is no {@link IResponseCallBackHandler} waiting for the return message on this
 	 * 'sender' node.

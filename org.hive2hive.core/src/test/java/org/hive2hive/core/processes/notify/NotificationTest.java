@@ -6,14 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.tomp2p.rpc.ObjectDataReply;
-
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
+import org.hive2hive.core.network.messages.MessageReplyHandler;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.FileTestUtil;
@@ -43,7 +42,7 @@ public class NotificationTest extends H2HJUnitTest {
 	private static final int NETWORK_SIZE = 6;
 
 	private static List<NetworkManager> network;
-	private static List<ObjectDataReply> messageHandlers;
+	private static List<MessageReplyHandler> messageHandlers;
 
 	private static UserCredentials userACredentials;
 	private static UserCredentials userBCredentials;
@@ -77,7 +76,7 @@ public class NotificationTest extends H2HJUnitTest {
 		UseCaseTestUtil.login(userCCredentials, network.get(5), FileTestUtil.getTempDirectory());
 
 		// store the message reply handler as backup
-		messageHandlers = new ArrayList<ObjectDataReply>(NETWORK_SIZE);
+		messageHandlers = new ArrayList<MessageReplyHandler>(NETWORK_SIZE);
 		for (NetworkManager client : network) {
 			messageHandlers.add(client.getConnection().getMessageReplyHandler());
 		}
@@ -85,11 +84,14 @@ public class NotificationTest extends H2HJUnitTest {
 
 	/**
 	 * Blocks the message reception of the peers
+	 * 
+	 * @throws IOException
 	 */
-	private void blockMessageRecption(int... peerIndices) {
+	private void blockMessageRecption(int... peerIndices) throws IOException {
+		DenyingMessageReplyHandler denyingMessageReplyHandler = new DenyingMessageReplyHandler();
 		for (int index : peerIndices) {
 			assert index < NETWORK_SIZE;
-			network.get(index).getConnection().getPeer().peer().objectDataReply(new DenyingMessageReplyHandler());
+			network.get(index).getConnection().getPeer().peer().rawDataReply(denyingMessageReplyHandler);
 		}
 	}
 
@@ -334,7 +336,7 @@ public class NotificationTest extends H2HJUnitTest {
 
 		// restore message handler from backup for a clean start
 		for (int i = 0; i < network.size(); i++) {
-			network.get(i).getConnection().getPeer().peer().objectDataReply(messageHandlers.get(i));
+			network.get(i).getConnection().getPeer().peer().rawDataReply(messageHandlers.get(i));
 		}
 	}
 
