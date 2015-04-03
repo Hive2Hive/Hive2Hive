@@ -1,5 +1,9 @@
 package org.hive2hive.core.api.interfaces;
 
+import java.util.Set;
+
+import net.tomp2p.peers.PeerAddress;
+
 import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -65,6 +69,17 @@ public interface IUserManager {
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 */
 	boolean isLoggedIn() throws NoPeerConnectionException;
+
+	/**
+	 * Returns a list of currently logged in clients. This list is updated every time a client logs in or
+	 * sends a notification message to another client (e.g. after a file operation). However, there is no
+	 * guarantee that this list is up-to-date if a client left without properly logging out.
+	 * 
+	 * @return a set of {@link PeerAddress} of the clients of the currently logged in user.
+	 * @throws NoPeerConnectionException If the peer is not connected to the network.
+	 * @throws NoSessionException If the peer has no session
+	 */
+	IProcessComponent<Set<PeerAddress>> createClientsProcess() throws NoPeerConnectionException, NoSessionException;
 
 	/**
 	 * Subscribe all user event handlers of the given listener instance.

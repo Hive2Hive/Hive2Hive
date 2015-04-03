@@ -1,5 +1,9 @@
 package org.hive2hive.core.api;
 
+import java.util.Set;
+
+import net.tomp2p.peers.PeerAddress;
+
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.events.framework.interfaces.IUserEventListener;
@@ -55,6 +59,11 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 		} catch (NoSessionException e) {
 			return false;
 		}
+	}
+
+	@Override
+	public IProcessComponent<Set<PeerAddress>> createClientsProcess() throws NoSessionException {
+		return ProcessFactory.instance().createClientListProcess(networkManager);
 	}
 
 	@Override

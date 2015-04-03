@@ -4,6 +4,8 @@ import java.io.File;
 import java.security.PublicKey;
 import java.util.Set;
 
+import net.tomp2p.peers.PeerAddress;
+
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.api.interfaces.IFileConfiguration;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -197,6 +199,15 @@ public final class ProcessFactory {
 
 		parentProcess.setName("Logout Process");
 		return parentProcess;
+	}
+
+	public IProcessComponent<Set<PeerAddress>> createClientListProcess(NetworkManager networkManager)
+			throws NoSessionException {
+		// consists of a single step
+		IProcessComponent<Set<PeerAddress>> process = new org.hive2hive.core.processes.clients.GetLocationsStep(
+				networkManager.getSession().getLocationsManager());
+		process.setName("Get Client List");
+		return process;
 	}
 
 	/**
