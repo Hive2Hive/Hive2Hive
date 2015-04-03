@@ -1,5 +1,7 @@
 package org.hive2hive.core.network.messages;
 
+import io.netty.buffer.Unpooled;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
@@ -10,6 +12,7 @@ import java.util.Map;
 
 import net.tomp2p.dht.FutureSend;
 import net.tomp2p.futures.FutureDirect;
+import net.tomp2p.message.Buffer;
 import net.tomp2p.p2p.RequestP2PConfiguration;
 import net.tomp2p.peers.Number160;
 
@@ -65,9 +68,18 @@ public final class MessageManager implements IMessageManager {
 			return false;
 		}
 
+		Buffer buffer = null;
+		try {
+			byte[] data = serializer.serialize(encryptedMessage);
+			buffer = new Buffer(Unpooled.wrappedBuffer(data));
+		} catch (IOException e) {
+			logger.error("Cannot serialize the encrypted message", e);
+			return false;
+		}
+
 		// send message to the peer which is responsible for the given key
 		FutureSend futureSend = networkManager.getConnection().getPeer().send(Number160.createHash(message.getTargetKey()))
-				.object(encryptedMessage).requestP2PConfiguration(createSendingConfiguration()).start();
+				.buffer(buffer).requestP2PConfiguration(createSendingConfiguration()).start();
 
 		// attach a future listener to log, handle and notify events
 		FutureRoutedListener listener = new FutureRoutedListener(message, targetPublicKey, this);
