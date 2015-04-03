@@ -93,6 +93,7 @@ public class Connection implements IPeerHolder {
 		}
 
 		// attach the reply handlers for messages
+		// TODO ObjectDataReply is only kept for backward compatibility
 		peerDHT.peer().objectDataReply(messageReplyHandler);
 		peerDHT.peer().rawDataReply(messageReplyHandler);
 
@@ -212,6 +213,7 @@ public class Connection implements IPeerHolder {
 		}
 
 		// attach a reply handler for messages
+		// TODO ObjectDataReply is only kept for backward compatibility
 		peerDHT.peer().objectDataReply(messageReplyHandler);
 		peerDHT.peer().rawDataReply(messageReplyHandler);
 
@@ -251,6 +253,7 @@ public class Connection implements IPeerHolder {
 		this.peerDHT = peer;
 
 		// attach a reply handler for messages
+		// TODO ObjectDataReply is only kept for backward compatibility
 		peerDHT.peer().objectDataReply(messageReplyHandler);
 		peerDHT.peer().rawDataReply(messageReplyHandler);
 
