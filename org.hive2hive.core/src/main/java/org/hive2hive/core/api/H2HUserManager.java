@@ -62,8 +62,8 @@ public class H2HUserManager extends H2HManager implements IUserManager {
 	}
 
 	@Override
-	public IProcessComponent<Set<PeerAddress>> createClientsProcess() throws NoSessionException {
-		return ProcessFactory.instance().createClientListProcess(networkManager);
+	public IProcessComponent<Set<PeerAddress>> createClientsListProcess() throws NoSessionException {
+		return ProcessFactory.instance().createClientsListProcess(networkManager);
 	}
 
 	@Override

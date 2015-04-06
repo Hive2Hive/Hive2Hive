@@ -144,7 +144,7 @@ public class UserManagerTest extends H2HJUnitTest {
 		userManager0.createLoginProcess(userCredentials, fileAgent).execute();
 
 		// get clients now, should only contain node 0
-		Set<PeerAddress> clients = userManager0.createClientsProcess().execute();
+		Set<PeerAddress> clients = userManager0.createClientsListProcess().execute();
 		assertEquals(1, clients.size());
 		assertTrue(clients.contains(network.get(0).getPeer().peerAddress()));
 
@@ -153,14 +153,14 @@ public class UserManagerTest extends H2HJUnitTest {
 		userManager1.createLoginProcess(userCredentials, fileAgent).execute();
 
 		// get clients now, should contain node 0 and 1 now
-		clients = userManager0.createClientsProcess().execute();
+		clients = userManager0.createClientsListProcess().execute();
 		assertEquals(2, clients.size());
 		assertTrue(clients.contains(network.get(0).getPeer().peerAddress()));
 		assertTrue(clients.contains(network.get(1).getPeer().peerAddress()));
 
 		// logout node 0
 		userManager0.createLogoutProcess().execute();
-		clients = userManager1.createClientsProcess().execute();
+		clients = userManager1.createClientsListProcess().execute();
 		assertEquals(1, clients.size());
 		assertTrue(clients.contains(network.get(1).getPeer().peerAddress()));
 	}

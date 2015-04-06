@@ -201,7 +201,7 @@ public final class ProcessFactory {
 		return parentProcess;
 	}
 
-	public IProcessComponent<Set<PeerAddress>> createClientListProcess(NetworkManager networkManager)
+	public IProcessComponent<Set<PeerAddress>> createClientsListProcess(NetworkManager networkManager)
 			throws NoSessionException {
 		// consists of a single step
 		IProcessComponent<Set<PeerAddress>> process = new org.hive2hive.core.processes.clients.GetLocationsStep(

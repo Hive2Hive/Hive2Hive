@@ -79,7 +79,7 @@ public interface IUserManager {
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If the peer has no session
 	 */
-	IProcessComponent<Set<PeerAddress>> createClientsProcess() throws NoPeerConnectionException, NoSessionException;
+	IProcessComponent<Set<PeerAddress>> createClientsListProcess() throws NoPeerConnectionException, NoSessionException;
 
 	/**
 	 * Subscribe all user event handlers of the given listener instance.
