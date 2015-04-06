@@ -20,5 +20,4 @@ public interface IH2HSerialize {
 	 * Deserializes an object from a byte array. The object type is not yet specific
 	 */
 	Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException;
-
 }

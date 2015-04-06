@@ -89,7 +89,7 @@ public class AESEncryptedVersionManager<T extends BaseVersionedNetworkContent> e
 
 					// check if get was successful
 					if (futureGet.isFailed() || fetchedVersions.isEmpty()) {
-						if (getCounter > getFailedLimit) {
+						if (getCounter > GET_FAILED_LIMIT) {
 							logger.warn("Loading of data failed after {} tries. {}", getCounter, parameters.toString());
 							throw new GetFailedException("Couldn't load data.");
 						} else {
@@ -111,7 +111,7 @@ public class AESEncryptedVersionManager<T extends BaseVersionedNetworkContent> e
 				}
 
 				// check if version delays or forks occurred
-				if (hasVersionDelay(fetchedVersions, digestCache) && delayCounter < delayLimit) {
+				if (hasVersionDelay(fetchedVersions, digestCache) && delayCounter < DELAY_LIMIT) {
 					logger.warn("Detected a version delay. #{}", delayCounter++);
 
 					// TODO reput latest versions for maintenance, consider only latest
@@ -129,8 +129,8 @@ public class AESEncryptedVersionManager<T extends BaseVersionedNetworkContent> e
 				Cache<Set<Number160>> latestVersionKeys = getLatest(digestCache);
 
 				// check for version fork
-				if (latestVersionKeys.size() > 1 && delayCounter < delayLimit) {
-					if (forkAfterGetCounter < forkAfterGetLimit) {
+				if (latestVersionKeys.size() > 1 && delayCounter < DELAY_LIMIT) {
+					if (forkAfterGetCounter < FORK_AFTER_GET_LIMIT) {
 						logger.warn("Got a version fork. Waiting. #{}", forkAfterGetCounter++);
 						// exponential back off waiting
 						try {
@@ -146,7 +146,7 @@ public class AESEncryptedVersionManager<T extends BaseVersionedNetworkContent> e
 
 					throw new GetFailedException("Got a version fork.");
 				} else {
-					if (delayCounter >= delayLimit) {
+					if (delayCounter >= DELAY_LIMIT) {
 						logger.warn("Ignoring delay after {} retries.", delayCounter);
 					}
 					if (encryptedContentCache.isEmpty()) {

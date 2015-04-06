@@ -50,8 +50,8 @@ public class ContactOtherClientsStepTest extends H2HJUnitTest {
 		// assign to each node the same key pair (simulating same user)
 		NetworkTestUtil.setSameSession(network);
 		// assign to a subset of the client nodes a rejecting message reply handler
-		network.get(4).getConnection().getPeer().peer().objectDataReply(new DenyingMessageReplyHandler());
-		network.get(5).getConnection().getPeer().peer().objectDataReply(new DenyingMessageReplyHandler());
+		network.get(4).getConnection().getPeer().peer().rawDataReply(new DenyingMessageReplyHandler());
+		network.get(5).getConnection().getPeer().peer().rawDataReply(new DenyingMessageReplyHandler());
 	}
 
 	private boolean isInitialClient(Locations locations, PeerAddress client) {

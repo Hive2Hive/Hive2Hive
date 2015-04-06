@@ -16,6 +16,7 @@ import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.DefaultMaintenance;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.peers.PeerMap;
 import net.tomp2p.peers.PeerMapConfiguration;
 import net.tomp2p.replication.IndirectReplication;
@@ -66,7 +67,7 @@ public class Connection implements IPeerHolder {
 			boolean success = createPeer(networkConfiguration);
 			// bootstrap if not initial peer
 			if (success && !networkConfiguration.isInitial()) {
-				success = bootstrap(networkConfiguration.getBootstrapAddress(), networkConfiguration.getBootstrapPort());
+				success = bootstrap(networkConfiguration);
 			}
 
 			return success;
@@ -78,15 +79,23 @@ public class Connection implements IPeerHolder {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
 			peerDHT = new PeerBuilderDHT(
 					preparePeerBuilder(networkConfiguration.getNodeID(), networkConfiguration.getPort()).start())
-					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
+					.storage(new StorageMemory(H2HConstants.TTL_CHECK_INTERVAL_MS, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
+
+			// set the firewall-flag or take the default value if not set
+			if (networkConfiguration.isFirewalled()) {
+				PeerAddress peerAddress = peerDHT.peerAddress().changeFirewalledTCP(true).changeFirewalledUDP(true);
+				peerDHT.peer().peerBean().serverPeerAddress(peerAddress);
+			}
 		} catch (IOException e) {
 			logger.error("Exception while creating a peer: ", e);
 			return false;
 		}
 
-		// attach a reply handler for messages
+		// attach the reply handlers for messages
+		// TODO ObjectDataReply is only kept for backward compatibility
 		peerDHT.peer().objectDataReply(messageReplyHandler);
+		peerDHT.peer().rawDataReply(messageReplyHandler);
 
 		// setup replication
 		startReplication();
@@ -115,21 +124,26 @@ public class Connection implements IPeerHolder {
 	/**
 	 * Bootstraps the connected peer to the network
 	 * 
-	 * @param bootstrapAddress Bootstrap IP address.
-	 * @param port Bootstrap port.
+	 * @param config the network configuration
 	 * @return <code>true</code>, if bootstrapping was successful, <code>false</code> otherwise.
 	 */
-	private boolean bootstrap(InetAddress bootstrapAddress, int port) {
-		FutureDiscover futureDiscover = peerDHT.peer().discover().inetAddress(bootstrapAddress).ports(port).start();
+	private boolean bootstrap(INetworkConfiguration config) {
+		InetAddress bootstrapAddress = config.getBootstrapAddress();
+		int bootstrapPort = config.getBootstrapPort();
+
+		FutureDiscover futureDiscover = peerDHT.peer().discover().inetAddress(bootstrapAddress).ports(bootstrapPort).start();
 		futureDiscover.awaitUninterruptibly(H2HConstants.DISCOVERY_TIMEOUT_MS);
 
 		if (futureDiscover.isSuccess()) {
 			logger.debug("Discovery successful. Outside address is '{}'.", futureDiscover.peerAddress().inetAddress());
+		} else if (futureDiscover.isNat() && config.tryUPnP()) {
+			// TODO set up port forwarding using UPnP
 		} else {
 			logger.warn("Discovery failed: {}.", futureDiscover.failedReason());
 		}
 
-		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().inetAddress(bootstrapAddress).ports(port).start();
+		FutureBootstrap futureBootstrap = peerDHT.peer().bootstrap().inetAddress(bootstrapAddress).ports(bootstrapPort)
+				.start();
 		futureBootstrap.awaitUninterruptibly(H2HConstants.BOOTSTRAPPING_TIMEOUT_MS);
 
 		if (futureBootstrap.isSuccess()) {
@@ -143,23 +157,28 @@ public class Connection implements IPeerHolder {
 	}
 
 	private void startReplication() {
-		IndirectReplication replication = new IndirectReplication(peerDHT);
-		// set replication factor
-		replication.replicationFactor(H2HConstants.REPLICATION_FACTOR);
-		// set replication frequency
-		replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL_MS);
-		// set kind of replication, default is 0Root
-		if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
-			replication.nRoot();
+		if (H2HConstants.ENABLE_REPLICATION) {
+			IndirectReplication replication = new IndirectReplication(peerDHT);
+			// set replication factor
+			replication.replicationFactor(H2HConstants.REPLICATION_FACTOR);
+			// set replication frequency
+			replication.intervalMillis(H2HConstants.REPLICATION_INTERVAL_MS);
+			// set kind of replication, default is 0Root
+			if (H2HConstants.REPLICATION_STRATEGY.equals("nRoot")) {
+				replication.nRoot();
+			}
+			// replicate to slow peers or add a filter
+			if (!H2HConstants.REPLICATE_TO_SLOW_PEERS) {
+				replication.addReplicationFilter(new SlowReplicationFilter());
+			}
+			// set flag to keep data, even when peer looses replication responsibility
+			replication.keepData(true);
+			// start the indirect replication
+			replication.start();
+
+			logger.trace("Started replication with factor {} and {} strategy.", H2HConstants.REPLICATION_FACTOR,
+					H2HConstants.REPLICATION_STRATEGY);
 		}
-		// replicate to slow peers or add a filter
-		if (!H2HConstants.REPLICATE_TO_SLOW_PEERS) {
-			replication.addReplicationFilter(new SlowReplicationFilter());
-		}
-		// set flag to keep data, even when peer looses replication responsibility
-		replication.keepData(true);
-		// start the indirect replication
-		replication.start();
 	}
 
 	/**
@@ -186,7 +205,7 @@ public class Connection implements IPeerHolder {
 		try {
 			H2HStorageMemory storageMemory = new H2HStorageMemory();
 			peerDHT = new PeerBuilderDHT(preparePeerBuilder(nodeId, port).masterPeer(masterPeer).peerMap(peerMap).start())
-					.storage(new StorageMemory(H2HConstants.TTL_PERIOD, H2HConstants.MAX_VERSIONS_HISTORY))
+					.storage(new StorageMemory(H2HConstants.TTL_CHECK_INTERVAL_MS, H2HConstants.MAX_VERSIONS_HISTORY))
 					.storageLayer(storageMemory).start();
 		} catch (IOException e) {
 			logger.error("Exception while creating a local peer: ", e);
@@ -194,7 +213,9 @@ public class Connection implements IPeerHolder {
 		}
 
 		// attach a reply handler for messages
+		// TODO ObjectDataReply is only kept for backward compatibility
 		peerDHT.peer().objectDataReply(messageReplyHandler);
+		peerDHT.peer().rawDataReply(messageReplyHandler);
 
 		if (masterPeer != null) {
 			// bootstrap to master peer
@@ -232,7 +253,9 @@ public class Connection implements IPeerHolder {
 		this.peerDHT = peer;
 
 		// attach a reply handler for messages
+		// TODO ObjectDataReply is only kept for backward compatibility
 		peerDHT.peer().objectDataReply(messageReplyHandler);
+		peerDHT.peer().rawDataReply(messageReplyHandler);
 
 		if (startReplication) {
 			startReplication();

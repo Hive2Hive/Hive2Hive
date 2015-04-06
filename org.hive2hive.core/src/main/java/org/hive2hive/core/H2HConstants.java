@@ -3,6 +3,7 @@ package org.hive2hive.core;
 import java.io.File;
 import java.math.BigInteger;
 
+import net.tomp2p.dht.StorageMemory;
 import net.tomp2p.peers.Number160;
 
 import org.apache.commons.io.FileUtils;
@@ -104,8 +105,9 @@ public interface H2HConstants {
 	/**
 	 * Replication
 	 */
+	public static final boolean ENABLE_REPLICATION = true;
 	public static final int REPLICATION_FACTOR = 5;
-	public static final int REPLICATION_INTERVAL_MS = 300000;
+	public static final int REPLICATION_INTERVAL_MS = 30 * 1000;
 	public static final String REPLICATION_STRATEGY = "nRoot"; // or 0Root
 	public static final boolean REPLICATE_TO_SLOW_PEERS = STORE_DATA_SLOW_PEERS;
 
@@ -113,7 +115,7 @@ public interface H2HConstants {
 	 * TTL of Data in Network
 	 */
 	// period in milliseconds between successive ttl check task executions
-	public static final int TTL_PERIOD = 500;
+	public static final int TTL_CHECK_INTERVAL_MS = StorageMemory.DEFAULT_STORAGE_CHECK_INTERVAL;
 
 	/**
 	 * TTL Refreshment Management

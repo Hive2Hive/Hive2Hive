@@ -26,6 +26,8 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	private boolean isLocal = false;
 	private Peer bootstrapPeer = null;
 	private int bootstrapPort = H2HConstants.H2H_PORT;
+	private boolean isFirewalled = false;
+	private boolean tryUpnp = false;
 
 	/**
 	 * @param nodeID defines the location of the peer in the DHT. Should not be null
@@ -87,9 +89,32 @@ public class NetworkConfiguration implements INetworkConfiguration {
 
 	/**
 	 * Set the peer to only connect locally
+	 * 
+	 * @return this instance
 	 */
 	public NetworkConfiguration setLocal() {
 		this.isLocal = true;
+		return this;
+	}
+
+	/**
+	 * Set whether this peer is firewalled (or behind a NAT) or not.
+	 * 
+	 * @return this instance
+	 */
+	public NetworkConfiguration setFirewalled(boolean isFirewalled) {
+		this.isFirewalled = isFirewalled;
+		return this;
+	}
+
+	/**
+	 * If this peer is {@link #isFirewalled}, you could use UPnP to configure the port mapping at the NAT
+	 * device.
+	 * 
+	 * @return this instance
+	 */
+	public NetworkConfiguration tryUPnP(boolean tryUpnp) {
+		this.tryUpnp = tryUpnp;
 		return this;
 	}
 
@@ -209,4 +234,13 @@ public class NetworkConfiguration implements INetworkConfiguration {
 		return port;
 	}
 
+	@Override
+	public boolean isFirewalled() {
+		return isFirewalled;
+	}
+
+	@Override
+	public boolean tryUPnP() {
+		return tryUpnp;
+	}
 }

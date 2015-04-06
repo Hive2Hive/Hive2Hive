@@ -136,13 +136,18 @@ public class FileChunkUtil {
 			}
 		}
 
+		// The file parts are assembled where they are located, then moved to the destination
+		File assembled = new File(fileParts.get(0).getParentFile(), fileParts.get(0).getName().concat("_assembled"));
+		logger.trace("Assemble file to {}", assembled.getPath());
 		for (File filePart : fileParts) {
 			// copy file parts to the new location, append
-			FileUtils.writeByteArrayToFile(destination, FileUtils.readFileToByteArray(filePart), true);
+			FileUtils.writeByteArrayToFile(assembled, FileUtils.readFileToByteArray(filePart), true);
 
 			if (!filePart.delete()) {
 				logger.warn("Couldn't delete temporary file part. filePart = '{}'", filePart);
 			}
 		}
+
+		FileUtils.moveFile(assembled, destination);
 	}
 }

@@ -66,4 +66,20 @@ public interface INetworkConfiguration {
 	 * @return the port of the peer this node bootstraps to.
 	 */
 	int getBootstrapPort();
+
+	/**
+	 * Indicates that the peer is behind a NAT / firewall. If no port forwarding or other NAT traversal
+	 * techniques are used, try it with {@link #tryUPnP()}.
+	 * 
+	 * @return <code>true</code> if the peer is firewalled, otherwise <code>false</code>
+	 */
+	boolean isFirewalled();
+
+	/**
+	 * Try to set up UPnP. Note that this may
+	 * not work and depends on the router and its configuration.
+	 * 
+	 * @return <code>true</code> if the peer should try to use UPnP for port-forwarding.
+	 */
+	boolean tryUPnP();
 }

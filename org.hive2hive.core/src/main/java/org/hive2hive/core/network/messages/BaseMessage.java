@@ -208,6 +208,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 		switch (reply) {
 			case FAILURE:
 			case FUTURE_FAILURE:
+			case FAILURE_DESERIALIZATION:
 				if (SendingBehavior.SEND_MAX_ALLOWED_TIMES == sendingBehavior) {
 					if (routedSendingCounter < H2HConstants.MAX_MESSAGE_SENDING) {
 						return true;

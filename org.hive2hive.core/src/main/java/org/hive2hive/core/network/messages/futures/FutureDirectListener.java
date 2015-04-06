@@ -12,6 +12,8 @@ import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
+import org.hive2hive.core.serializer.IH2HSerialize;
+import org.hive2hive.core.serializer.SerializerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	private final PublicKey receiverPublicKey;
 	private final MessageManager messageManager;
 	private final CountDownLatch latch;
+	private final IH2HSerialize serializer;
 	private DeliveryState state;
 
 	private enum DeliveryState {
@@ -61,10 +64,12 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	 * @param messageManager
 	 *            reference needed for re-sending
 	 */
-	public FutureDirectListener(BaseDirectMessage message, PublicKey receiverPublicKey, MessageManager messageManager) {
+	public FutureDirectListener(BaseDirectMessage message, PublicKey receiverPublicKey, MessageManager messageManager,
+			IH2HSerialize serializer) {
 		this.message = message;
 		this.receiverPublicKey = receiverPublicKey;
 		this.messageManager = messageManager;
+		this.serializer = serializer;
 		this.latch = new CountDownLatch(1);
 	}
 
@@ -147,15 +152,17 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	private AcceptanceReply extractAcceptanceReply(FutureDirect future) {
 		String errorReason = "";
 		if (future.isSuccess()) {
-			Object responseObject;
 			try {
-				responseObject = future.object();
-				if (responseObject == null) {
+				if (future.buffer() == null || future.buffer().buffer() == null) {
 					errorReason = "Returned object is null";
-				} else if (responseObject instanceof AcceptanceReply) {
-					return (AcceptanceReply) responseObject;
 				} else {
-					errorReason = "The returned object was not of type AcceptanceReply!";
+					byte[] rawReply = SerializerUtil.convertToByteArray(future.buffer().buffer());
+					Object responseObject = serializer.deserialize(rawReply);
+					if (responseObject instanceof AcceptanceReply) {
+						return (AcceptanceReply) responseObject;
+					} else {
+						errorReason = "The returned object was not of type AcceptanceReply!";
+					}
 				}
 			} catch (Exception e) {
 				errorReason = "Exception occured while getting the object.";
@@ -167,5 +174,4 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 			return AcceptanceReply.FUTURE_FAILURE;
 		}
 	}
-
 }

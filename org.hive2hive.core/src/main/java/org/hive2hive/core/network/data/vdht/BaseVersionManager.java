@@ -28,9 +28,9 @@ public abstract class BaseVersionManager<T extends BaseVersionedNetworkContent> 
 	private static final Logger logger = LoggerFactory.getLogger(BaseVersionManager.class);
 
 	// limit constants
-	protected static final int getFailedLimit = 2;
-	protected static final int forkAfterGetLimit = 2;
-	protected static final int delayLimit = 2;
+	protected static final int GET_FAILED_LIMIT = 2;
+	protected static final int FORK_AFTER_GET_LIMIT = 2;
+	protected static final int DELAY_LIMIT = 2;
 
 	protected final DataManager dataManager;
 	protected final IParameters parameters;

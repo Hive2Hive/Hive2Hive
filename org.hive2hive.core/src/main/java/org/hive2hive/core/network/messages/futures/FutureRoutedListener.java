@@ -1,5 +1,8 @@
 package org.hive2hive.core.network.messages.futures;
 
+import io.netty.buffer.ByteBuf;
+
+import java.io.IOException;
 import java.security.PublicKey;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
@@ -12,6 +15,8 @@ import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.network.messages.AcceptanceReply;
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.MessageManager;
+import org.hive2hive.core.serializer.IH2HSerialize;
+import org.hive2hive.core.serializer.SerializerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +43,7 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	private final PublicKey receiverPublicKey;
 	private final MessageManager messageManager;
 	private final CountDownLatch latch;
+	private final IH2HSerialize serializer;
 	private DeliveryState state;
 
 	private enum DeliveryState {
@@ -54,10 +60,12 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	 * @param messageManager
 	 *            reference needed for re-sending
 	 */
-	public FutureRoutedListener(BaseMessage message, PublicKey receiverPublicKey, MessageManager messageManager) {
+	public FutureRoutedListener(BaseMessage message, PublicKey receiverPublicKey, MessageManager messageManager,
+			IH2HSerialize serializer) {
 		this.message = message;
 		this.receiverPublicKey = receiverPublicKey;
 		this.messageManager = messageManager;
+		this.serializer = serializer;
 		this.latch = new CountDownLatch(1);
 	}
 
@@ -130,19 +138,24 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	private AcceptanceReply extractAcceptanceReply(FutureSend future) {
 		String errorReason = "";
 		if (future.isSuccess()) {
-			Collection<Object> returndedObject = future.rawDirectData2().values();
+			Collection<ByteBuf> returndedObject = future.rawDirectData1().values();
 			if (returndedObject == null) {
 				errorReason = "Returned object is null.";
 			} else if (returndedObject.isEmpty()) {
 				errorReason = "Returned raw data is empty.";
 			} else {
-				Object firstReturnedObject = returndedObject.iterator().next();
-				if (firstReturnedObject == null) {
-					errorReason = "First returned object is null.";
-				} else if (firstReturnedObject instanceof AcceptanceReply) {
-					return (AcceptanceReply) firstReturnedObject;
-				} else {
-					errorReason = "The returned object was not of type AcceptanceReply!";
+				byte[] rawData = SerializerUtil.convertToByteArray(returndedObject.iterator().next());
+				try {
+					Object firstReturnedObject = serializer.deserialize(rawData);
+					if (firstReturnedObject == null) {
+						errorReason = "First returned object is null.";
+					} else if (firstReturnedObject instanceof AcceptanceReply) {
+						return (AcceptanceReply) firstReturnedObject;
+					} else {
+						errorReason = "The returned object was not of type AcceptanceReply!";
+					}
+				} catch (ClassNotFoundException | IOException e) {
+					errorReason = "The returned object could not be deserialized";
 				}
 			}
 			logger.error("A failure while sending a message occured. Reason = '{}'", errorReason);
@@ -152,5 +165,4 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 			return AcceptanceReply.FUTURE_FAILURE;
 		}
 	}
-
 }

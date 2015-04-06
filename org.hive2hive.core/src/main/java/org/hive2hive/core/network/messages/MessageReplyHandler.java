@@ -1,13 +1,18 @@
 package org.hive2hive.core.network.messages;
 
+import io.netty.buffer.Unpooled;
+
 import java.io.IOException;
+import java.io.Serializable;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.SignatureException;
 
+import net.tomp2p.message.Buffer;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
+import net.tomp2p.rpc.RawDataReply;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
@@ -17,6 +22,7 @@ import org.hive2hive.core.model.versioned.HybridEncryptedContent;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.serializer.IH2HSerialize;
+import org.hive2hive.core.serializer.SerializerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +34,11 @@ import org.slf4j.LoggerFactory;
  * the sender node. This design allows a quick and non-blocking message
  * handling.
  * 
- * @author Nendor, Seppi
+ * @author Nendor
+ * @author Seppi
+ * @author Nico
  */
-public class MessageReplyHandler implements ObjectDataReply {
+public class MessageReplyHandler implements RawDataReply, ObjectDataReply {
 
 	private static final Logger logger = LoggerFactory.getLogger(MessageReplyHandler.class);
 
@@ -40,6 +48,33 @@ public class MessageReplyHandler implements ObjectDataReply {
 	public MessageReplyHandler(NetworkManager networkManager, IH2HSerialize serializer) {
 		this.networkManager = networkManager;
 		this.serializer = serializer;
+	}
+
+	@Override
+	public Buffer reply(PeerAddress sender, Buffer requestBuffer, boolean complete) throws Exception {
+		byte[] rawRequest = SerializerUtil.convertToByteArray(requestBuffer.buffer());
+
+		Object request;
+		try {
+			request = serializer.deserialize(rawRequest);
+		} catch (IOException | ClassNotFoundException e) {
+			logger.error("Cannot deserialize the raw request from sender {}", sender);
+			return new Buffer(Unpooled.wrappedBuffer(serializer.serialize(AcceptanceReply.FAILURE_DESERIALIZATION)));
+		}
+
+		Object reply = reply(sender, request);
+		byte[] rawReply;
+		if (reply instanceof Serializable) {
+			rawReply = serializer.serialize((Serializable) reply);
+		} else if (reply == null) {
+			logger.error("The reply is null.");
+			return null;
+		} else {
+			logger.error("Cannot serialize the response. It is of kind {}", reply.getClass().getName());
+			rawReply = serializer.serialize(AcceptanceReply.FAILURE);
+		}
+
+		return new Buffer(Unpooled.wrappedBuffer(rawReply));
 	}
 
 	@Override
@@ -88,7 +123,7 @@ public class MessageReplyHandler implements ObjectDataReply {
 			message = serializer.deserialize(decryptedMessage);
 		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Message could not be deserialized.", e);
-			return null;
+			return AcceptanceReply.FAILURE_DESERIALIZATION;
 		}
 
 		if (message != null && message instanceof BaseMessage) {
