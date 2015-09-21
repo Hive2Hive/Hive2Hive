@@ -48,6 +48,7 @@
 	<properties>
 		<!-- platform independent encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<tomp2p.version>5.0-Beta6</tomp2p.version>
 	</properties>
 
 	<build>
