@@ -52,7 +52,7 @@ public class DeleteFileTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		userCredentials = generateRandomCredentials();
 
-		root = FileTestUtil.getTempDirectory();
+		root = tempFolder.newFolder();
 		client = network.get(0);
 
 		// register a user
@@ -182,7 +182,6 @@ public class DeleteFileTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(root);
 		afterClass();
 	}
 }

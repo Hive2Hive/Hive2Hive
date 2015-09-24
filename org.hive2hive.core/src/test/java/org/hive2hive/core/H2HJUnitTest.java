@@ -12,7 +12,9 @@ import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.UserCredentials;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.junit.rules.Timeout;
 import org.slf4j.Logger;
@@ -25,6 +27,9 @@ public class H2HJUnitTest {
 	protected static final int DEFAULT_NETWORK_SIZE = 3;
 	protected static Class<? extends H2HJUnitTest> testClass;
 	protected static Logger logger;
+
+	@ClassRule
+	public static TemporaryFolder tempFolder = new TemporaryFolder();
 
 	@Rule
 	public TestName name = new TestName();

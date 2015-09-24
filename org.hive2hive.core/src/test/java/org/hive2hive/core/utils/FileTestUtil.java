@@ -6,7 +6,6 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.file.FileUtil;
-import org.junit.Assert;
 
 public class FileTestUtil {
 
@@ -35,11 +34,5 @@ public class FileTestUtil {
 		}
 
 		return file;
-	}
-
-	public static File getTempDirectory() {
-		File dir = new File(FileUtils.getTempDirectory(), H2HJUnitTest.randomString());
-		Assert.assertTrue(dir.mkdirs());
-		return dir;
 	}
 }

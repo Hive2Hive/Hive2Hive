@@ -9,7 +9,6 @@ import java.util.List;
 
 import net.engio.mbassy.listener.Handler;
 
-import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.events.framework.interfaces.IFileEventListener;
 import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
@@ -26,7 +25,6 @@ import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -51,8 +49,8 @@ public class FileEventsTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(networkSize);
 		userCredentials = generateRandomCredentials();
 
-		rootA = FileTestUtil.getTempDirectory();
-		rootB = FileTestUtil.getTempDirectory();
+		rootA = tempFolder.newFolder();
+		rootB = tempFolder.newFolder();
 		clientA = network.get(0);
 		clientB = network.get(1);
 
@@ -67,18 +65,6 @@ public class FileEventsTest extends H2HJUnitTest {
 
 	@AfterClass
 	public static void endTest() {
-		NetworkTestUtil.shutdownNetwork(network);
-		try {
-			if (rootA != null && rootA.exists()) {
-				FileUtils.deleteDirectory(rootA);
-			}
-			if (rootB != null && rootB.exists()) {
-				FileUtils.deleteDirectory(rootB);
-			}
-		} catch (IOException ioex) {
-			logger.error("Could not cleanup folders.", ioex);
-		}
-
 		afterClass();
 	}
 
@@ -86,20 +72,6 @@ public class FileEventsTest extends H2HJUnitTest {
 	public void beforeTest() {
 		// clear events from previous test case
 		listener.getEvents().clear();
-	}
-
-	@After
-	public void afterTest() {
-		try {
-			if (rootA != null && rootA.exists()) {
-				FileUtils.cleanDirectory(rootA);
-			}
-			if (rootB != null && rootB.exists()) {
-				FileUtils.cleanDirectory(rootB);
-			}
-		} catch (IOException ioex) {
-			logger.error("Could not cleanup directories.", ioex);
-		}
 	}
 
 	/**

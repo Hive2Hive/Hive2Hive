@@ -52,7 +52,7 @@ public class DownloadLargeFileTest extends H2HJUnitTest {
 
 		// create user, register and login both clients
 		userCredentials = generateRandomCredentials();
-		uploaderRoot = FileTestUtil.getTempDirectory();
+		uploaderRoot = tempFolder.newFolder();
 		UseCaseTestUtil.registerAndLogin(userCredentials, uploader, uploaderRoot);
 
 		// upload the large file before the 2nd peer logs in
@@ -92,8 +92,6 @@ public class DownloadLargeFileTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(uploaderRoot);
-		FileUtils.deleteDirectory(downloaderRoot);
 		afterClass();
 	}
 }

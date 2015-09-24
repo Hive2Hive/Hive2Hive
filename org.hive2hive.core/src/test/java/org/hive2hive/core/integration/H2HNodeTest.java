@@ -13,7 +13,6 @@ import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.helper.TestFileAgent;
@@ -78,7 +77,7 @@ public class H2HNodeTest extends H2HJUnitTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testAddFileWrongDir() throws IOException, NoPeerConnectionException, NoSessionException,
 			IllegalArgumentException {
-		File testFile = new File(FileTestUtil.getTempDirectory(), "test-file2");
+		File testFile = new File(tempFolder.newFolder(), "test-file2");
 		FileUtils.write(testFile, "Hello World 2");
 
 		loggedInNode.getFileManager().createAddProcess(testFile);

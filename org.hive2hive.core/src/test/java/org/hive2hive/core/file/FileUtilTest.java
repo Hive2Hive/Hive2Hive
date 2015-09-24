@@ -5,13 +5,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.network.data.PublicKeyManager;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.serializer.FSTSerializer;
 import org.hive2hive.core.utils.helper.TestFileAgent;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,7 +25,6 @@ import org.junit.Test;
 public class FileUtilTest extends H2HJUnitTest {
 
 	private static FSTSerializer serializer;
-	private File root;
 	private TestFileAgent fileAgent;
 
 	@BeforeClass
@@ -43,15 +40,8 @@ public class FileUtilTest extends H2HJUnitTest {
 	}
 
 	@Before
-	public void createRoot() {
-		String randomName = randomString();
-		root = new File(System.getProperty("java.io.tmpdir"), randomName);
+	public void createRoot() throws IOException {
 		fileAgent = new TestFileAgent();
-	}
-
-	@After
-	public void cleanup() throws IOException {
-		FileUtils.deleteDirectory(root);
 	}
 
 	@Test

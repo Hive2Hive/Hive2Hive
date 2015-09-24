@@ -2,6 +2,7 @@ package org.hive2hive.core.events;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,6 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.AfterClass;
@@ -36,7 +36,7 @@ public class UserEventsTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void loginLogoutEventTest() throws NoPeerConnectionException, NoSessionException {
+	public void loginLogoutEventTest() throws NoPeerConnectionException, NoSessionException, IOException {
 		List<NetworkManager> network = NetworkTestUtil.createNetwork(2);
 
 		// register an event listener at each node
@@ -51,13 +51,13 @@ public class UserEventsTest extends H2HJUnitTest {
 		assertEquals(0, listener0.loginEvents.size());
 		assertEquals(0, listener1.loginEvents.size());
 
-		UseCaseTestUtil.login(credentials, network.get(0), FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(credentials, network.get(0), tempFolder.newFolder());
 
 		// there should be still no event
 		assertEquals(0, listener0.loginEvents.size());
 		assertEquals(0, listener1.loginEvents.size());
 
-		UseCaseTestUtil.login(credentials, network.get(1), FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(credentials, network.get(1), tempFolder.newFolder());
 
 		// the first client should now have a login event
 		assertEquals(1, listener0.loginEvents.size());

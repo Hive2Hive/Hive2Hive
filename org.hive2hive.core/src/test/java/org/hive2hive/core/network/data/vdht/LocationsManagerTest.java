@@ -5,7 +5,6 @@ import java.util.List;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.model.versioned.Locations;
 import org.hive2hive.core.network.NetworkManager;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.AfterClass;
@@ -30,7 +29,7 @@ public class LocationsManagerTest extends H2HJUnitTest {
 	@Test
 	public void testRepair() throws Exception {
 		NetworkManager node = NetworkTestUtil.getRandomNode(network);
-		UseCaseTestUtil.registerAndLogin(generateRandomCredentials(), node, FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.registerAndLogin(generateRandomCredentials(), node, tempFolder.newFolder());
 
 		Locations repaired = node.getSession().getLocationsManager().repairLocations();
 		Assert.assertNotNull(repaired);

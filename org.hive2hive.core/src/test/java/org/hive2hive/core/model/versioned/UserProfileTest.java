@@ -1,15 +1,14 @@
 package org.hive2hive.core.model.versioned;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.KeyPair;
 
 import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.model.FileIndex;
 import org.hive2hive.core.model.FolderIndex;
-import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -56,7 +55,7 @@ public class UserProfileTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void getFileByPath() {
+	public void getFileByPath() throws IOException {
 		FolderIndex root = userProfile.getRoot();
 
 		// tree in the UP
@@ -70,7 +69,7 @@ public class UserProfileTest extends H2HJUnitTest {
 				"bla".getBytes());
 
 		// tree on the FS
-		File rootFile = FileTestUtil.getTempDirectory();
+		File rootFile = tempFolder.newFolder();
 		File folder1 = new File(rootFile, folderIndex1.getName());
 		File file1 = new File(folder1, fileIndex1.getName());
 		File file2 = new File(folder1, fileIndex2.getName());

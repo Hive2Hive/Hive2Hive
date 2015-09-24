@@ -15,8 +15,6 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.HashUtil;
-import org.hive2hive.core.utils.FileTestUtil;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,7 +51,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 
 	@Before
 	public void createTreeNode() throws IOException {
-		rootFile = FileTestUtil.getTempDirectory();
+		rootFile = tempFolder.newFolder();
 
 		// naming convention:
 		// [number][type][index] where number is the level and type is either 'f' for file or 'd' for
@@ -85,11 +83,6 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		node1d = new FolderIndex(root, keys, "1d");
 		node2f = new FileIndex(node1d, keys, "2f", HashUtil.hash(file2f));
 		node2d = new FolderIndex(node1d, keys, "2d");
-	}
-
-	@After
-	public void cleanup() throws IOException {
-		FileUtils.deleteDirectory(rootFile);
 	}
 
 	@Test

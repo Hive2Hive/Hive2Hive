@@ -65,8 +65,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 		uploader.getConnection().getPeer().peer().rawDataReply(new DenyingMessageReplyHandler());
 
 		// create the roots and the file manager
-		uploaderRoot = FileTestUtil.getTempDirectory();
-		File rootDownloader = FileTestUtil.getTempDirectory();
+		uploaderRoot = tempFolder.newFolder();
+		File rootDownloader = tempFolder.newFolder();
 
 		// register a user
 		UseCaseTestUtil.register(userCredentials, registrer);
@@ -225,7 +225,6 @@ public class UpdateFileTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(uploaderRoot);
 		afterClass();
 	}
 }

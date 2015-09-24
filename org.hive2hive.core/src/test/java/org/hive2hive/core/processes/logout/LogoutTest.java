@@ -15,7 +15,6 @@ import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.serializer.IH2HSerialize;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
@@ -43,7 +42,7 @@ public class LogoutTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		userCredentials = generateRandomCredentials();
 
-		UseCaseTestUtil.registerAndLogin(userCredentials, network.get(0), FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.registerAndLogin(userCredentials, network.get(0), tempFolder.newFolder());
 	}
 
 	@Test

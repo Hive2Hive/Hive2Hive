@@ -29,7 +29,7 @@ public class FileChunkUtilTest extends H2HJUnitTest {
 
 	@BeforeClass
 	public static void initTest() throws Exception {
-		parent = FileTestUtil.getTempDirectory();
+		parent = tempFolder.newFolder();
 		testClass = FileChunkUtilTest.class;
 		beforeClass();
 	}

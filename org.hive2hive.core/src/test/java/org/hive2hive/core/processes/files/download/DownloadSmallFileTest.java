@@ -61,7 +61,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 
 		// create user, register and login both clients
 		userCredentials = generateRandomCredentials();
-		uploaderRoot = FileTestUtil.getTempDirectory();
+		uploaderRoot = tempFolder.newFolder();
 		UseCaseTestUtil.registerAndLogin(userCredentials, uploader, uploaderRoot);
 		downloaderRoot = new File(FileUtils.getTempDirectory(), randomString());
 		UseCaseTestUtil.login(userCredentials, downloader, downloaderRoot);
@@ -154,8 +154,6 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(uploaderRoot);
-		FileUtils.deleteDirectory(downloaderRoot);
 		afterClass();
 	}
 }

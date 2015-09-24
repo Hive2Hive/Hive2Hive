@@ -14,7 +14,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
@@ -37,14 +36,13 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 		UserCredentials credentials = generateRandomCredentials();
 
-		root = FileTestUtil.getTempDirectory();
+		root = tempFolder.newFolder();
 		UseCaseTestUtil.registerAndLogin(credentials, network.get(0), root);
 	}
 
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(root);
 		afterClass();
 	}
 

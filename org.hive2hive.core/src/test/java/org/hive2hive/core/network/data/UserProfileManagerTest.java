@@ -29,7 +29,6 @@ import org.hive2hive.core.network.data.parameters.Parameters;
 import org.hive2hive.core.security.EncryptionUtil.RSA_KEYLENGTH;
 import org.hive2hive.core.security.HashUtil;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestProcessComponentListener;
@@ -56,7 +55,6 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 
 	private UserCredentials userCredentials;
 	private NetworkManager client;
-	private File root;
 
 	private enum Operation {
 		PUT,
@@ -81,7 +79,6 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	public void setup() throws NoPeerConnectionException, IOException, GeneralSecurityException {
 		userCredentials = generateRandomCredentials();
 		client = NetworkTestUtil.getRandomNode(network);
-		root = FileTestUtil.getTempDirectory();
 
 		// create an user profile
 		UserProfile userProfile = new UserProfile(userCredentials.getUserId(),
@@ -218,6 +215,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 	@Test
 	public void testStress() throws NoSessionException, GetFailedException, PutFailedException, IOException,
 			NoPeerConnectionException, AbortModifyException {
+		File root = tempFolder.newFolder();
 		UserProfileManager profileManager = new UserProfileManager(client.getDataManager(), userCredentials);
 		for (int i = 0; i < 10; i++) {
 			final boolean isFolder = rnd.nextBoolean();

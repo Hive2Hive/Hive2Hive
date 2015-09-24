@@ -10,7 +10,6 @@ import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.model.PermissionType;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestFileEventListener;
@@ -37,12 +36,12 @@ public abstract class BaseShareReadWriteTest extends H2HJUnitTest {
 	protected static TestFileEventListener eventsAtA;
 	protected static TestFileEventListener eventsAtB;
 
-	protected static void setupNetwork() throws NoPeerConnectionException {
+	protected static void setupNetwork() throws NoPeerConnectionException, IOException {
 		logger.info("Setup network.");
 		network = NetworkTestUtil.createNetwork(DEFAULT_NETWORK_SIZE);
 
 		logger.info("Create user A.");
-		rootA = FileTestUtil.getTempDirectory();
+		rootA = tempFolder.newFolder();
 		userA = generateRandomCredentials();
 		nodeA = network.get(0);
 		logger.info("Register and login user A.");
@@ -52,7 +51,7 @@ public abstract class BaseShareReadWriteTest extends H2HJUnitTest {
 		nodeA.getEventBus().subscribe(eventsAtA);
 
 		logger.info("Create user B.");
-		rootB = FileTestUtil.getTempDirectory();
+		rootB = tempFolder.newFolder();
 		userB = generateRandomCredentials();
 		nodeB = network.get(1);
 		logger.info("Register and login user B.");
@@ -82,10 +81,7 @@ public abstract class BaseShareReadWriteTest extends H2HJUnitTest {
 
 	@AfterClass
 	public static void afterTest() throws IOException {
-		FileUtils.deleteDirectory(rootA);
-		FileUtils.deleteDirectory(rootB);
 		NetworkTestUtil.shutdownNetwork(network);
-
 		afterClass();
 	}
 

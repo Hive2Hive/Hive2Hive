@@ -15,7 +15,6 @@ import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.network.messages.MessageReplyHandler;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.H2HWaiter;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
@@ -68,12 +67,12 @@ public class NotificationTest extends H2HJUnitTest {
 		UseCaseTestUtil.register(userCCredentials, network.get(5));
 
 		// login all nodes
-		UseCaseTestUtil.login(userACredentials, network.get(0), FileTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(userACredentials, network.get(1), FileTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(userACredentials, network.get(2), FileTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(userBCredentials, network.get(3), FileTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(userBCredentials, network.get(4), FileTestUtil.getTempDirectory());
-		UseCaseTestUtil.login(userCCredentials, network.get(5), FileTestUtil.getTempDirectory());
+		UseCaseTestUtil.login(userACredentials, network.get(0), tempFolder.newFolder());
+		UseCaseTestUtil.login(userACredentials, network.get(1), tempFolder.newFolder());
+		UseCaseTestUtil.login(userACredentials, network.get(2), tempFolder.newFolder());
+		UseCaseTestUtil.login(userBCredentials, network.get(3), tempFolder.newFolder());
+		UseCaseTestUtil.login(userBCredentials, network.get(4), tempFolder.newFolder());
+		UseCaseTestUtil.login(userCCredentials, network.get(5), tempFolder.newFolder());
 
 		// store the message reply handler as backup
 		messageHandlers = new ArrayList<MessageReplyHandler>(NETWORK_SIZE);

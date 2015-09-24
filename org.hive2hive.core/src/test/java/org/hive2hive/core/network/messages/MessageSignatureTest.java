@@ -3,6 +3,7 @@ package org.hive2hive.core.network.messages;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.security.PublicKey;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testMessageWithSignatureSameUser() throws NoPeerConnectionException, NoSessionException {
+	public void testMessageWithSignatureSameUser() throws NoPeerConnectionException, NoSessionException, IOException {
 		NetworkTestUtil.setSameSession(network);
 		// select two random nodes
 		NetworkManager sender = network.get(0);
@@ -59,7 +60,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testMessageWithSignatureDifferentUser() throws NoPeerConnectionException, NoSessionException {
+	public void testMessageWithSignatureDifferentUser() throws NoPeerConnectionException, NoSessionException, IOException {
 		NetworkTestUtil.setDifferentSessions(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);
@@ -78,7 +79,7 @@ public class MessageSignatureTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testMessageWithWrongSignature() throws NoPeerConnectionException, NoSessionException {
+	public void testMessageWithWrongSignature() throws NoPeerConnectionException, NoSessionException, IOException {
 		NetworkTestUtil.setDifferentSessions(network);
 		NetworkManager sender = network.get(0);
 		NetworkManager receiver = network.get(1);

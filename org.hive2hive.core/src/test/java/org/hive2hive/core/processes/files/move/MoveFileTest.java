@@ -13,7 +13,6 @@ import org.hive2hive.core.model.Index;
 import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.AfterClass;
@@ -46,7 +45,7 @@ public class MoveFileTest extends H2HJUnitTest {
 		userCredentials = generateRandomCredentials();
 		// register user
 		UseCaseTestUtil.register(userCredentials, client);
-		root = FileTestUtil.getTempDirectory();
+		root = tempFolder.newFolder();
 		// login user
 		UseCaseTestUtil.login(userCredentials, client, root);
 	}
@@ -158,7 +157,6 @@ public class MoveFileTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		FileUtils.deleteDirectory(root);
 		afterClass();
 	}
 }

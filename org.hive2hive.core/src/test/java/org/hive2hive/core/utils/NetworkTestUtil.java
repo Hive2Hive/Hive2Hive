@@ -1,5 +1,6 @@
 package org.hive2hive.core.utils;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.KeyPair;
@@ -88,8 +89,9 @@ public class NetworkTestUtil {
 	 * @param network
 	 *            list containing all nodes which have different key pairs
 	 * @throws NoPeerConnectionException
+	 * @throws IOException
 	 */
-	public static void setDifferentSessions(List<NetworkManager> network) throws NoPeerConnectionException {
+	public static void setDifferentSessions(List<NetworkManager> network) throws NoPeerConnectionException, IOException {
 		for (NetworkManager node : network) {
 			KeyPair keyPair = H2HJUnitTest.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 			KeyPair protectionKeyPair = H2HJUnitTest.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
@@ -118,8 +120,9 @@ public class NetworkTestUtil {
 	 * @param network
 	 *            list containing all nodes which need to have the same key pair
 	 * @throws NoPeerConnectionException
+	 * @throws IOException
 	 */
-	public static void setSameSession(List<NetworkManager> network) throws NoPeerConnectionException {
+	public static void setSameSession(List<NetworkManager> network) throws NoPeerConnectionException, IOException {
 		KeyPair keyPair = H2HJUnitTest.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		KeyPair protectionKeys = H2HJUnitTest.generateRSAKeyPair(H2HConstants.KEYLENGTH_USER_KEYS);
 		UserCredentials userCredentials = H2HJUnitTest.generateRandomCredentials();

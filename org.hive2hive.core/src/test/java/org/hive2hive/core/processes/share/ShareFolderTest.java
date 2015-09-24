@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.io.FileUtils;
 import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.events.framework.interfaces.file.IFileAddEvent;
 import org.hive2hive.core.events.framework.interfaces.file.IFileShareEvent;
@@ -51,11 +50,11 @@ public class ShareFolderTest extends H2HJUnitTest {
 		beforeClass();
 
 		network = NetworkTestUtil.createNetwork(Math.max(DEFAULT_NETWORK_SIZE, 3));
-		rootA = FileTestUtil.getTempDirectory();
+		rootA = tempFolder.newFolder();
 		userA = generateRandomCredentials("userA");
 		UseCaseTestUtil.registerAndLogin(userA, network.get(0), rootA);
 
-		rootB = FileTestUtil.getTempDirectory();
+		rootB = tempFolder.newFolder();
 		userB = generateRandomCredentials("userB");
 		UseCaseTestUtil.registerAndLogin(userB, network.get(1), rootB);
 
@@ -136,7 +135,7 @@ public class ShareFolderTest extends H2HJUnitTest {
 	@Test
 	public void shareThreeUsers() throws IOException, IllegalArgumentException, NoSessionException, GetFailedException,
 			InterruptedException, NoPeerConnectionException {
-		File rootC = FileTestUtil.getTempDirectory();
+		File rootC = tempFolder.newFolder();
 		UserCredentials userC = generateRandomCredentials("userC");
 		UseCaseTestUtil.registerAndLogin(userC, network.get(2), rootC);
 
@@ -189,12 +188,6 @@ public class ShareFolderTest extends H2HJUnitTest {
 
 	@AfterClass
 	public static void endTest() throws IOException {
-		if (rootA.exists()) {
-			FileUtils.deleteDirectory(rootA);
-		}
-		if (rootB.exists()) {
-			FileUtils.deleteDirectory(rootB);
-		}
 		NetworkTestUtil.shutdownNetwork(network);
 		afterClass();
 	}

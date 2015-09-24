@@ -12,7 +12,6 @@ import org.hive2hive.core.model.IFileVersion;
 import org.hive2hive.core.network.NetworkManager;
 import org.hive2hive.core.processes.ProcessFactory;
 import org.hive2hive.core.security.UserCredentials;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.TestExecutionUtil;
 import org.hive2hive.core.utils.UseCaseTestUtil;
@@ -56,7 +55,7 @@ public class RecoverFileTest extends H2HJUnitTest {
 		client = NetworkTestUtil.getRandomNode(network);
 
 		// register a user
-		root = FileTestUtil.getTempDirectory();
+		root = tempFolder.newFolder();
 		UseCaseTestUtil.registerAndLogin(userCredentials, client, root);
 
 		// add an intial file to the network

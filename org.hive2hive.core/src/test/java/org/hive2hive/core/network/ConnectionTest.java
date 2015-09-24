@@ -3,6 +3,7 @@ package org.hive2hive.core.network;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -14,7 +15,6 @@ import org.hive2hive.core.exceptions.NoSessionException;
 import org.hive2hive.core.security.H2HDummyEncryption;
 import org.hive2hive.core.serializer.FSTSerializer;
 import org.hive2hive.core.serializer.IH2HSerialize;
-import org.hive2hive.core.utils.FileTestUtil;
 import org.hive2hive.core.utils.TestFileConfiguration;
 import org.hive2hive.core.utils.UseCaseTestUtil;
 import org.junit.AfterClass;
@@ -80,8 +80,7 @@ public class ConnectionTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void testConnectDisconnectKeepSession() throws UnknownHostException, NoPeerConnectionException,
-			NoSessionException {
+	public void testConnectDisconnectKeepSession() throws NoPeerConnectionException, NoSessionException, IOException {
 		NetworkManager nodeA = new NetworkManager(new H2HDummyEncryption(), serializer, new TestFileConfiguration());
 		NetworkManager nodeB = new NetworkManager(new H2HDummyEncryption(), serializer, new TestFileConfiguration());
 
@@ -91,7 +90,7 @@ public class ConnectionTest extends H2HJUnitTest {
 			nodeA.connect(netConfigA);
 			nodeB.connect(netConfigB);
 
-			UseCaseTestUtil.registerAndLogin(generateRandomCredentials(), nodeB, FileTestUtil.getTempDirectory());
+			UseCaseTestUtil.registerAndLogin(generateRandomCredentials(), nodeB, tempFolder.newFolder());
 			assertTrue(nodeB.disconnect(true));
 			assertTrue(nodeB.connect(netConfigB));
 			assertNotNull(nodeB.getSession());

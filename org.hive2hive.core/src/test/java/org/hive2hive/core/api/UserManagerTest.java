@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -80,7 +81,7 @@ public class UserManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void isLoggedInTest() throws NoPeerConnectionException, InterruptedException, NoSessionException,
-			InvalidProcessStateException, ProcessExecutionException {
+			InvalidProcessStateException, ProcessExecutionException, IOException {
 		UserCredentials userCredentials = generateRandomCredentials();
 
 		TestFileAgent fileAgent = new TestFileAgent();
@@ -131,7 +132,7 @@ public class UserManagerTest extends H2HJUnitTest {
 
 	@Test
 	public void getClientListTest() throws NoPeerConnectionException, InterruptedException, InvalidProcessStateException,
-			ProcessExecutionException, NoSessionException {
+			ProcessExecutionException, NoSessionException, IOException {
 		UserCredentials userCredentials = generateRandomCredentials();
 
 		// register at node 0

@@ -4,15 +4,15 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.hive2hive.core.H2HJUnitTest;
 import org.hive2hive.core.file.IFileAgent;
-import org.hive2hive.core.utils.FileTestUtil;
 
 public class TestFileAgent implements IFileAgent {
 
 	private final File root;
 
-	public TestFileAgent() {
-		root = FileTestUtil.getTempDirectory();
+	public TestFileAgent() throws IOException {
+		root = H2HJUnitTest.tempFolder.newFolder();
 	}
 
 	public TestFileAgent(File root) {

@@ -52,11 +52,11 @@ public class AddFileTest extends H2HJUnitTest {
 		// create some random user credentials
 		userCredentials = generateRandomCredentials();
 		// register and login a user (peer 0)
-		uploaderRoot = FileTestUtil.getTempDirectory();
+		uploaderRoot = tempFolder.newFolder();
 		UseCaseTestUtil.registerAndLogin(userCredentials, network.get(0), uploaderRoot);
 
 		// other client to verify this
-		downloaderRoot = FileTestUtil.getTempDirectory();
+		downloaderRoot = tempFolder.newFolder();
 		UseCaseTestUtil.login(userCredentials, network.get(1), downloaderRoot);
 	}
 
@@ -163,12 +163,6 @@ public class AddFileTest extends H2HJUnitTest {
 	@AfterClass
 	public static void endTest() throws IOException {
 		NetworkTestUtil.shutdownNetwork(network);
-		if (uploaderRoot != null && uploaderRoot.exists()) {
-			FileUtils.deleteDirectory(uploaderRoot);
-		}
-		if (downloaderRoot != null && downloaderRoot.exists()) {
-			FileUtils.deleteDirectory(downloaderRoot);
-		}
 		afterClass();
 	}
 }
