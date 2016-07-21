@@ -1,19 +1,10 @@
 package org.hive2hive.core.network.messages;
 
 import io.netty.buffer.Unpooled;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.security.SignatureException;
-
 import net.tomp2p.message.Buffer;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 import net.tomp2p.rpc.RawDataReply;
-
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
@@ -26,6 +17,13 @@ import org.hive2hive.core.serializer.SerializerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.security.SignatureException;
+
 /**
  * This is the general message handler of each node. It checks if received
  * message is ok (depends on message e.g. routed to correct node). If accepted
@@ -33,43 +31,55 @@ import org.slf4j.LoggerFactory;
  * handler thread has started the reply handler gives immediately response to
  * the sender node. This design allows a quick and non-blocking message
  * handling.
- * 
+ *
  * @author Nendor
  * @author Seppi
  * @author Nico
  */
-public class MessageReplyHandler implements RawDataReply, ObjectDataReply {
+public class MessageReplyHandler implements RawDataReply, ObjectDataReply
+{
 
 	private static final Logger logger = LoggerFactory.getLogger(MessageReplyHandler.class);
 
 	private final NetworkManager networkManager;
 	private final IH2HSerialize serializer;
 
-	public MessageReplyHandler(NetworkManager networkManager, IH2HSerialize serializer) {
+	public MessageReplyHandler(NetworkManager networkManager, IH2HSerialize serializer)
+	{
 		this.networkManager = networkManager;
 		this.serializer = serializer;
 	}
 
 	@Override
-	public Buffer reply(PeerAddress sender, Buffer requestBuffer, boolean complete) throws Exception {
+	public Buffer reply(PeerAddress sender, Buffer requestBuffer, boolean complete) throws Exception
+	{
 		byte[] rawRequest = SerializerUtil.convertToByteArray(requestBuffer.buffer());
 
 		Object request;
-		try {
+		try
+		{
 			request = serializer.deserialize(rawRequest);
-		} catch (IOException | ClassNotFoundException e) {
+		}
+		catch(IOException | ClassNotFoundException e)
+		{
 			logger.error("Cannot deserialize the raw request from sender {}", sender);
-			return new Buffer(Unpooled.wrappedBuffer(serializer.serialize(AcceptanceReply.FAILURE_DESERIALIZATION)));
+			return new Buffer(Unpooled.wrappedBuffer(
+					serializer.serialize(AcceptanceReply.FAILURE_DESERIALIZATION)));
 		}
 
 		Object reply = reply(sender, request);
 		byte[] rawReply;
-		if (reply instanceof Serializable) {
+		if (reply instanceof Serializable)
+		{
 			rawReply = serializer.serialize((Serializable) reply);
-		} else if (reply == null) {
+		}
+		else if (reply == null)
+		{
 			logger.error("The reply is null.");
 			return null;
-		} else {
+		}
+		else
+		{
 			logger.error("Cannot serialize the response. It is of kind {}", reply.getClass().getName());
 			rawReply = serializer.serialize(AcceptanceReply.FAILURE);
 		}
@@ -78,20 +88,28 @@ public class MessageReplyHandler implements RawDataReply, ObjectDataReply {
 	}
 
 	@Override
-	public Object reply(PeerAddress sender, Object request) {
-		if (!(request instanceof HybridEncryptedContent)) {
+	public Object reply(PeerAddress sender, Object request)
+	{
+		if (!(request instanceof HybridEncryptedContent))
+		{
 			logger.error("Received unknown object {}", request);
 			return null;
 		}
 
 		H2HSession session;
-		try {
-			if (networkManager.getSession() == null) {
+		try
+		{
+			if (networkManager.getSession() == null)
+			{
 				throw new NoSessionException();
-			} else {
+			}
+			else
+			{
 				session = networkManager.getSession();
 			}
-		} catch (NoSessionException e) {
+		}
+		catch(NoSessionException e)
+		{
 			logger.warn("Currently no user is logged in! Keys for decryption needed. Node ID = '{}'.",
 					networkManager.getNodeId());
 			return AcceptanceReply.FAILURE;
@@ -102,96 +120,132 @@ public class MessageReplyHandler implements RawDataReply, ObjectDataReply {
 		// get signature
 		String senderId = encryptedMessage.getUserId();
 		byte[] signature = encryptedMessage.getSignature();
-		if (senderId == null || signature == null) {
+		if (senderId == null || signature == null)
+		{
 			logger.warn("No signature for message.");
 			return AcceptanceReply.FAILURE_SIGNATURE;
 		}
 
 		// asymmetrically decrypt message
 		byte[] decryptedMessage = null;
-		try {
+		try
+		{
 			KeyPair keys = session.getKeyPair();
-			decryptedMessage = networkManager.getEncryption().decryptHybridRaw(encryptedMessage, keys.getPrivate());
-		} catch (Exception e) {
+			decryptedMessage = networkManager.getEncryption()
+					.decryptHybridRaw(encryptedMessage, keys.getPrivate());
+		}
+		catch(Exception e)
+		{
 			logger.warn("Decryption of message failed.", e);
 			return AcceptanceReply.FAILURE_DECRYPTION;
 		}
 
 		// deserialize decrypted message
 		Object message = null;
-		try {
+		try
+		{
 			message = serializer.deserialize(decryptedMessage);
-		} catch (IOException | ClassNotFoundException e) {
+		}
+		catch(IOException | ClassNotFoundException e)
+		{
 			logger.error("Message could not be deserialized.", e);
 			return AcceptanceReply.FAILURE_DESERIALIZATION;
 		}
 
-		if (message != null && message instanceof BaseMessage) {
+		if (message != null && message instanceof BaseMessage)
+		{
 			BaseMessage receivedMessage = (BaseMessage) message;
 
 			// verify the signature
-			if (session.getKeyManager().containsPublicKey(senderId)) {
-				if (!verifySignature(senderId, decryptedMessage, signature)) {
+			if (session.getKeyManager().containsPublicKey(senderId))
+			{
+				if (!verifySignature(senderId, decryptedMessage, signature))
+				{
 					return AcceptanceReply.FAILURE_SIGNATURE;
 				}
 
 				// give a network manager reference to work (verify, handle)
-				try {
+				try
+				{
 					receivedMessage.setNetworkManager(networkManager);
-				} catch (NoPeerConnectionException e) {
+				}
+				catch(NoPeerConnectionException e)
+				{
 					logger.error("Cannot process the message because the peer is not connected.", e);
 					return AcceptanceReply.FAILURE;
 				}
 
 				// check if message gets accepted
 				AcceptanceReply reply = receivedMessage.accept();
-				if (AcceptanceReply.OK == reply) {
+				if (AcceptanceReply.OK == reply)
+				{
 					// handle message in own thread
-					logger.debug("Received and accepted the message. Node ID = '{}'.", networkManager.getNodeId());
-					new Thread(receivedMessage).start();
-				} else {
-					logger.warn("Received but denied a message. Acceptance reply = '{}', Node ID = '{}'.", reply,
+					logger.debug("Received and accepted the message. Node ID = '{}'.",
 							networkManager.getNodeId());
+					new Thread(receivedMessage).start();
+				}
+				else
+				{
+					logger.warn(
+							"Received but denied a message. Acceptance reply = '{}', Node ID = '{}'.",
+							reply, networkManager.getNodeId());
 				}
 
 				return reply;
-			} else {
-				new Thread(new VerifyMessage(senderId, decryptedMessage, signature, receivedMessage)).start();
+			}
+			else
+			{
+				new Thread(new VerifyMessage(senderId, decryptedMessage, signature, receivedMessage))
+						.start();
 				return AcceptanceReply.OK_PROVISIONAL;
 			}
-		} else {
+		}
+		else
+		{
 			logger.error("Received unknown object.");
 			return null;
 		}
 	}
 
-	private boolean verifySignature(String senderId, byte[] decryptedMessage, byte[] signature) {
-		try {
+	private boolean verifySignature(String senderId, byte[] decryptedMessage, byte[] signature)
+	{
+		try
+		{
 			PublicKey publicKey = networkManager.getSession().getKeyManager().getPublicKey(senderId);
-			if (EncryptionUtil.verify(decryptedMessage, signature, publicKey, networkManager.getEncryption()
-					.getSecurityProvider())) {
+			if (EncryptionUtil.verify(decryptedMessage, signature, publicKey,
+					networkManager.getEncryption().getSecurityProvider()))
+			{
 				logger.debug("Message signature from user '{}' verified. Node ID = '{}'.", senderId,
 						networkManager.getNodeId());
 				return true;
-			} else {
+			}
+			else
+			{
 				logger.error("Message from user '{}' has wrong signature. Node ID = '{}'.", senderId,
 						networkManager.getNodeId());
 				return false;
 			}
-		} catch (GetFailedException | InvalidKeyException | SignatureException | NoSessionException e) {
+		}
+		catch(GetFailedException | InvalidKeyException | SignatureException | NoSessionException e)
+		{
 			logger.error("Verifying message from user '{}' failed.", senderId, e);
 			return false;
 		}
 	}
 
-	private class VerifyMessage implements Runnable {
+	private class VerifyMessage implements Runnable
+	{
 
 		private final String senderId;
 		private final byte[] decryptedMessage;
 		private final byte[] signature;
 		private final BaseMessage message;
 
-		public VerifyMessage(String senderId, byte[] decryptedMessage, byte[] signature, BaseMessage message) {
+		public VerifyMessage(String senderId,
+				byte[] decryptedMessage,
+				byte[] signature,
+				BaseMessage message)
+		{
 			this.senderId = senderId;
 			this.decryptedMessage = decryptedMessage;
 			this.signature = signature;
@@ -199,28 +253,37 @@ public class MessageReplyHandler implements RawDataReply, ObjectDataReply {
 		}
 
 		@Override
-		public void run() {
-			if (!verifySignature(senderId, decryptedMessage, signature)) {
+		public void run()
+		{
+			if (!verifySignature(senderId, decryptedMessage, signature))
+			{
 				return;
 			}
 
 			// give a network manager reference to work (verify, handle)
-			try {
+			try
+			{
 				message.setNetworkManager(networkManager);
-			} catch (NoPeerConnectionException e) {
+			}
+			catch(NoPeerConnectionException e)
+			{
 				logger.error("Cannot process the message because the peer is not connected.", e);
 				return;
 			}
 
 			// check if message gets accepted
 			AcceptanceReply reply = message.accept();
-			if (AcceptanceReply.OK == reply) {
+			if (AcceptanceReply.OK == reply)
+			{
 				// handle message in own thread
-				logger.debug("Received and accepted the message. Node ID = '{}'.", networkManager.getNodeId());
-				new Thread(message).start();
-			} else {
-				logger.warn("Received but denied a message. Acceptance reply = '{}', Node ID = '{}'.", reply,
+				logger.debug("Received and accepted the message. Node ID = '{}'.",
 						networkManager.getNodeId());
+				new Thread(message).start();
+			}
+			else
+			{
+				logger.warn("Received but denied a message. Acceptance reply = '{}', Node ID = '{}'.",
+						reply, networkManager.getNodeId());
 			}
 		}
 

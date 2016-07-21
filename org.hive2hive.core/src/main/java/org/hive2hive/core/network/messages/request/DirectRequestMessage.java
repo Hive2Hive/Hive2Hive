@@ -1,6 +1,8 @@
 package org.hive2hive.core.network.messages.request;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -18,19 +20,24 @@ public abstract class DirectRequestMessage extends BaseDirectMessage implements 
 
 	private static final long serialVersionUID = -8363641962924723518L;
 
-	private transient IResponseCallBackHandler handler;
+	private transient Set<IResponseCallBackHandler> handler = new HashSet<>();
 
 	public DirectRequestMessage(PeerAddress targetPeerAddress) {
 		super(targetPeerAddress);
 	}
 
-	public final IResponseCallBackHandler getCallBackHandler() {
+	public final Set<IResponseCallBackHandler> getCallBackHandler() {
 		return handler;
 	}
 
 	public final void setCallBackHandler(IResponseCallBackHandler handler) {
-		this.handler = handler;
+		this.handler.add(handler);
 	}
+
+	public final void addCallBackHandler(IResponseCallBackHandler handler) {
+		this.handler.add(handler);
+	}
+
 
 	public final ResponseMessage createResponse(Serializable content) {
 		return new ResponseMessage(messageID, senderAddress, content);

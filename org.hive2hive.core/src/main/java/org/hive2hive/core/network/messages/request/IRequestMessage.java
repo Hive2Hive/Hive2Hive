@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.messages.request;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.BaseDirectMessage;
@@ -25,11 +26,19 @@ public interface IRequestMessage {
 	public void setCallBackHandler(IResponseCallBackHandler handler);
 
 	/**
+	 * Add
+	 *
+	 *  @param handler
+	 *            a {@link IResponseCallBackHandler} for handling responses from receiver node
+	 */
+	public void addCallBackHandler(IResponseCallBackHandler handler);
+
+	/**
 	 * Getter
 	 * 
 	 * @return the callback handler (if set)
 	 */
-	public IResponseCallBackHandler getCallBackHandler();
+	public Set<IResponseCallBackHandler> getCallBackHandler();
 
 	/**
 	 * Configures the {@link ResponseMessage} for this {@link RoutedRequestMessage} with the correct message
