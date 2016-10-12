@@ -58,4 +58,9 @@ public interface IRequestMessage {
 	 */
 	public void sendDirectResponse(ResponseMessage response);
 
+	/**
+	 * Customize time for wait message callBack
+	 * */
+	public int getDirectDownloadWaitMs();
+
 }

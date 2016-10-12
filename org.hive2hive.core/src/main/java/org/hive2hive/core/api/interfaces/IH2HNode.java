@@ -2,6 +2,7 @@ package org.hive2hive.core.api.interfaces;
 
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.rpc.ObjectDataReply;
+import org.hive2hive.core.network.NetworkManager;
 
 /**
  * This interface represents the entry point of Hive2Hive and exposes the managers necessary for interaction.
@@ -86,4 +87,10 @@ public interface IH2HNode {
 	 *         returns null.
 	 */
 	PeerDHT getPeer();
+
+	/**
+	 * Returns the {@link NetworkManager} for custom network management.
+	 * @return the NetworkManager
+	 * */
+	NetworkManager getNetworkManager();
 }

@@ -126,6 +126,28 @@ public class FolderIndex extends Index {
 	}
 
 	/**
+	 * Finds a recursive child with a name. If the child does not exist, null is returned
+	 *
+	 * @param name
+	 * @return the child with the given name or <code>null</code> if none was found with that name
+	 */
+	public Index getChildRecursiveByName(String name) {
+		if (name != null) {
+			String withoutSeparator = name.replace(FileUtil.getFileSep(), "");
+			for (Index child : children) {
+				if (child.getName().equalsIgnoreCase(withoutSeparator)) {
+					return child;
+				}else {
+					if(child instanceof FolderIndex) {
+						return ((FolderIndex) child).getChildRecursiveByName(name);
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Indicate that this node is shared
 	 * 
 	 * @param protectionKeys if the user has write access, the protection keys are != null, else, they can be

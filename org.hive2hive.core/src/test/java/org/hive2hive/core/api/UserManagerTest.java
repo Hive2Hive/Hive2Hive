@@ -15,6 +15,7 @@ import org.hive2hive.core.api.interfaces.IH2HNode;
 import org.hive2hive.core.api.interfaces.IUserManager;
 import org.hive2hive.core.exceptions.NoPeerConnectionException;
 import org.hive2hive.core.exceptions.NoSessionException;
+import org.hive2hive.core.exceptions.ParentInUserProfileNotFoundException;
 import org.hive2hive.core.security.UserCredentials;
 import org.hive2hive.core.utils.NetworkTestUtil;
 import org.hive2hive.core.utils.helper.TestFileAgent;

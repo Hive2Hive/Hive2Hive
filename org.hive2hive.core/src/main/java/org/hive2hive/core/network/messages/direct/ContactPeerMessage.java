@@ -2,6 +2,7 @@ package org.hive2hive.core.network.messages.direct;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.events.framework.interfaces.IUserEventGenerator;
 import org.hive2hive.core.events.implementations.UserLoginEvent;
 import org.hive2hive.core.network.messages.request.DirectRequestMessage;
@@ -39,4 +40,9 @@ public class ContactPeerMessage extends DirectRequestMessage implements IUserEve
 		sendDirectResponse(createResponse(evidenceContent));
 	}
 
+	@Override
+	public int getDirectDownloadWaitMs()
+	{
+		return H2HConstants.DIRECT_DOWNLOAD_AWAIT_MS;
+	}
 }

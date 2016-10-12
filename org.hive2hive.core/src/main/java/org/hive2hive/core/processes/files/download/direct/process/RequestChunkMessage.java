@@ -6,6 +6,7 @@ import java.security.PublicKey;
 
 import net.tomp2p.peers.PeerAddress;
 
+import org.hive2hive.core.H2HConstants;
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.GetFailedException;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -112,5 +113,11 @@ public class RequestChunkMessage extends DirectRequestMessage {
 			logger.warn("MD5 hash of the read chunk {} and of the expected file does not match", chunkNumber);
 			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));
 		}
+	}
+
+	@Override
+	public int getDirectDownloadWaitMs()
+	{
+		return H2HConstants.DIRECT_DOWNLOAD_AWAIT_MS;
 	}
 }

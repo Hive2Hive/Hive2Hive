@@ -63,10 +63,29 @@ public abstract class BaseMessageProcessStep extends ProcessStep<Void> implement
 			throw new SendFailedException("No success sending the message.");
 		} else if (responseLatch != null) {
 			try {
-				// wait for the response to arrive
-				if (!responseLatch.await(H2HConstants.DIRECT_DOWNLOAD_AWAIT_MS, TimeUnit.MILLISECONDS)) {
-					throw new SendFailedException("Response did not arrive within the configured wait time of "
-							+ H2HConstants.DIRECT_DOWNLOAD_AWAIT_MS + "ms");
+				if (message instanceof IRequestMessage)
+				{
+					IRequestMessage requestMessage = (IRequestMessage) message;
+
+					// wait for the response to arrive with custom time
+					if (!responseLatch
+							.await(requestMessage.getDirectDownloadWaitMs(), TimeUnit.MILLISECONDS))
+					{
+						throw new SendFailedException(
+								"Response did not arrive within the configured wait time of "
+										+ requestMessage.getDirectDownloadWaitMs() + "ms");
+					}
+				}
+				else
+				{
+					// wait for the response to arrive
+					if (!responseLatch
+							.await(H2HConstants.DIRECT_DOWNLOAD_AWAIT_MS, TimeUnit.MILLISECONDS))
+					{
+						throw new SendFailedException(
+								"Response did not arrive within the configured wait time of "
+										+ H2HConstants.DIRECT_DOWNLOAD_AWAIT_MS + "ms");
+					}
 				}
 			} catch (InterruptedException e) {
 				throw new SendFailedException("Cannot wait for the response because interrupted");
