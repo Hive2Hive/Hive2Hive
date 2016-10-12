@@ -38,7 +38,7 @@ public interface IRequestMessage {
 	 * 
 	 * @return the callback handler (if set)
 	 */
-	public Set<IResponseCallBackHandler> getCallBackHandler();
+	public Set<IResponseCallBackHandler> getCallBackHandlers();
 
 	/**
 	 * Configures the {@link ResponseMessage} for this {@link RoutedRequestMessage} with the correct message

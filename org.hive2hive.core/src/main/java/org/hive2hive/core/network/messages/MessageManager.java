@@ -190,7 +190,7 @@ public final class MessageManager implements IMessageManager {
 	private void configureCallbackHandlerIfNeeded(BaseMessage message) {
 		if (message instanceof IRequestMessage) {
 			IRequestMessage requestMessage = (IRequestMessage) message;
-			callBackHandlers.put(message.getMessageID(), requestMessage.getCallBackHandler());
+			callBackHandlers.put(message.getMessageID(), requestMessage.getCallBackHandlers());
 			requestMessage.setCallBackHandler(null);
 		}
 	}

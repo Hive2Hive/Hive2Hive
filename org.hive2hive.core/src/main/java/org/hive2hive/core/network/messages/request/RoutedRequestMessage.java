@@ -24,7 +24,7 @@ public abstract class RoutedRequestMessage extends BaseMessage implements IReque
 		super(targetKey);
 	}
 
-	public final Set<IResponseCallBackHandler> getCallBackHandler() {
+	public final Set<IResponseCallBackHandler> getCallBackHandlers() {
 		return handler;
 	}
 

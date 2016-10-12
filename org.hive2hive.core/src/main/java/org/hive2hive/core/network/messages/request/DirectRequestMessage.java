@@ -26,7 +26,7 @@ public abstract class DirectRequestMessage extends BaseDirectMessage implements 
 		super(targetPeerAddress);
 	}
 
-	public final Set<IResponseCallBackHandler> getCallBackHandler() {
+	public final Set<IResponseCallBackHandler> getCallBackHandlers() {
 		return handler;
 	}
 
