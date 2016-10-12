@@ -1,6 +1,7 @@
 package org.hive2hive.core.network.messages.direct.response;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import net.tomp2p.peers.PeerAddress;
 
@@ -13,11 +14,11 @@ import org.slf4j.LoggerFactory;
 /**
  * This message has to be used for response messages when a request message implementing the
  * {@link IRequestMessage} interface arrives.</br></br>
- * 
+ *
  * <b>Important</b> The message id of the response message has to be the same like the requesting message.
  * This is necessary for the requesting peer to find the correct {@link IResponseCallBackHandler} to handle
  * the response message at the requesting node.</br></br>
- * 
+ *
  * <b>Design decisions:</b>
  * <ul>
  * <li>A response message is a {@link BaseDirectMessage}. The goal is to contact the requesting node directly.
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * <li>The fall back for re-routing is disabled. It makes no sense to route a response message to another not
  * requesting node.</li>
  * </ul>
- * 
+ *
  * @author Nendor, Seppi
  */
 public class ResponseMessage extends BaseDirectMessage {
@@ -38,7 +39,7 @@ public class ResponseMessage extends BaseDirectMessage {
 
 	/**
 	 * Constructor for a response message.
-	 * 
+	 *
 	 * @param messageID
 	 *            the message id which has to be the same like the request message id
 	 * @param requesterAddress
@@ -53,9 +54,12 @@ public class ResponseMessage extends BaseDirectMessage {
 
 	@Override
 	public void run() {
-		IResponseCallBackHandler handler = messageManager.getCallBackHandler(getMessageID());
-		if (handler != null) {
-			handler.handleResponseMessage(this);
+		Set<IResponseCallBackHandler> handlers = messageManager.getCallBackHandlers(getMessageID());
+		if (handlers != null && handlers.size() > 0) {
+			for(IResponseCallBackHandler handler : handlers) {
+				if(handler != null)
+					handler.handleResponseMessage(this);
+			}
 		} else {
 			logger.warn("No call back handler for this message! CurrentNodeID = '{}', AsyncReturnMessage = '{}'.",
 					networkManager.getNodeId(), this);

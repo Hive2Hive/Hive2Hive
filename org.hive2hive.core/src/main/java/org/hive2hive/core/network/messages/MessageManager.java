@@ -8,7 +8,9 @@ import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.tomp2p.dht.FutureSend;
 import net.tomp2p.futures.FutureDirect;
@@ -40,13 +42,13 @@ public final class MessageManager implements IMessageManager {
 	private static final Logger logger = LoggerFactory.getLogger(MessageManager.class);
 
 	private final NetworkManager networkManager;
-	private final Map<String, IResponseCallBackHandler> callBackHandlers;
+	private final Map<String, Set<IResponseCallBackHandler>> callBackHandlers;
 	private final IH2HSerialize serializer;
 
 	public MessageManager(NetworkManager networkManager, IH2HSerialize serializer) {
 		this.networkManager = networkManager;
 		this.serializer = serializer;
-		this.callBackHandlers = new HashMap<String, IResponseCallBackHandler>();
+		this.callBackHandlers = new HashMap<>();
 	}
 
 	@Override
@@ -150,7 +152,7 @@ public final class MessageManager implements IMessageManager {
 	 *            a unique message id
 	 * @return a callback handler or <code>null</code> if doesn't exist
 	 */
-	public IResponseCallBackHandler getCallBackHandler(String messageId) {
+	public Set<IResponseCallBackHandler> getCallBackHandlers(String messageId) {
 		return callBackHandlers.remove(messageId);
 	}
 
@@ -188,7 +190,7 @@ public final class MessageManager implements IMessageManager {
 	private void configureCallbackHandlerIfNeeded(BaseMessage message) {
 		if (message instanceof IRequestMessage) {
 			IRequestMessage requestMessage = (IRequestMessage) message;
-			callBackHandlers.put(message.getMessageID(), requestMessage.getCallBackHandler());
+			callBackHandlers.put(message.getMessageID(), requestMessage.getCallBackHandlers());
 			requestMessage.setCallBackHandler(null);
 		}
 	}
