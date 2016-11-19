@@ -47,7 +47,7 @@ public class HashUtil {
 	}
 
 	/**
-	 * Generates a MD5 hash of an input stream (can take a while)
+	 * Generates a hash of an input stream (can take a while)
 	 *
 	 * @param file
 	 * @return the hash of the file
@@ -100,15 +100,15 @@ public class HashUtil {
 	}
 
 	/**
-	 * Compares if the file md5 matches a given md5 hash
+	 * Compares if the file hash matches a given hash
 	 *
 	 * @param file
-	 * @param expectedMD5
+	 * @param expectedHash
 	 * @return <code>true</code> if the file has the expected hash
 	 * @throws IOException
 	 */
-	public static boolean compare(File file, byte[] expectedMD5) throws IOException {
-		if (!file.exists() && (expectedMD5 == null || expectedMD5.length == 0)) {
+	public static boolean compare(File file, byte[] expectedHash) throws IOException {
+		if (!file.exists() && (expectedHash == null || expectedHash.length == 0)) {
 			// both do not exist
 			return true;
 		} else if (file.isDirectory()) {
@@ -116,19 +116,19 @@ public class HashUtil {
 			return true;
 		}
 
-		byte[] md5Hash = HashUtil.hash(file);
-		return compare(md5Hash, expectedMD5);
+		byte[] hash = HashUtil.hash(file);
+		return compare(hash, expectedHash);
 	}
 
 	/**
 	 * Compares if the given md5 matches another md5 hash. This method works symmetrically and is not
 	 * dependent on the parameter order
 	 *
-	 * @param md5 the hash to test
-	 * @param expectedMD5 the expected md5 hash
+	 * @param actual the hash to test
+	 * @param expected the expected hash
 	 * @return <code>true</code> if the hashes match
 	 */
-	public static boolean compare(byte[] md5, byte[] expectedMD5) {
+	public static boolean compare(byte[] actual, byte[] expected) {
 		return Arrays.equals(md5, expectedMD5);
 	}
 }
