@@ -77,7 +77,7 @@ public class InitDownloadChunksStep extends ProcessStep<Void> {
 				// can be cast because only files are downloaded
 				FileIndex fileIndex = (FileIndex) context.consumeIndex();
 				try {
-					if (HashUtil.compare(destination, fileIndex.getMD5())) {
+					if (HashUtil.compare(destination, fileIndex.getHash())) {
 						throw new ProcessExecutionException(this,
 								"File already exists on disk. Content does match. No download needed.");
 					}

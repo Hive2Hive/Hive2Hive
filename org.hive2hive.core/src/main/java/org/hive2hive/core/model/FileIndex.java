@@ -14,7 +14,7 @@ import org.hive2hive.core.model.versioned.MetaFileSmall;
 public class FileIndex extends Index {
 
 	private static final long serialVersionUID = -465877391037883409L;
-	private byte[] md5LatestVersion;
+	private byte[] latestVersionHash;
 	private byte[] metaFileHash;
 
 	/**
@@ -24,10 +24,10 @@ public class FileIndex extends Index {
 	 * @param keyPair
 	 * @param name
 	 */
-	public FileIndex(FolderIndex parent, KeyPair keyPair, String name, byte[] md5LatestVersion) {
+	public FileIndex(FolderIndex parent, KeyPair keyPair, String name, byte[] latestVersionHash) {
 		super(keyPair, name, parent);
 		assert parent != null;
-		this.md5LatestVersion = md5LatestVersion;
+		this.latestVersionHash = latestVersionHash;
 	}
 
 	/**
@@ -35,7 +35,7 @@ public class FileIndex extends Index {
 	 */
 	public FileIndex(FileIndex fileIndex) {
 		super(fileIndex.fileKeys, fileIndex.name, fileIndex.parent);
-		this.md5LatestVersion = fileIndex.md5LatestVersion;
+		this.latestVersionHash = fileIndex.latestVersionHash;
 		this.metaFileHash = fileIndex.metaFileHash;
 	}
 
@@ -49,12 +49,12 @@ public class FileIndex extends Index {
 		return parent.canWrite();
 	}
 
-	public byte[] getMD5() {
-		return md5LatestVersion;
+	public byte[] getHash() {
+		return latestVersionHash;
 	}
 
-	public void setMD5(byte[] md5LatestVersion) {
-		this.md5LatestVersion = md5LatestVersion;
+	public void setHash(byte[] latestVersionHash) {
+		this.latestVersionHash = latestVersionHash;
 	}
 
 	@Override

@@ -29,7 +29,7 @@ public class AddIndexToUserProfileStep extends BaseModifyUserProfileStep {
 	private final AddFileProcessContext context;
 
 	// pre-calculated hash in case it's a file
-	private byte[] md5;
+	private byte[] hash;
 
 	public AddIndexToUserProfileStep(AddFileProcessContext context, UserProfileManager profileManager) {
 		super(profileManager);
@@ -41,9 +41,9 @@ public class AddIndexToUserProfileStep extends BaseModifyUserProfileStep {
 		File file = context.consumeFile();
 		if (file.isFile()) {
 			try {
-				md5 = HashUtil.hash(file);
+				hash = HashUtil.hash(file);
 			} catch (IOException e) {
-				logger.error("Creating MD5 hash of file '{}' was not possible.", file.getName(), e);
+				logger.error("Creating hash of file '{}' was not possible.", file.getName(), e);
 				throw new ProcessExecutionException(this, "Cannot calculate the hash of the file " + file.getName());
 			}
 		}
@@ -67,7 +67,7 @@ public class AddIndexToUserProfileStep extends BaseModifyUserProfileStep {
 			FolderIndex folderIndex = new FolderIndex(parentNode, context.consumeMetaFileEncryptionKeys(), file.getName());
 			context.provideIndex(folderIndex);
 		} else {
-			FileIndex fileIndex = new FileIndex(parentNode, context.consumeMetaFileEncryptionKeys(), file.getName(), md5);
+			FileIndex fileIndex = new FileIndex(parentNode, context.consumeMetaFileEncryptionKeys(), file.getName(), hash);
 			context.provideIndex(fileIndex);
 		}
 	}

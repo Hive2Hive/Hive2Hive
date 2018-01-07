@@ -22,14 +22,14 @@ public class FileNode {
 	private final List<FileNode> children;
 	private final String path;
 	private final File file;
-	private final byte[] md5;
+	private final byte[] contentHash;
 	private final Set<UserPermission> userPermissions;
 
-	public FileNode(FileNode parent, File file, String path, byte[] md5, Set<UserPermission> userPermissions) {
+	public FileNode(FileNode parent, File file, String path, byte[] contentHash, Set<UserPermission> userPermissions) {
 		this.parent = parent;
 		this.file = file;
 		this.path = path;
-		this.md5 = md5;
+		this.contentHash = contentHash;
 		this.userPermissions = userPermissions;
 		this.children = new ArrayList<FileNode>();
 	}
@@ -92,7 +92,7 @@ public class FileNode {
 		if (file.exists()) {
 			return file.isFile();
 		} else {
-			return md5 != null;
+			return contentHash != null;
 		}
 	}
 
@@ -106,12 +106,12 @@ public class FileNode {
 	}
 
 	/**
-	 * The MD5 hash of the file. In case of a folder, this is null.
+	 * The hash of the file. In case of a folder, this is null.
 	 * 
-	 * @return the MD5 hash of the newest file version
+	 * @return the hash of the newest file version
 	 */
-	public byte[] getMd5() {
-		return md5;
+	public byte[] getContentHash() {
+		return contentHash;
 	}
 
 	/**
@@ -135,7 +135,7 @@ public class FileNode {
 	@Override
 	public String toString() {
 		return String.format("%s: %s [%s] %s", isFile() ? "File" : "Folder", getPath(), getUserPermissions(),
-				isFile() ? String.format("(MD5: %s)", EncryptionUtil.byteToHex(getMd5())) : "");
+				isFile() ? String.format("(Hash: %s)", EncryptionUtil.byteToHex(getContentHash())) : "");
 	}
 
 	/**

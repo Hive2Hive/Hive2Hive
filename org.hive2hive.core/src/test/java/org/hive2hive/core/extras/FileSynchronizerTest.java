@@ -164,7 +164,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Assert.assertTrue(updatedLocally.contains(file2f));
 
 		// change file in user profile as well --> should not occur as updated locally
-		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
+		node1f2.setHash(HashUtil.hash(randomString().getBytes()));
 
 		fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
 		updatedLocally = fileSynchronizer.getUpdatedLocally();
@@ -175,8 +175,8 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 	@Test
 	public void testUpdatedRemotely() throws IOException, ClassNotFoundException {
 		// change two files in the user profile; hashes on disk remain the same
-		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
-		node2f.setMD5(HashUtil.hash(randomString().getBytes()));
+		node1f2.setHash(HashUtil.hash(randomString().getBytes()));
+		node2f.setHash(HashUtil.hash(randomString().getBytes()));
 
 		Map<String, byte[]> same = FileSynchronizer.visitFiles(rootFile);
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, same, same);
@@ -227,7 +227,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		file1f2.delete();
 
 		// modify the same file remotely
-		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
+		node1f2.setHash(HashUtil.hash(randomString().getBytes()));
 		Map<String, byte[]> after = FileSynchronizer.visitFiles(rootFile);
 
 		FileSynchronizer fileSynchronizer = new FileSynchronizer(rootFile, userProfile, before, after);
@@ -247,7 +247,7 @@ public class FileSynchronizerTest extends H2HJUnitTest {
 		Map<String, byte[]> before = FileSynchronizer.visitFiles(rootFile);
 
 		// change a file in the user profile
-		node1f2.setMD5(HashUtil.hash(randomString().getBytes()));
+		node1f2.setHash(HashUtil.hash(randomString().getBytes()));
 
 		// change file on disk as well --> should occur as updated remotely since there is a conflict and the
 		// profile wins

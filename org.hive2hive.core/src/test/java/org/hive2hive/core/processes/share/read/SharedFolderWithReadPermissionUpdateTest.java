@@ -76,13 +76,13 @@ public class SharedFolderWithReadPermissionUpdateTest extends BaseShareReadWrite
 		logger.info("Update file '{}' at A.", fileFromAAtA.toString());
 		long lastUpdated = fileFromAAtA.lastModified();
 		FileUtils.write(fileFromAAtA, randomString(), false);
-		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
+		byte[] newHash = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(nodeA, fileFromAAtA);
 
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtB, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newHash);
 	}
 
 	@Test
@@ -119,13 +119,13 @@ public class SharedFolderWithReadPermissionUpdateTest extends BaseShareReadWrite
 		logger.info("Update file '{}' at A.", fileFromAAtA.toString());
 		long lastUpdated = fileFromAAtA.lastModified();
 		FileUtils.write(fileFromAAtA, randomString(), false);
-		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
+		byte[] newHash = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(nodeA, fileFromAAtA);
 
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtB, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newHash);
 	}
 
 	@Test
@@ -177,7 +177,7 @@ public class SharedFolderWithReadPermissionUpdateTest extends BaseShareReadWrite
 		} while (updatingFile.lastModified() == lastModified);
 	}
 
-	private void checkFileIndex(File fileA, File fileB, byte[] md5Hash) throws GetFailedException, NoSessionException {
+	private void checkFileIndex(File fileA, File fileB, byte[] hash) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = nodeA.getSession().getProfileManager().readUserProfile();
 		FileIndex indexA = (FileIndex) userProfileA.getFileByPath(fileA, nodeA.getSession().getRootFile());
 
@@ -197,9 +197,9 @@ public class SharedFolderWithReadPermissionUpdateTest extends BaseShareReadWrite
 		// user B isn't allowed to write
 		Assert.assertFalse(indexB.canWrite());
 
-		// check if md5 hash is the same
-		Assert.assertTrue(Arrays.equals(indexA.getMD5(), md5Hash));
-		Assert.assertTrue(Arrays.equals(indexB.getMD5(), md5Hash));
+		// check if hash is the same
+		Assert.assertTrue(Arrays.equals(indexA.getHash(), hash));
+		Assert.assertTrue(Arrays.equals(indexB.getHash(), hash));
 
 		// check if userA's content protection keys are other ones
 		Assert.assertFalse(indexA.getProtectionKeys().getPrivate().equals(userProfileA.getProtectionKeys().getPrivate()));

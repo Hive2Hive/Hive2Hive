@@ -54,7 +54,7 @@ public class GetFileListStep extends ProcessStep<FileNode> {
 		Set<UserPermission> userPermissions;
 		if (current.isFile()) {
 			FileIndex fileIndex = (FileIndex) current;
-			hash = fileIndex.getMD5();
+			hash = fileIndex.getHash();
 			userPermissions = fileIndex.getParent().getCalculatedUserPermissions();
 		} else {
 			userPermissions = ((FolderIndex) current).getCalculatedUserPermissions();

@@ -69,13 +69,13 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 		logger.info("Update file '{}' at A.", fileFromAAtA.toString());
 		long lastUpdated = fileFromAAtA.lastModified();
 		FileUtils.write(fileFromAAtA, randomString(), false);
-		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
+		byte[] newHash = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtB, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newHash);
 	}
 
 	@Test
@@ -93,13 +93,13 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 		logger.info("Update file '{}' at B.", fileFromAAtA.toString());
 		long lastUpdated = fileFromAAtB.lastModified();
 		FileUtils.write(fileFromAAtB, randomString(), false);
-		byte[] newMD5 = HashUtil.hash(fileFromAAtB);
+		byte[] newHash = HashUtil.hash(fileFromAAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromAAtB);
 
 		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtA, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newHash);
 	}
 
 	@Test
@@ -117,13 +117,13 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 		logger.info("Update file '{}' at A.", fileFromBAtB.toString());
 		long lastUpdated = fileFromBAtA.lastModified();
 		FileUtils.write(fileFromBAtA, randomString(), false);
-		byte[] newMD5 = HashUtil.hash(fileFromBAtA);
+		byte[] newHash = HashUtil.hash(fileFromBAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromBAtA);
 
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtB, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(fileFromBAtA, fileFromBAtB, newMD5);
+		checkFileIndex(fileFromBAtA, fileFromBAtB, newHash);
 	}
 
 	@Test
@@ -141,13 +141,13 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 		logger.info("Update file '{}' at B.", fileFromBAtB.toString());
 		long lastUpdated = fileFromBAtB.lastModified();
 		FileUtils.write(fileFromBAtB, randomString(), false);
-		byte[] newMD5 = HashUtil.hash(fileFromBAtB);
+		byte[] newHash = HashUtil.hash(fileFromBAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtA, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(fileFromBAtA, fileFromBAtB, newMD5);
+		checkFileIndex(fileFromBAtA, fileFromBAtB, newHash);
 	}
 
 	@Test
@@ -165,13 +165,13 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 		logger.info("Update file '{}' at A.", fileFromAAtA.toString());
 		long lastUpdated = fileFromAAtA.lastModified();
 		FileUtils.write(fileFromAAtA, randomString(), false);
-		byte[] newMD5 = HashUtil.hash(fileFromAAtA);
+		byte[] newHash = HashUtil.hash(fileFromAAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromAAtA);
 
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtB, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newHash);
 	}
 
 	@Test
@@ -189,13 +189,13 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 		logger.info("Update file '{}' at B.", fileFromAAtA.toString());
 		long lastUpdated = fileFromAAtB.lastModified();
 		FileUtils.write(fileFromAAtB, randomString(), false);
-		byte[] newMD5 = HashUtil.hash(fileFromAAtB);
+		byte[] newHash = HashUtil.hash(fileFromAAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromAAtB);
 
 		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromAAtA.toString());
 		waitTillSynchronizedUpdating(fileFromAAtA, lastUpdated);
 		compareFiles(fileFromAAtA, fileFromAAtB);
-		checkFileIndex(fileFromAAtA, fileFromAAtB, newMD5);
+		checkFileIndex(fileFromAAtA, fileFromAAtB, newHash);
 	}
 
 	@Test
@@ -213,13 +213,13 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 		logger.info("Update file '{}' at A.", fileFromBAtB.toString());
 		long lastUpdated = fileFromBAtA.lastModified();
 		FileUtils.write(fileFromBAtA, randomString(), false);
-		byte[] newMD5 = HashUtil.hash(fileFromBAtA);
+		byte[] newHash = HashUtil.hash(fileFromBAtA);
 		UseCaseTestUtil.uploadNewVersion(network.get(0), fileFromBAtA);
 
 		logger.info("Wait till update of file '{}' gets synchronized with B.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtB, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(fileFromBAtA, fileFromBAtB, newMD5);
+		checkFileIndex(fileFromBAtA, fileFromBAtB, newHash);
 	}
 
 	@Test
@@ -237,13 +237,13 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 		logger.info("Update file '{}' at B.", fileFromBAtB.toString());
 		long lastUpdated = fileFromBAtB.lastModified();
 		FileUtils.write(fileFromBAtB, randomString(), false);
-		byte[] newMD5 = HashUtil.hash(fileFromBAtB);
+		byte[] newHash = HashUtil.hash(fileFromBAtB);
 		UseCaseTestUtil.uploadNewVersion(network.get(1), fileFromBAtB);
 
 		logger.info("Wait till update of file '{}' gets synchronized with A.", fileFromBAtB.toString());
 		waitTillSynchronizedUpdating(fileFromBAtA, lastUpdated);
 		compareFiles(fileFromBAtA, fileFromBAtB);
-		checkFileIndex(fileFromBAtA, fileFromBAtB, newMD5);
+		checkFileIndex(fileFromBAtA, fileFromBAtB, newHash);
 	}
 
 	/**
@@ -261,7 +261,7 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 		} while (updatingFile.lastModified() == lastModified);
 	}
 
-	private void checkFileIndex(File fileA, File fileB, byte[] md5Hash) throws GetFailedException, NoSessionException {
+	private void checkFileIndex(File fileA, File fileB, byte[] hash) throws GetFailedException, NoSessionException {
 		UserProfile userProfileA = network.get(0).getSession().getProfileManager().readUserProfile();
 		FileIndex indexA = (FileIndex) userProfileA.getFileByPath(fileA, network.get(0).getSession().getRootFile());
 
@@ -272,9 +272,9 @@ public class SharedFolderWithWritePermissionUpdateTest extends BaseShareReadWrit
 		Assert.assertTrue(indexA.isFile());
 		Assert.assertTrue(indexB.isFile());
 
-		// check if md5 hash is the same
-		Assert.assertTrue(Arrays.equals(indexA.getMD5(), md5Hash));
-		Assert.assertTrue(Arrays.equals(indexB.getMD5(), md5Hash));
+		// check if hash is the same
+		Assert.assertTrue(Arrays.equals(indexA.getHash(), hash));
+		Assert.assertTrue(Arrays.equals(indexB.getHash(), hash));
 
 		// check if content protection keys are the same
 		Assert.assertTrue(indexA.getProtectionKeys().getPrivate().equals(indexB.getProtectionKeys().getPrivate()));

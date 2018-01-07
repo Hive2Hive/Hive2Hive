@@ -98,12 +98,12 @@ public class UpdateUserProfileTask extends UserProfileTask implements IUserProfi
 					"User without WRITE permissions tried to update a file.");
 		}
 
-		// copy the md5 parameter of the received file
+		// copy the hash parameter of the received file
 		Index existing = parent.getChildByName(updatedFile.getName());
 		if (existing.isFile() && updatedFile.isFile()) {
 			logger.debug("File update in a shared folder received: '{}'.", updatedFile.getName());
 			FileIndex existingFile = (FileIndex) existing;
-			existingFile.setMD5(newHash);
+			existingFile.setHash(newHash);
 		}
 	}
 }

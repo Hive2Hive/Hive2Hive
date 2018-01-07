@@ -30,10 +30,10 @@ public class HashUtil {
 	}
 
 	/**
-	 * Generates a MD5 hash of a given data
+	 * Generates a hash of a given data
 	 *
-	 * @param data to calculate the MD5 hash over it
-	 * @return the md5 hash
+	 * @param data to calculate the hash over it
+	 * @return the hash
 	 */
 	public static byte[] hash(byte[] data) {
 		try {
@@ -121,7 +121,7 @@ public class HashUtil {
 	}
 
 	/**
-	 * Compares if the given md5 matches another md5 hash. This method works symmetrically and is not
+	 * Compares if the given hash matches another hash. This method works symmetrically and is not
 	 * dependent on the parameter order
 	 *
 	 * @param actual the hash to test
@@ -129,6 +129,6 @@ public class HashUtil {
 	 * @return <code>true</code> if the hashes match
 	 */
 	public static boolean compare(byte[] actual, byte[] expected) {
-		return Arrays.equals(md5, expectedMD5);
+		return Arrays.equals(actual, expected);
 	}
 }

@@ -65,7 +65,7 @@ public class GetFileListProcessTest extends H2HJUnitTest {
 		assertEquals(1, fileList.getChildren().size());
 
 		assertEquals(child1, fileList.getChildren().get(0).getFile());
-		assertTrue(HashUtil.compare(HashUtil.hash(child1), fileList.getChildren().get(0).getMd5()));
+		assertTrue(HashUtil.compare(HashUtil.hash(child1), fileList.getChildren().get(0).getContentHash()));
 
 		// add dir1 to the network
 		File dir1 = new File(root, randomString());

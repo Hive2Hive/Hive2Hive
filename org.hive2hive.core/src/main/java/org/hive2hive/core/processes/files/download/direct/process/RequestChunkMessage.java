@@ -30,7 +30,7 @@ public class RequestChunkMessage extends DirectRequestMessage {
 	private final int chunkNumber;
 	// how many bytes to read
 	private final int chunkLength;
-	// the md5 hash of the file
+	// the hash of the file
 	private final byte[] chunkHash;
 
 	public RequestChunkMessage(PeerAddress targetPeerAddress, PublicKey fileKey, int chunkNumber, int chunkLength,
@@ -102,14 +102,14 @@ public class RequestChunkMessage extends DirectRequestMessage {
 		}
 
 		// verify the chunk hash
-		byte[] md5Hash = HashUtil.hash(chunk.getData());
-		if (HashUtil.compare(md5Hash, chunkHash)) {
-			logger.debug("MD5 hash of the chunk {} has been verified, returning the chunk", chunkNumber);
+		byte[] hash = HashUtil.hash(chunk.getData());
+		if (HashUtil.compare(hash, chunkHash)) {
+			logger.debug("Hash of the chunk {} has been verified, returning the chunk", chunkNumber);
 
 			// return the content of the file part
 			sendDirectResponse(createResponse(new ChunkMessageResponse(chunk)));
 		} else {
-			logger.warn("MD5 hash of the read chunk {} and of the expected file does not match", chunkNumber);
+			logger.warn("Hash of the read chunk {} and of the expected file does not match", chunkNumber);
 			sendDirectResponse(createResponse(new ChunkMessageResponse(AnswerType.DECLINED)));
 		}
 	}

@@ -224,7 +224,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 			if (!isFolder) {
 				FileUtils.writeStringToFile(file, randomString());
 			}
-			final byte[] md5Hash = HashUtil.hash(file);
+			final byte[] hash = HashUtil.hash(file);
 			final KeyPair fileKeys = generateRSAKeyPair(RSA_KEYLENGTH.BIT_512);
 
 			while (true) {
@@ -237,7 +237,7 @@ public class UserProfileManagerTest extends H2HJUnitTest {
 						if (isFolder) {
 							new FolderIndex(indexes.get(rnd.nextInt(indexes.size())), fileKeys, randomString());
 						} else {
-							new FileIndex(indexes.get(rnd.nextInt(indexes.size())), fileKeys, file.getName(), md5Hash);
+							new FileIndex(indexes.get(rnd.nextInt(indexes.size())), fileKeys, file.getName(), hash);
 						}
 					}
 				});

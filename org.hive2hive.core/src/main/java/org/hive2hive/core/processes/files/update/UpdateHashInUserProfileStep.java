@@ -16,22 +16,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A step updating the MD5 hash in the user profile
+ * A step updating the hash in the user profile
  * 
  * @author Nico, Seppi
  */
-public class UpdateMD5inUserProfileStep extends BaseModifyUserProfileStep {
+public class UpdateHashInUserProfileStep extends BaseModifyUserProfileStep {
 
-	private static final Logger logger = LoggerFactory.getLogger(UpdateMD5inUserProfileStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(UpdateHashInUserProfileStep.class);
 
 	private final UpdateFileProcessContext context;
 
 	// initialized before the user profile is modified
-	private byte[] newMD5;
+	private byte[] newHash;
 	// set while the profile is modified, used for rollback reasons
-	private byte[] originalMD5;
+	private byte[] originalHash;
 
-	public UpdateMD5inUserProfileStep(UpdateFileProcessContext context, UserProfileManager profileManager) {
+	public UpdateHashInUserProfileStep(UpdateFileProcessContext context, UserProfileManager profileManager) {
 		super(profileManager);
 		this.context = context;
 	}
@@ -39,9 +39,9 @@ public class UpdateMD5inUserProfileStep extends BaseModifyUserProfileStep {
 	@Override
 	protected void beforeModify() throws ProcessExecutionException {
 		try {
-			newMD5 = HashUtil.hash(context.consumeFile());
+			newHash = HashUtil.hash(context.consumeFile());
 		} catch (IOException e) {
-			throw new ProcessExecutionException(this, "The new MD5 hash for the user profile could not be generated.");
+			throw new ProcessExecutionException(this, "The new hash for the user profile could not be generated.");
 		}
 	}
 
@@ -54,15 +54,15 @@ public class UpdateMD5inUserProfileStep extends BaseModifyUserProfileStep {
 		index.setMetaFileHash(context.consumeHash());
 
 		// store for backup
-		originalMD5 = index.getMD5();
-		if (HashUtil.compare(originalMD5, newMD5)) {
+		originalHash = index.getHash();
+		if (HashUtil.compare(originalHash, newHash)) {
 			throw new AbortModifyException(AbortModificationCode.SAME_CONTENT,
 					"Try to create new version with same content.");
 		}
 
 		// make modifications
-		logger.debug("Updating the MD5 hash in the user profile.");
-		index.setMD5(newMD5);
+		logger.debug("Updating the hash in the user profile.");
+		index.setHash(newHash);
 
 		// store for notification
 		context.provideIndex(index);
@@ -72,6 +72,6 @@ public class UpdateMD5inUserProfileStep extends BaseModifyUserProfileStep {
 	protected void modifyRollback(UserProfile userProfile) {
 		BaseMetaFile metaFile = context.consumeMetaFile();
 		FileIndex fileNode = (FileIndex) userProfile.getFileById(metaFile.getId());
-		fileNode.setMD5(originalMD5);
+		fileNode.setHash(originalHash);
 	}
 }

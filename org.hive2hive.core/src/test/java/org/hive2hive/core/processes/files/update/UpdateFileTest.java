@@ -83,7 +83,7 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// overwrite the content in the file
 		String newContent = randomString();
 		FileUtils.write(file, newContent, false);
-		byte[] md5UpdatedFile = HashUtil.hash(file);
+		byte[] hashUpdatedFile = HashUtil.hash(file);
 
 		// upload the new version
 		UseCaseTestUtil.uploadNewVersion(uploader, file);
@@ -96,8 +96,8 @@ public class UpdateFileTest extends H2HJUnitTest {
 		// new content should be latest one
 		Assert.assertEquals(newContent, FileUtils.readFileToString(downloaded));
 
-		// check the md5 hash
-		Assert.assertTrue(HashUtil.compare(downloaded, md5UpdatedFile));
+		// check the hash
+		Assert.assertTrue(HashUtil.compare(downloaded, hashUpdatedFile));
 	}
 
 	@Test
@@ -120,10 +120,10 @@ public class UpdateFileTest extends H2HJUnitTest {
 			waiter.tickASecond();
 		} while (!listener.hasExecutionFailed());
 
-		// verify if the md5 hash did not change
+		// verify if the hash did not change
 		UserProfile userProfile = UseCaseTestUtil.getUserProfile(downloader, userCredentials);
 		FileIndex fileNode = (FileIndex) userProfile.getFileByPath(file, uploaderRoot);
-		Assert.assertTrue(HashUtil.compare(file, fileNode.getMD5()));
+		Assert.assertTrue(HashUtil.compare(file, fileNode.getHash()));
 	}
 
 	@Test

@@ -117,10 +117,10 @@ public class AskForChunkStep extends BaseMessageProcessStep {
 	}
 
 	private void verifyAndWriteChunk(MetaChunk metaChunk, Chunk chunk) {
-		// verify the md5 hash
+		// verify the hash
 		byte[] respondedHash = HashUtil.hash(chunk.getData());
 		if (HashUtil.compare(respondedHash, metaChunk.getChunkHash())) {
-			logger.debug("Peer {} sent a valid content for chunk {}. MD5 verified.", context.getSelectedPeer(),
+			logger.debug("Peer {} sent a valid content for chunk {}. Hash verified.", context.getSelectedPeer(),
 					metaChunk.getIndex());
 		} else {
 			logger.error("Peer {} sent an invalid content for chunk {}.", context.getSelectedPeer(), metaChunk.getIndex());

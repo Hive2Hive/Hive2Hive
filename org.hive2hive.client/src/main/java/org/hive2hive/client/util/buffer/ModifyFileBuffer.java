@@ -49,9 +49,9 @@ public class ModifyFileBuffer extends BaseFileBuffer {
 				toDelete.add(file);
 			} else {
 				try {
-					// check for MD5 hashes, if equal, skip the file
+					// check for hashes, if equal, skip the file
 					byte[] fileHash = HashUtil.hash(file);
-					if (HashUtil.compare(fileHash, fileTaste.getMd5())) {
+					if (HashUtil.compare(fileHash, fileTaste.getContentHash())) {
 						// hashes are equal, no need to upload it to the DHT
 						toDelete.add(file);
 					}

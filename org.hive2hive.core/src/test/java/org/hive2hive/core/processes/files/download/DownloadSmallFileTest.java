@@ -114,7 +114,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 		// create the existing file
 		File existing = new File(downloaderRoot, uploadedFile.getName());
 		FileUtils.write(existing, "existing content");
-		byte[] md5Before = HashUtil.hash(existing);
+		byte[] hashBefore = HashUtil.hash(existing);
 
 		UseCaseTestUtil.downloadFile(downloader, fileNode.getFilePublicKey());
 
@@ -126,7 +126,7 @@ public class DownloadSmallFileTest extends H2HJUnitTest {
 		Assert.assertEquals(testContent, content);
 
 		// the content of the existing file is modified
-		Assert.assertFalse(HashUtil.compare(downloadedFile, md5Before));
+		Assert.assertFalse(HashUtil.compare(downloadedFile, hashBefore));
 	}
 
 	@Test

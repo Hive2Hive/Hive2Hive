@@ -25,7 +25,7 @@ public interface IUploadContext {
 
 	public void provideUsersToNotify(Set<String> users);
 
-	// ------ PutMetaFileStep, CreateNewVersionStep, UpdateMD5InUserProfileStep ------
+	// ------ PutMetaFileStep, CreateNewVersionStep, UpdateHashInUserProfileStep ------
 
 	public BaseMetaFile consumeMetaFile();
 

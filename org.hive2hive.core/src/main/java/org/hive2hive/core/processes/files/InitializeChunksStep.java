@@ -96,8 +96,8 @@ public class InitializeChunksStep extends ProcessStep<Void> {
 				throw new ProcessExecutionException(this, ex, "Cannot read the large file.");
 			}
 
-			byte[] md5Hash = HashUtil.hash(chunk.getData());
-			context.getMetaChunks().add(new MetaChunk(chunkId, md5Hash, i));
+			byte[] hash = HashUtil.hash(chunk.getData());
+			context.getMetaChunks().add(new MetaChunk(chunkId, hash, i));
 		}
 	}
 }

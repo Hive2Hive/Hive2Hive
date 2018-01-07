@@ -23,59 +23,59 @@ public class HashUtilTest extends H2HJUnitTest {
 	}
 
 	@Test
-	public void md5DataTest() {
+	public void hashDataTest() {
 		String data = randomString(1000);
-		byte[] md5 = HashUtil.hash(data.getBytes());
-		assertNotNull(md5);
+		byte[] hash = HashUtil.hash(data.getBytes());
+		assertNotNull(hash);
 
-		// assert that hashing twice results in the same md5 hash
-		assertEquals(new String(md5), new String(HashUtil.hash(data.getBytes())));
+		// assert that hashing twice results in the same hash
+		assertEquals(new String(hash), new String(HashUtil.hash(data.getBytes())));
 
-		// assert that different data is hashed to different md5 hashes
+		// assert that different data is hashed to different hashes
 		String data2 = randomString(1000);
 		assertNotEquals(data, data2);
-		assertNotEquals(new String(md5), new String(HashUtil.hash(data2.getBytes())));
+		assertNotEquals(new String(hash), new String(HashUtil.hash(data2.getBytes())));
 	}
 
 	@Test
-	public void md5ExampleDataTest() {
+	public void hashExampleDataTest() {
 		final String expected = "XrY7u+Ae7tCTyyK7j1rNww==";
 		String data = "hello world";
 
-		byte[] md5 = HashUtil.hash(data.getBytes());
-		String result = new String(Base64.encode(md5));
+		byte[] hash = HashUtil.hash(data.getBytes());
+		String result = new String(Base64.encode(hash));
 
 		assertEquals(expected, result);
 	}
 
 	@Test
-	public void md5StreamTest() throws IOException {
+	public void hashStreamTest() throws IOException {
 		String data = randomString(5 * 1024);
 		File file = new File(System.getProperty("java.io.tmpdir"), randomString());
 		FileUtils.writeStringToFile(file, data);
 
-		byte[] md5 = HashUtil.hash(file);
-		assertNotNull(md5);
+		byte[] hash = HashUtil.hash(file);
+		assertNotNull(hash);
 
-		// assert that hashing twice results in the same md5 hash
-		assertEquals(new String(md5), new String(HashUtil.hash(file)));
+		// assert that hashing twice results in the same hash
+		assertEquals(new String(hash), new String(HashUtil.hash(file)));
 
-		// assert that different data is hashed to different md5 hashes
+		// assert that different data is hashed to different hashes
 		String data2 = randomString(1000);
 		assertNotEquals(data, data2);
-		assertNotEquals(new String(md5), new String(HashUtil.hash(data2.getBytes())));
+		assertNotEquals(new String(hash), new String(HashUtil.hash(data2.getBytes())));
 	}
 
 	@Test
-	public void md5StreamExampleDataTest() throws IOException {
+	public void hashStreamExampleDataTest() throws IOException {
 		final String expected = "XrY7u+Ae7tCTyyK7j1rNww==";
 		String data = "hello world";
 
 		File file = new File(FileUtils.getTempDirectory(), randomString());
 		FileUtils.writeStringToFile(file, data);
 
-		byte[] md5 = HashUtil.hash(file);
-		String result = new String(Base64.encode(md5));
+		byte[] hash = HashUtil.hash(file);
+		String result = new String(Base64.encode(hash));
 
 		assertEquals(expected, result);
 	}

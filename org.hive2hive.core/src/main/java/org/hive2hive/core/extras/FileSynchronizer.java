@@ -79,9 +79,9 @@ public class FileSynchronizer {
 					if (node.isFolder()) {
 						deletedLocally.add(node);
 					} else {
-						// check the MD5 value to not delete a modified file
+						// check the hash value to not delete a modified file
 						FileIndex fileNode = (FileIndex) node;
-						if (HashUtil.compare(fileNode.getMD5(), before.get(path))) {
+						if (HashUtil.compare(fileNode.getHash(), before.get(path))) {
 							// file has not been modified remotely, delete it
 							logger.debug("File '{}' has been deleted locally during absence.", path);
 							deletedLocally.add(node);
@@ -189,7 +189,7 @@ public class FileSynchronizer {
 			}
 
 			if (HashUtil.compare(before.get(path), now.get(path))) {
-				// md5 before and after match --> nothing changed
+				// hash before and after match --> nothing changed
 				continue;
 			}
 
@@ -203,9 +203,9 @@ public class FileSynchronizer {
 
 			FileIndex fileNode = (FileIndex) index;
 
-			// has been modified --> check if profile has same md5 as 'before'. If not, there are three
+			// has been modified --> check if profile has same hash as 'before'. If not, there are three
 			// different versions. Thus, the profile wins.
-			if (HashUtil.compare(fileNode.getMD5(), before.get(path)) && !HashUtil.compare(fileNode.getMD5(), now.get(path))) {
+			if (HashUtil.compare(fileNode.getHash(), before.get(path)) && !HashUtil.compare(fileNode.getHash(), now.get(path))) {
 				logger.debug("File '{}' has been updated locally during absence.", path);
 				updatedLocally.add(file);
 			}
@@ -235,9 +235,9 @@ public class FileSynchronizer {
 			FileIndex fileIndex = (FileIndex) index;
 			String path = fileIndex.getFullPath();
 			if (before.containsKey(path) && now.containsKey(path)) {
-				if (!HashUtil.compare(fileIndex.getMD5(), now.get(path))
-						&& !HashUtil.compare(fileIndex.getMD5(), before.get(path))) {
-					// different md5 hashes than 'before' and 'now'
+				if (!HashUtil.compare(fileIndex.getHash(), now.get(path))
+						&& !HashUtil.compare(fileIndex.getHash(), before.get(path))) {
+					// different hashes than 'before' and 'now'
 					logger.debug("File '{}' has been updated remotely during absence.", path);
 					updatedRemotely.add(fileIndex);
 				}

@@ -34,6 +34,6 @@ public class UpdateNotificationMessageFactory extends BaseNotificationMessageFac
 	@Override
 	public UserProfileTask createUserProfileTask(String sender) {
 		return new UpdateUserProfileTask(sender, generateProtectionKeys(),
-				updatedFileIndex.getFilePublicKey(), updatedFileIndex.getMD5());
+				updatedFileIndex.getFilePublicKey(), updatedFileIndex.getHash());
 	}
 }
