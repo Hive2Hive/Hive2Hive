@@ -74,9 +74,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 	public void generateAESKeyFromPasswordTest() {
 
 		// test all key sizes
-		AES_KEYLENGTH[] sizes = EncryptionUtilTest.getAESKeySizes();
-
-		for (int s = 0; s < sizes.length; s++) {
+		for (AES_KEYLENGTH keyLength : AES_KEYLENGTH.values()) {
 
 			// test various UserPasswords
 			for (int i = 0; i < 3; i++) {
@@ -84,7 +82,7 @@ public class PasswordUtilTest extends H2HJUnitTest {
 				String randomPW = randomString(20);
 				String randomPIN = randomString(6);
 
-				logger.debug("Testing {}-bit AES key generation from user password and PIN:", sizes[s].value());
+				logger.debug("Testing {}-bit AES key generation from user password and PIN:", keyLength.value());
 				logger.debug("Random PW: {}.", randomPW);
 				logger.debug("Random PIN: {}.", randomPIN);
 
@@ -93,13 +91,13 @@ public class PasswordUtilTest extends H2HJUnitTest {
 				for (int j = 0; j < aesKey.length; j++) {
 
 					// generate AES key
-					aesKey[j] = PasswordUtil.generateAESKeyFromPassword(randomPW, randomPIN, sizes[s]);
+					aesKey[j] = PasswordUtil.generateAESKeyFromPassword(randomPW, randomPIN, keyLength);
 
 					assertNotNull(aesKey[j]);
 					assertNotNull(aesKey[j].getEncoded());
-					assertTrue(aesKey[j].getEncoded().length == sizes[s].value() / 8);
+					assertTrue(aesKey[j].getEncoded().length == keyLength.value() / 8);
 
-					logger.debug("Generated {}-bit AES key: {}.", sizes[s].value(),
+					logger.debug("Generated {}-bit AES key: {}.", keyLength.value(),
 							EncryptionUtil.byteToHex(aesKey[j].getEncoded()));
 
 					// test whether generated AES passwords are equal

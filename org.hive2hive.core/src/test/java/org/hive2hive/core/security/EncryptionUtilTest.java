@@ -63,15 +63,13 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	public void generateAESKeyTest() {
 
 		// test all key sizes
-		AES_KEYLENGTH[] sizes = getAESKeySizes();
+		for (AES_KEYLENGTH keylength : AES_KEYLENGTH.values()) {
 
-		for (int s = 0; s < sizes.length; s++) {
-
-			logger.debug("Testing AES {}-bit key generation.", sizes[s].value());
+			logger.debug("Testing AES {}-bit key generation.", keylength.value());
 
 			// generate AES key
 			long start = System.currentTimeMillis();
-			SecretKey aesKey = EncryptionUtil.generateAESKey(sizes[s], SECURITY_PROVIDER);
+			SecretKey aesKey = EncryptionUtil.generateAESKey(keylength, SECURITY_PROVIDER);
 			long stop = System.currentTimeMillis();
 			logger.debug("Generated AES key: {}.", EncryptionUtil.byteToHex(aesKey.getEncoded()));
 			logger.debug("Time: {} ms.", stop - start);
@@ -85,15 +83,12 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	public void generateRSAKeyPairTest() {
 
 		// test all key sizes
-		RSA_KEYLENGTH[] sizes = getRSAKeySizes();
-
-		for (int s = 0; s < sizes.length; s++) {
-
-			logger.debug("Testing RSA {}-bit key pair generation.", sizes[s].value());
+		for (RSA_KEYLENGTH keyLength : RSA_KEYLENGTH.values()) {
+			logger.debug("Testing RSA {}-bit key pair generation.", keyLength.value());
 
 			// generate RSA key pair
 			long start = System.currentTimeMillis();
-			KeyPair rsaKeyPair = generateRSAKeyPair(sizes[s]);
+			KeyPair rsaKeyPair = generateRSAKeyPair(keyLength);
 			long stop = System.currentTimeMillis();
 
 			assertNotNull(rsaKeyPair);
@@ -110,17 +105,14 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	public void encryptionAESTest() {
 
 		// test all key sizes
-		AES_KEYLENGTH[] sizes = getAESKeySizes();
-
-		for (int s = 0; s < sizes.length; s++) {
-
-			logger.debug("Testing AES {}-bit encryption and decryption.", sizes[s].value());
+		for (AES_KEYLENGTH keylength : AES_KEYLENGTH.values()) {
+			logger.debug("Testing AES {}-bit encryption and decryption.", keylength.value());
 
 			// generate random sized content (max. 2MB)
 			byte[] data = generateRandomContent(2097152);
 
 			// generate AES key
-			SecretKey aesKey = EncryptionUtil.generateAESKey(sizes[s], SECURITY_PROVIDER);
+			SecretKey aesKey = EncryptionUtil.generateAESKey(keylength, SECURITY_PROVIDER);
 
 			// generate IV
 			byte[] initVector = EncryptionUtil.generateIV();
@@ -156,20 +148,18 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	public void encryptionRSATest() {
 
 		// test all key sizes
-		RSA_KEYLENGTH[] sizes = getRSAKeySizes();
+		for (RSA_KEYLENGTH keyLength : RSA_KEYLENGTH.values()) {
 
-		for (int s = 0; s < sizes.length; s++) {
-
-			logger.debug("Testing RSA {}-bit encryption and decryption.", sizes[s].value());
+			logger.debug("Testing RSA {}-bit encryption and decryption.", keyLength.value());
 
 			// generate random sized content (max. (key size / 8) - 11 bytes)
-			byte[] data = generateRandomContent((sizes[s].value() / 8) - 11);
+			byte[] data = generateRandomContent((keyLength.value() / 8) - 11);
 
-			logger.debug("Testing RSA encryption of a sample {} byte file with a {} bit key.", data.length, sizes[s].value());
+			logger.debug("Testing RSA encryption of a sample {} byte file with a {} bit key.", data.length, keyLength.value());
 			printBytes("Original Data", data);
 
 			// generate RSA key pair
-			KeyPair rsaKeyPair = generateRSAKeyPair(sizes[s]);
+			KeyPair rsaKeyPair = generateRSAKeyPair(keyLength);
 
 			// encrypt data with public key
 			byte[] encryptedData = null;
@@ -208,25 +198,22 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	@Test
 	public void encryptionHybridTest() {
 		Random rnd = new Random();
-		RSA_KEYLENGTH[] rsaSizes = getRSAKeySizes();
-		AES_KEYLENGTH[] aesSizes = getAESKeySizes();
-
 		// test all RSA key sizes
-		for (int s1 = 0; s1 < rsaSizes.length; s1++) {
+		for (RSA_KEYLENGTH rsaLength : RSA_KEYLENGTH.values()) {
 
 			// test all AES key sizes
-			for (int s2 = 0; s2 < aesSizes.length; s2++) {
+			for (AES_KEYLENGTH aesLength : AES_KEYLENGTH.values()) {
 
 				// generate random content (0-10 MB)
 				byte[] data = generateFixedContent((int) (rnd.nextDouble() * 10 * 1024 * 1024));
 
 				logger.debug(
 						"Testing hybrid encryption and decryption of a sample {} byte file with a {} bit RSA and a {} bit AES key.",
-						data.length, rsaSizes[s1].value(), aesSizes[s2].value());
+						data.length, rsaLength.value(), aesLength.value());
 
 				// generate RSA key pair
 				long start = System.currentTimeMillis();
-				KeyPair rsaKeyPair = generateRSAKeyPair(rsaSizes[s1]);
+				KeyPair rsaKeyPair = generateRSAKeyPair(rsaLength);
 				long stop = System.currentTimeMillis();
 				logger.debug("RSA Key Generation Time: {} ms.", stop - start);
 
@@ -234,7 +221,7 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 				HybridEncryptedContent encryptedData = null;
 				try {
 					start = System.currentTimeMillis();
-					encryptedData = EncryptionUtil.encryptHybrid(data, rsaKeyPair.getPublic(), aesSizes[s2],
+					encryptedData = EncryptionUtil.encryptHybrid(data, rsaKeyPair.getPublic(), aesLength,
 							SECURITY_PROVIDER, STRONG_AES);
 					stop = System.currentTimeMillis();
 					logger.debug("Hybrid Encryption Time: {} ms.", stop - start);
@@ -271,18 +258,15 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 	public void signatureTest() {
 
 		// test all key sizes
-		RSA_KEYLENGTH[] sizes = getRSAKeySizes();
-
-		for (int s = 0; s < sizes.length; s++) {
-
-			logger.debug("Testing SHA-1 with RSA {}-bit signing and verificiation.", sizes[s].value());
+		for (RSA_KEYLENGTH keyLength : RSA_KEYLENGTH.values()) {
+			logger.debug("Testing SHA-1 with RSA {}-bit signing and verificiation.", keyLength.value());
 
 			// generate random sized content (max. 100 bytes)
 			byte[] data = generateRandomContent(100);
 			printBytes("Original Data:", data);
 
 			// generate RSA key pair
-			KeyPair rsaKeyPair = generateRSAKeyPair(sizes[s]);
+			KeyPair rsaKeyPair = generateRSAKeyPair(keyLength);
 
 			// sign data with private key
 			byte[] signature = null;
@@ -351,22 +335,6 @@ public class EncryptionUtilTest extends H2HJUnitTest {
 		long stopTime = System.currentTimeMillis();
 		long elapsedTime = stopTime - startTime;
 		logger.debug("elapsed time = {}", elapsedTime);
-	}
-
-	public static AES_KEYLENGTH[] getAESKeySizes() {
-		AES_KEYLENGTH[] sizes = new AES_KEYLENGTH[AES_KEYLENGTH.values().length];
-		for (int i = 0; i < sizes.length; i++) {
-			sizes[i] = AES_KEYLENGTH.values()[i];
-		}
-		return sizes;
-	}
-
-	public static RSA_KEYLENGTH[] getRSAKeySizes() {
-		RSA_KEYLENGTH[] sizes = new RSA_KEYLENGTH[RSA_KEYLENGTH.values().length];
-		for (int i = 0; i < sizes.length; i++) {
-			sizes[i] = RSA_KEYLENGTH.values()[i];
-		}
-		return sizes;
 	}
 
 	@AfterClass
