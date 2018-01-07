@@ -88,15 +88,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
-
 			<!-- create a test jar with the test classes -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

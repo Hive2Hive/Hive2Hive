@@ -1,29 +1,37 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<groupId>org.hive2hive</groupId>
 	<artifactId>org.hive2hive.parent</artifactId>
 	<version>1.2.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	
+
 	<name>Hive2Hive</name>
 	<url>http://www.hive2hive.org</url>
 	<description>Hive2Hive is an open-source library for distributed, P2P-based file synchronization &amp; sharing ensuring maximum anonymity and security.</description>
 
-  	<licenses>
+	<licenses>
 		<license>
 			<name>MIT License</name>
 			<url>http://opensource.org/licenses/MIT</url>
 		</license>
 	</licenses>
-  
-  	<modules>
+
+	<modules>
 		<module>org.hive2hive.core</module>
 		<module>org.hive2hive.client</module>
 		<module>org.hive2hive.examples</module>
 	</modules>
-	
+
+	<properties>
+		<!-- platform independent encoding -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<tomp2p.version>5.0-Beta8</tomp2p.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -44,24 +52,9 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
-	<properties>
-		<!-- platform independent encoding -->
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<tomp2p.version>5.0-Beta8</tomp2p.version>
-	</properties>
 
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
-			
 			<!-- Attach sources -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -93,5 +86,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 </project>
