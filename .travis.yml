@@ -1,6 +1,4 @@
 language: java
-jdk:
-  - oraclejdk7
 
 # whitelist
 branches:
