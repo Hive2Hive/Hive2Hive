@@ -1,6 +1,8 @@
 package org.hive2hive.core.network.messages.request;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hive2hive.core.network.messages.BaseMessage;
 import org.hive2hive.core.network.messages.direct.response.IResponseCallBackHandler;
@@ -16,18 +18,22 @@ public abstract class RoutedRequestMessage extends BaseMessage implements IReque
 
 	private static final long serialVersionUID = 4510609215735076075L;
 
-	private transient IResponseCallBackHandler handler;
+	private transient Set<IResponseCallBackHandler> handler = new HashSet<>();
 
 	public RoutedRequestMessage(String targetKey) {
 		super(targetKey);
 	}
 
-	public final IResponseCallBackHandler getCallBackHandler() {
+	public final Set<IResponseCallBackHandler> getCallBackHandlers() {
 		return handler;
 	}
 
 	public final void setCallBackHandler(IResponseCallBackHandler handler) {
-		this.handler = handler;
+		this.handler.add(handler);
+	}
+
+	public void addCallBackHandler(IResponseCallBackHandler handler) {
+		this.handler.add(handler);
 	}
 
 	public final ResponseMessage createResponse(Serializable content) {
