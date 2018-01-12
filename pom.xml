@@ -18,6 +18,27 @@
 		</license>
 	</licenses>
 
+	<scm>
+		<connection>scm:git:git@github.com:Hive2Hive/Hive2Hive.git</connection>
+		<developerConnection>scm:git:git@github.com:Hive2Hive/Hive2Hive.git</developerConnection>
+		<url>https://github.com/Hive2Hive/Hive2Hive</url>
+	</scm>
+
+	<developers>
+		<developer>
+			<name>Nico Rutishauser</name>
+			<url>https://github.com/nicoruti</url>
+		</developer>
+		<developer>
+			<name>Christian Lüthold</name>
+			<url>https://github.com/Cynthion</url>
+		</developer>
+		<developer>
+			<name>Sebastian Golaszewski</name>
+			<url>https://github.com/ippes</url>
+		</developer>
+	</developers>
+
 	<modules>
 		<module>org.hive2hive.core</module>
 		<module>org.hive2hive.client</module>
@@ -53,6 +74,17 @@
 		</dependency>
 	</dependencies>
 
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
 	<build>
 		<plugins>
 			<!-- Attach sources -->
@@ -83,6 +115,19 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+
+			<!-- Deploy / Release to OSSRH repository -->
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
