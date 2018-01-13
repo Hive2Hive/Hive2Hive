@@ -39,7 +39,7 @@ public class HashUtilTest extends H2HJUnitTest {
 
 	@Test
 	public void hashExampleDataTest() {
-		final String expected = "XrY7u+Ae7tCTyyK7j1rNww==";
+		final String expected = "uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=";
 		String data = "hello world";
 
 		byte[] hash = HashUtil.hash(data.getBytes());
@@ -68,7 +68,7 @@ public class HashUtilTest extends H2HJUnitTest {
 
 	@Test
 	public void hashStreamExampleDataTest() throws IOException {
-		final String expected = "XrY7u+Ae7tCTyyK7j1rNww==";
+		final String expected = "uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=";
 		String data = "hello world";
 
 		File file = new File(FileUtils.getTempDirectory(), randomString());

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class HashUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(HashUtil.class);
-	private static final String HASH_ALGORITHM = "SHA256";
+	private static final String HASH_ALGORITHM = "SHA-256";
 
 	private HashUtil() {
 		// only static methods
