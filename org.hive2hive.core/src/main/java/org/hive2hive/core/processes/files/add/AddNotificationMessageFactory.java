@@ -21,6 +21,7 @@ public class AddNotificationMessageFactory extends BaseNotificationMessageFactor
 	private final PublicKey parentKey;
 
 	/**
+	 * @param encryption the encryption implementation
 	 * @param addedFileIndex the index that has been added (may contain sub-files)
 	 * @param parentKey the new parent's public key
 	 */

@@ -24,11 +24,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The base class of all {@link UserProfileTask}s.</br>
+ * The base class of all {@link UserProfileTask}s.<br>
  * A ({@link Runnable}) task which is stored on the proxy node of the receiving user. This task will be stored
  * in a �queue�-like data structure. This allows an asynchronous communication between users (i.e., between
  * friends). This task is used in case an user needs to update its profile due to changes introduced by
- * friends.</br></br>
+ * friends.<br><br>
  * 
  * <b>User Profile Task Queue</b> All {@link UserProfileTask} objects have to be stored (encrypted with the
  * receivers public key) on the proxy node of the receiver. The {@link DataManager} provides the method
@@ -102,14 +102,11 @@ public abstract class UserProfileTask extends BaseNetworkContent {
 	/**
 	 * Helper method that asynchronously notifies all clients of the same user.
 	 * 
-	 * @param messageFactory
-	 * @throws NoPeerConnectionException
-	 * @throws IllegalArgumentException
-	 * @throws InvalidProcessStateException
-	 * @throws NoSessionException
+	 * @param messageFactory the message factory
+	 * @throws NoPeerConnectionException if the peer is not connected
+	 * @throws NoSessionException if the user has no session.
 	 */
-	protected void notifyOtherClients(BaseNotificationMessageFactory messageFactory) throws NoPeerConnectionException,
-			InvalidProcessStateException, NoSessionException {
+	protected void notifyOtherClients(BaseNotificationMessageFactory messageFactory) throws NoPeerConnectionException, NoSessionException {
 		Set<String> onlyMe = new HashSet<String>(1);
 		onlyMe.add(networkManager.getUserId());
 
@@ -118,7 +115,7 @@ public abstract class UserProfileTask extends BaseNetworkContent {
 
 		try {
 			notificationProcess.execute();
-		} catch (ProcessExecutionException ex) {
+		} catch (ProcessExecutionException | InvalidProcessStateException ex) {
 			logger.error("Notification process execution failed.", ex);
 		}
 	}

@@ -49,9 +49,9 @@ public class HashUtil {
 	/**
 	 * Generates a hash of an input stream (can take a while)
 	 *
-	 * @param file
+	 * @param file the file to hash its contents
 	 * @return the hash of the file
-	 * @throws IOException
+	 * @throws IOException if te file cannot be read
 	 */
 	public static byte[] hash(File file) throws IOException {
 		if (file == null) {
@@ -102,10 +102,10 @@ public class HashUtil {
 	/**
 	 * Compares if the file hash matches a given hash
 	 *
-	 * @param file
-	 * @param expectedHash
+	 * @param file the file to comapre its hash
+	 * @param expectedHash the expected hash of the file
 	 * @return <code>true</code> if the file has the expected hash
-	 * @throws IOException
+	 * @throws IOException if the file cannot be read
 	 */
 	public static boolean compare(File file, byte[] expectedHash) throws IOException {
 		if (!file.exists() && (expectedHash == null || expectedHash.length == 0)) {

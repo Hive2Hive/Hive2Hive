@@ -13,9 +13,10 @@ public interface IMessageManager {
 
 	/**
 	 * Send a message which gets routed to the next responsible node according the
-	 * {@link BaseMessage#getTargetKey()} key.</br>
+	 * {@link BaseMessage#getTargetKey()} key.<br>
 	 * <b>Important:</b> This message gets encrypted with the given public key. Use this method for direct
-	 * sending to nodes, which have the according private key.</br></br>
+	 * sending to nodes, which have the according private key.<br>
+	 * <br>
 	 * <b>Design decision:</b>For an appropriate message handling like resends, error log and notifying
 	 * listeners a {@link FutureRoutedListener} future listener gets attached to the {@link FutureDirect}
 	 * object.
@@ -24,14 +25,16 @@ public interface IMessageManager {
 	 *            a message to send
 	 * @param targetPublicKey
 	 *            the public key of the receivers node to encrypt the message
+	 * @return <code>true</code> if sending was successful
 	 */
 	boolean send(BaseMessage message, PublicKey targetPublicKey);
 
 	/**
 	 * Send a message directly to a node according the {@link BaseDirectMessage#getTargetAddress()} peer
-	 * address.</br>
+	 * address.<br>
 	 * <b>Important:</b> This message gets encrypted with the given public key. Use this method for direct
-	 * sending to nodes, which have the according private key.</br></br>
+	 * sending to nodes, which have the according private key.<br>
+	 * <br>
 	 * <b>Design decision:</b>For an appropriate message handling like resends, error log and notifying
 	 * listeners a {@link FutureDirectListener} future listener gets attached to the {@link FutureResponse}
 	 * object.
@@ -40,6 +43,7 @@ public interface IMessageManager {
 	 *            a direct message to send
 	 * @param targetPublicKey
 	 *            the public key of the receivers node to encrypt the message
+	 * @return <code>true</code> if sending was successful
 	 */
 	boolean sendDirect(BaseDirectMessage message, PublicKey targetPublicKey);
 

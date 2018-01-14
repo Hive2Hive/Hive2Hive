@@ -24,8 +24,9 @@ import org.slf4j.LoggerFactory;
  * Use this future adapter when sending a {@link BaseMessage}. Attach this listener to the future which gets
  * returned at {@link MessageManager#send(BaseMessage, PublicKey)} to enable a appropriate failure handling.
  * Use the {@link FutureRoutedListener#await()} method to wait blocking until the message is sent (or
- * not).</br></br>
- * <b>Failure Handling</b></br>
+ * not).<br>
+ * <br>
+ * <b>Failure Handling</b><br>
  * Sending a message can fail when the future object failed, when the future object contains wrong data or the
  * responding node detected a failure. See {@link AcceptanceReply} for possible failures. If sending of a
  * message fails the message gets re-send as long as {@link BaseMessage#handleSendingFailure(AcceptanceReply)}
@@ -57,8 +58,10 @@ public class FutureRoutedListener extends BaseFutureAdapter<FutureSend> {
 	 * 
 	 * @param message
 	 *            message which has been sent (needed for re-sending)
+	 * @param receiverPublicKey the receivers public key
 	 * @param messageManager
 	 *            reference needed for re-sending
+	 * @param serializer the serializer
 	 */
 	public FutureRoutedListener(BaseMessage message, PublicKey receiverPublicKey, MessageManager messageManager,
 			IH2HSerialize serializer) {

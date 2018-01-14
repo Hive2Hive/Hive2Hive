@@ -17,7 +17,8 @@ import org.hive2hive.processframework.ProcessStep;
 
 /**
  * This is a process step for sending a {@link BaseMessage}.
- * </br></br>
+ * <br>
+ * <br>
  * 
  * <b>Design decision:</b>
  * <ul>
@@ -44,6 +45,10 @@ public abstract class BaseMessageProcessStep extends ProcessStep<Void> implement
 
 	/**
 	 * Send a routed message or a direct message (by handing an implementation of {@link BaseDirectMessage}.
+	 * 
+	 * @param message the message to send
+	 * @param receiverPublicKey the receivers public key
+	 * @throws SendFailedException if the message cannot be sent
 	 */
 	protected void send(BaseMessage message, PublicKey receiverPublicKey) throws SendFailedException {
 		if (message instanceof IRequestMessage) {

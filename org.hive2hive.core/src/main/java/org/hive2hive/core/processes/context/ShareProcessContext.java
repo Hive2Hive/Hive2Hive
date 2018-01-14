@@ -111,6 +111,8 @@ public class ShareProcessContext implements IInitializeMetaUpdateContext, INotif
 
 	/**
 	 * Sets whether the folder was shared before
+	 * 
+	 * @param sharedBefore whether the file has been shared before
 	 */
 	public void setSharedBefore(boolean sharedBefore) {
 		this.sharedBefore = sharedBefore;

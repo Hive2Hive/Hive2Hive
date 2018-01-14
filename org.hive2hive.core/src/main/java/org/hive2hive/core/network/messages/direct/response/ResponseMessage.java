@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This message has to be used for response messages when a request message implementing the
- * {@link IRequestMessage} interface arrives.</br></br>
+ * {@link IRequestMessage} interface arrives.<br><br>
  *
  * <b>Important</b> The message id of the response message has to be the same like the requesting message.
  * This is necessary for the requesting peer to find the correct {@link IResponseCallBackHandler} to handle
- * the response message at the requesting node.</br></br>
+ * the response message at the requesting node.<br><br>
  *
  * <b>Design decisions:</b>
  * <ul>

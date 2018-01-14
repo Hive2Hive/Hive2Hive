@@ -22,7 +22,7 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	/**
 	 * Constructor for root node.
 	 * 
-	 * @param fileKeys
+	 * @param fileKeys the root file keys
 	 */
 	public Index(KeyPair fileKeys) {
 		this(fileKeys, null, null);
@@ -70,7 +70,7 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	/**
 	 * Changes the name of the index. The name is the same as the name of the file.
 	 * 
-	 * @param name
+	 * @param name the name of the index
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -79,7 +79,7 @@ public abstract class Index implements Comparable<Index>, Serializable {
 	/**
 	 * Set the parent index (used when the parent may be changed)
 	 * 
-	 * @param parent
+	 * @param parent the parent index
 	 */
 	public void setParent(FolderIndex parent) {
 		if (parent == null) {

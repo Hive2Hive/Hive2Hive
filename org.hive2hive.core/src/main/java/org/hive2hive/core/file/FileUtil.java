@@ -25,7 +25,10 @@ public class FileUtil {
 	/**
 	 * Writes the meta data (used to synchronize) to the disk
 	 * 
-	 * @throws IOException
+	 * @param fileAgent the file agent
+	 * @param keyManager the key manager
+	 * @param serializer the serializer to use
+	 * @throws IOException if the data cannot be serialized or stored
 	 */
 	public static void writePersistentMetaData(IFileAgent fileAgent, PublicKeyManager keyManager, IH2HSerialize serializer)
 			throws IOException {
@@ -44,6 +47,8 @@ public class FileUtil {
 	/**
 	 * Reads the meta data (used to synchronize) from the disk
 	 * 
+	 * @param fileAgent the file agent
+	 * @param serializer the serializer to use
 	 * @return the read meta data (never null)
 	 */
 	public static PersistentMetaData readPersistentMetaData(IFileAgent fileAgent, IH2HSerialize serializer) {
@@ -71,6 +76,10 @@ public class FileUtil {
 
 	/**
 	 * Makes a file path relative to the base
+	 * 
+	 * @param base the base file
+	 * @param child the child file
+	 * @return the relative file
 	 */
 	public static File relativize(File base, File child) {
 		return new File(base.toURI().relativize(child.toURI()).getPath());
@@ -80,6 +89,7 @@ public class FileUtil {
 	 * Note that file.length can be very slowly (see
 	 * http://stackoverflow.com/questions/116574/java-get-file-size-efficiently)
 	 * 
+	 * @param file the file to determine the size
 	 * @return the file size in bytes
 	 */
 	public static long getFileSize(File file) {
@@ -119,15 +129,19 @@ public class FileUtil {
 
 	/**
 	 * Does the same as {@link #isInH2HDirectory(File, File)} but taking a session as parameter
+	 * 
+	 * @param fileAgent the file agent
+	 * @param file the file to check
+	 * @return whether the file is in the managed directory
 	 */
 	public static boolean isInH2HDirectory(IFileAgent fileAgent, File file) {
 		return fileAgent == null ? false : isInH2HDirectory(file, fileAgent.getRoot());
 	}
 
 	/**
-	 * Sorts the given list in pre-order style
+	 * Sorts the given list in pre-order style.
 	 * 
-	 * @param unsortedFiles
+	 * @param unsortedFiles a list of unsorted file. The list will be updated.
 	 */
 	public static void sortPreorder(List<File> unsortedFiles) {
 		Collections.sort(unsortedFiles, new Comparator<File>() {

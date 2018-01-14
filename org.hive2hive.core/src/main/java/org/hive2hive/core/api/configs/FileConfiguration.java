@@ -48,6 +48,7 @@ public class FileConfiguration implements IFileConfiguration {
 	 * @param maxNumOfVersions the allowed number of versions
 	 * @param maxSizeAllVersions the maximum file size when summing up all versions (in bytes)
 	 * @param chunkSize the size of a chunk (in bytes)
+	 * @return the created configuration
 	 */
 	public static IFileConfiguration createCustom(BigInteger maxFileSize, int maxNumOfVersions,
 			BigInteger maxSizeAllVersions, int chunkSize) {

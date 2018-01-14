@@ -145,6 +145,7 @@ public interface IParameters {
 	 * Set data which is used to put in network.
 	 * 
 	 * @param data used to put in network
+	 * @return it-self (builder pattern)
 	 */
 	public IParameters setData(Data data);
 

@@ -57,6 +57,8 @@ public abstract class BaseModifyUserProfileStep extends ProcessStep<Void> implem
 	/**
 	 * Is called <strong>before</strong> {@link IUserProfileModification#modifyUserProfile(UserProfile)}.
 	 * However, this method is only called once, thus ideal for slow operations.
+	 * 
+	 * @throws ProcessExecutionException if the process cannot be executed
 	 */
 	protected void beforeModify() throws ProcessExecutionException {
 		// optional to overwrite
@@ -65,6 +67,8 @@ public abstract class BaseModifyUserProfileStep extends ProcessStep<Void> implem
 	/**
 	 * Is called <strong>after</strong> {@link IUserProfileModification#modifyUserProfile(UserProfile)}. It's
 	 * good for preparation of next process steps, cleanups or other things that should be done only once.
+	 * 
+	 * @throws ProcessExecutionException if the process cannot be executed
 	 */
 	protected void afterModify() throws ProcessExecutionException {
 		// optional to overwrite
@@ -73,6 +77,8 @@ public abstract class BaseModifyUserProfileStep extends ProcessStep<Void> implem
 	/**
 	 * Is called to un-modify the user profile during rollback. During rollback, {@link #beforeModify()} and
 	 * {@link #afterModify()} are not called anymore.
+	 * 
+	 * @param userProfile the current user's profile
 	 */
 	protected abstract void modifyRollback(UserProfile userProfile);
 

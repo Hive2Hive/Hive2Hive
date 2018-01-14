@@ -33,6 +33,8 @@ public abstract class BaseModifyLocationsStep extends ProcessStep<Void> {
 
 	/**
 	 * Modify the Locations here
+	 * 
+	 * @param locations the locations to modify
 	 */
 	protected abstract void modify(Locations locations);
 
@@ -87,6 +89,8 @@ public abstract class BaseModifyLocationsStep extends ProcessStep<Void> {
 
 	/**
 	 * Un-modify the Locations
+	 * 
+	 * @param locations the locations to un-modify
 	 */
 	protected abstract void rollback(Locations locations);
 

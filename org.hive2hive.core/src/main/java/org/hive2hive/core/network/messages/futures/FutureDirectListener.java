@@ -23,8 +23,9 @@ import org.slf4j.LoggerFactory;
  * returned at {@link MessageManager#sendDirect(BaseDirectMessage, PublicKey)} to enable a appropriate
  * failure handling. Use the {@link FutureRoutedListener#await()} method to wait blocking until the message is
  * sent (or
- * not).</br></br>
- * <b>Failure Handling</b></br>
+ * not).<br>
+ * <br>
+ * <b>Failure Handling</b><br>
  * Sending a direct message can fail when the future object failed, when the future object contains wrong data
  * or the
  * responding node detected a failure. See {@link AcceptanceReply} for possible failures. If sending of a
@@ -63,6 +64,7 @@ public class FutureDirectListener extends BaseFutureAdapter<FutureDirect> {
 	 *            the receivers public key which was used for encryption
 	 * @param messageManager
 	 *            reference needed for re-sending
+	 * @param serializer the serializer
 	 */
 	public FutureDirectListener(BaseDirectMessage message, PublicKey receiverPublicKey, MessageManager messageManager,
 			IH2HSerialize serializer) {

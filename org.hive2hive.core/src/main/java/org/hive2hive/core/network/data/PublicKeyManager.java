@@ -43,35 +43,35 @@ public class PublicKeyManager {
 	}
 
 	/**
-	 * Helper method that returns the public key of the currently logged in user.
+	 * @return the public key of the currently logged in user.
 	 */
 	public PublicKey getOwnPublicKey() {
 		return usersKeyPair.getPublic();
 	}
 
 	/**
-	 * Helper method that returns the private key of the currently logged in user
+	 * @return the private key of the currently logged in user
 	 */
 	public PrivateKey getOwnPrivateKey() {
 		return usersKeyPair.getPrivate();
 	}
 
 	/**
-	 * Helper method that returns the users key pair
+	 * @return the users key pair
 	 */
 	public KeyPair getOwnKeyPair() {
 		return usersKeyPair;
 	}
 
 	/**
-	 * Helper method that returns the protection keys for e.g. the {@link Locations}.
+	 * @return the protection keys for e.g. the {@link Locations}.
 	 */
 	public KeyPair getDefaultProtectionKeyPair() {
 		return defaultProtectionKeyPair;
 	}
 
 	/**
-	 * Returns a copy of all cached public keys
+	 * @return a copy of all cached public keys
 	 */
 	public Map<String, PublicKey> getCachedPublicKeys() {
 		return Collections.unmodifiableMap(publicKeyCache);

@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is the base class of all messages used by <code>Hive2Hive</code> which has to be sent directly to
  * another node. All messages are sent to their destination in an asynchronous manner.<br>
- * </br>
+ * <br>
  * 
  * <b>Design decision:</b>
  * <ul>
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * </ul>
  * 
  * Direct messages are sent by the {@link MessageManager}. For more details please have
- * a look at {@link MessageManager#sendDirect(BaseDirectMessage, java.security.PublicKey)}.</br></br>
+ * a look at {@link MessageManager#sendDirect(BaseDirectMessage, java.security.PublicKey)}.<br><br>
  * 
  * @author Nendor, Seppi, Nico
  */
@@ -62,7 +62,7 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	}
 
 	/**
-	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.</br>
+	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.<br>
 	 * A message ID will be created.
 	 * 
 	 * @param targetKey
@@ -78,8 +78,8 @@ public abstract class BaseDirectMessage extends BaseMessage {
 	}
 
 	/**
-	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.</br>
-	 * No targetKey has to be specified and no redirected sending is done in case of failure. </br>
+	 * This is the abstract base class for messages which are sent directly (via TCP) to a target node.<br>
+	 * No targetKey has to be specified and no redirected sending is done in case of failure. <br>
 	 * A message ID will be created.
 	 * 
 	 * @param targetAddress

@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A put future adapter for verifying a put of a {@link BaseNetworkContent} object. Provides failure handling
- * and a blocking wait.</br></br>
+ * and a blocking wait.<br><br>
  * 
- * <b>Failure Handling</b></br>
+ * <b>Failure Handling</b><br>
  * Putting can fail when the future object failed, when the future object contains wrong data or the
  * responding node detected a failure. See {@link PutStatus} for possible failures. If putting fails the
  * adapter retries it to a certain threshold (see {@link H2HConstants#PUT_RETRIES}). All puts are

@@ -27,7 +27,7 @@ public class FolderIndex extends Index {
 	/**
 	 * Constructor for the root folder.
 	 * 
-	 * @param keyPair
+	 * @param keyPair the folder's keypair.
 	 */
 	public FolderIndex(KeyPair keyPair) {
 		super(keyPair);
@@ -36,9 +36,9 @@ public class FolderIndex extends Index {
 	/**
 	 * Constructor for child nodes of type 'folder'
 	 * 
-	 * @param parent
-	 * @param keyPair
-	 * @param name
+	 * @param parent the parent folder
+	 * @param keyPair the folder's keypair
+	 * @param name the name of the folder
 	 */
 	public FolderIndex(FolderIndex parent, KeyPair keyPair, String name) {
 		super(keyPair, name, parent);
@@ -46,6 +46,8 @@ public class FolderIndex extends Index {
 
 	/**
 	 * Copy constructor
+	 * 
+	 * @param folderIndex the folder to copy
 	 */
 	public FolderIndex(FolderIndex folderIndex) {
 		super(folderIndex.fileKeys, folderIndex.name, folderIndex.parent);
@@ -86,7 +88,7 @@ public class FolderIndex extends Index {
 	/**
 	 * Add a child to the index. The child can either represent a file or a folder
 	 * 
-	 * @param child
+	 * @param child the child to add (file or folder)
 	 */
 	public void addChild(Index child) {
 		// only add once
@@ -98,7 +100,7 @@ public class FolderIndex extends Index {
 	/**
 	 * Remove a child from the index tree
 	 * 
-	 * @param child
+	 * @param child the child to remove (file or folder)
 	 */
 	public void removeChild(Index child) {
 		if (!children.remove(child)) {
@@ -110,7 +112,7 @@ public class FolderIndex extends Index {
 	/**
 	 * Finds a child with a name. If the child does not exist, null is returned
 	 * 
-	 * @param name
+	 * @param name the name to search
 	 * @return the child with the given name or <code>null</code> if none was found with that name
 	 */
 	public Index getChildByName(String name) {
@@ -156,7 +158,7 @@ public class FolderIndex extends Index {
 	 * Add a permission for a user to read / write that directory (all sub-directories inherit this
 	 * permission)
 	 * 
-	 * @param userPermission
+	 * @param userPermission the user permissions to add
 	 */
 	public void addUserPermissions(UserPermission userPermission) {
 		userPermissions.add(userPermission);
@@ -165,7 +167,7 @@ public class FolderIndex extends Index {
 	/**
 	 * Remove a user's permission. Note that you never should remove your own permission of your root!
 	 * 
-	 * @param userId
+	 * @param userId the user id of the permission to revoke
 	 */
 	public void removeUserPermissions(String userId) {
 		Iterator<UserPermission> iter = userPermissions.iterator();
@@ -233,7 +235,7 @@ public class FolderIndex extends Index {
 	/**
 	 * Returns whether a specific user can write to this folder.
 	 * 
-	 * @param userId
+	 * @param userId the given userId
 	 * @return <code>true</code> if the user has write permissions to this folder
 	 */
 	public boolean canWrite(String userId) {

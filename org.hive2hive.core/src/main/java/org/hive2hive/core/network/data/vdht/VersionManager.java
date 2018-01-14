@@ -36,7 +36,8 @@ public class VersionManager<T extends BaseVersionedNetworkContent> extends BaseV
 	/**
 	 * Performs a get call (blocking).
 	 * 
-	 * @throws GetFailedException
+	 * @return the fetched data
+	 * @throws GetFailedException if the data cannot be fetched
 	 */
 	public T get() throws GetFailedException {
 		// load the current digest list from network
@@ -138,8 +139,8 @@ public class VersionManager<T extends BaseVersionedNetworkContent> extends BaseV
 							return (T) contentCache.lastEntry().getValue();
 						} catch (Exception e) {
 							logger.error("Cannot get the version.", e);
-							throw new GetFailedException(String.format("Cannot get the version. reason = '%s'",
-									e.getMessage()));
+							throw new GetFailedException(
+									String.format("Cannot get the version. reason = '%s'", e.getMessage()));
 						}
 					}
 				}
@@ -150,7 +151,9 @@ public class VersionManager<T extends BaseVersionedNetworkContent> extends BaseV
 	/**
 	 * Encrypts the modified user profile and puts it (blocking).
 	 * 
-	 * @throws PutFailedException
+	 * @param networkContent the content to put
+	 * @param protectionKeys the protection keys
+	 * @throws PutFailedException if the content cannot be put
 	 */
 	public void put(T networkContent, KeyPair protectionKeys) throws PutFailedException {
 		networkContent.generateVersionKey();

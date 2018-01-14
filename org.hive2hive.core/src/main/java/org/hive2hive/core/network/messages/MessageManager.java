@@ -1,22 +1,13 @@
 package org.hive2hive.core.network.messages;
 
-import io.netty.buffer.Unpooled;
-
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import net.tomp2p.dht.FutureSend;
-import net.tomp2p.futures.FutureDirect;
-import net.tomp2p.message.Buffer;
-import net.tomp2p.p2p.RequestP2PConfiguration;
-import net.tomp2p.peers.Number160;
 
 import org.hive2hive.core.H2HSession;
 import org.hive2hive.core.exceptions.NoSessionException;
@@ -31,6 +22,13 @@ import org.hive2hive.core.security.EncryptionUtil;
 import org.hive2hive.core.serializer.IH2HSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.netty.buffer.Unpooled;
+import net.tomp2p.dht.FutureSend;
+import net.tomp2p.futures.FutureDirect;
+import net.tomp2p.message.Buffer;
+import net.tomp2p.p2p.RequestP2PConfiguration;
+import net.tomp2p.peers.Number160;
 
 /**
  * This class handles the sending of messages.

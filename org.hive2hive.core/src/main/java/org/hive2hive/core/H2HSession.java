@@ -40,7 +40,7 @@ public class H2HSession {
 	}
 
 	/**
-	 * Returns the own encryption key pair
+	 * @return the own encryption key pair
 	 */
 	public KeyPair getKeyPair() {
 		return keyManager.getOwnKeyPair();

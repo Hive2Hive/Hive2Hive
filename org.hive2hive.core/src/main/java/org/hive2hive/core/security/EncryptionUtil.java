@@ -125,6 +125,7 @@ public final class EncryptionUtil {
 	 * Generates an asymmetric RSA key pair of the specified key length.
 	 * 
 	 * @param keyLength The length the RSA keys should have.
+	 * @param securityProvider the security provider (e.g. bouncycastle)
 	 * @return An asymmetric RSA key pair of the specified length.
 	 */
 	public static KeyPair generateRSAKeyPair(RSA_KEYLENGTH keyLength, String securityProvider) {
@@ -145,6 +146,8 @@ public final class EncryptionUtil {
 	 * @param data The data to be encrypted.
 	 * @param secretKey The symmetric key with which the data shall be encrypted.
 	 * @param initVector The initialization vector (IV) with which the data shall be encrypted.
+	 * @param securityProvider the security provider (e.g. bouncycastle)
+	 * @param strongAES the aes encryption implementation
 	 * @return Returns the encrypted data.
 	 * @throws GeneralSecurityException in case something goes wrong
 	 */
@@ -166,7 +169,8 @@ public final class EncryptionUtil {
 	 * @param data The data to be decrypted.
 	 * @param secretKey The symmetric key with which the data shall be decrypted.
 	 * @param initVector The initialization vector (IV) with which the data shall be decrypted.
-	 * @param strongAES
+	 * @param securityProvider the security provider (e.g. bouncycastle)
+	 * @param strongAES the aes encryption implementation
 	 * @return Returns the decrypted data.
 	 * @throws GeneralSecurityException in case something goes wrong
 	 */
@@ -190,12 +194,16 @@ public final class EncryptionUtil {
 	 * @param publicKey The asymmetric public key with which the data shall be encrypted.
 	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return Returns the encrypted data.
-	 * @throws InvalidKeyException
-	 * @throws BadPaddingException
-	 * @throws IllegalBlockSizeException
+	 * @throws InvalidKeyException if the key is is invalid
+	 * @throws BadPaddingException if this cipher is in decryption mode, and (un)padding has been requested,
+	 *             but the decrypted data is not bounded by the appropriate padding bytes
+	 * @throws IllegalBlockSizeException if this cipher is a block cipher, no padding has been requested (only
+	 *             in encryption mode), and the total input length of the data processed by this cipher is not
+	 *             a multiple of block size; or if this encryption algorithm is unable to process the input
+	 *             data provided.
 	 */
-	public static byte[] encryptRSA(byte[] data, PublicKey publicKey, String securityProvider) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException {
+	public static byte[] encryptRSA(byte[] data, PublicKey publicKey, String securityProvider)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		try {
 			Cipher cipher = Cipher.getInstance("RSA", securityProvider);
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
@@ -214,12 +222,16 @@ public final class EncryptionUtil {
 	 * @param privateKey The asymmetric private key with which the data shall be decrypted.
 	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return Returns the decrypted data.
-	 * @throws InvalidKeyException
-	 * @throws BadPaddingException
-	 * @throws IllegalBlockSizeException
+	 * @throws InvalidKeyException if the key is is invalid
+	 * @throws BadPaddingException if this cipher is in decryption mode, and (un)padding has been requested,
+	 *             but the decrypted data is not bounded by the appropriate padding bytes
+	 * @throws IllegalBlockSizeException if this cipher is a block cipher, no padding has been requested (only
+	 *             in encryption mode), and the total input length of the data processed by this cipher is not
+	 *             a multiple of block size; or if this encryption algorithm is unable to process the input
+	 *             data provided.
 	 */
-	public static byte[] decryptRSA(byte[] data, PrivateKey privateKey, String securityProvider) throws InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException {
+	public static byte[] decryptRSA(byte[] data, PrivateKey privateKey, String securityProvider)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		try {
 			Cipher cipher = Cipher.getInstance("RSA", securityProvider);
 			cipher.init(Cipher.DECRYPT_MODE, privateKey);
@@ -234,12 +246,13 @@ public final class EncryptionUtil {
 	/**
 	 * Encrypts the provided data in a hybrid manner. First, the content is symmetrically encrypted with a
 	 * randomly generated IV and AES key of the specified length. Then, these encryption parameters are
-	 * asymmetrically encrypted with the provided RSA public key.</br>
+	 * asymmetrically encrypted with the provided RSA public key.<br>
 	 * 
 	 * @param data The data to be encrypted in a hybrid manner.
 	 * @param publicKey The RSA public key with which the data shall be encrypted.
 	 * @param aesKeyLength The key length of the inner AES encryption.
 	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
+	 * @param strongAES the strong aes encryption implementation
 	 * @return Returns a {@link HybridEncryptedContent} object containing the RSA encrypted parameters and the
 	 *         AES encrypted content.
 	 * @throws GeneralSecurityException in case something goes wrong
@@ -277,6 +290,7 @@ public final class EncryptionUtil {
 	 * @param data The {@link HybridEncryptedContent} to be decrypted in a hybrid manner.
 	 * @param privateKey The RSA private key with which the data shall be decrypted.
 	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
+	 * @param strongAES the strong aes encryption implementation
 	 * @return Returns the decrypted data.
 	 * @throws GeneralSecurityException in case something goes wrong
 	 */
@@ -302,11 +316,11 @@ public final class EncryptionUtil {
 	 * @param privateKey The private key used to sign the content.
 	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return The created signature of the data.
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
+	 * @throws InvalidKeyException if the key is invalid
+	 * @throws SignatureException if the data cannot be signed
 	 */
-	public static byte[] sign(byte[] data, PrivateKey privateKey, String securityProvider) throws InvalidKeyException,
-			SignatureException {
+	public static byte[] sign(byte[] data, PrivateKey privateKey, String securityProvider)
+			throws InvalidKeyException, SignatureException {
 		try {
 			Signature signEngine = Signature.getInstance(SINGATURE_ALGORITHM, securityProvider);
 			signEngine.initSign(privateKey);
@@ -327,8 +341,8 @@ public final class EncryptionUtil {
 	 * @param publicKey The public key used to verify the content.
 	 * @param securityProvider the security provider (e.g. "BC" for bouncy castle)
 	 * @return Returns true if the signature could be verified and false otherwise.
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
+	 * @throws InvalidKeyException if the key is invalid
+	 * @throws SignatureException if the signature cannot be checked
 	 */
 	public static boolean verify(byte[] data, byte[] signature, PublicKey publicKey, String securityProvider)
 			throws InvalidKeyException, SignatureException {

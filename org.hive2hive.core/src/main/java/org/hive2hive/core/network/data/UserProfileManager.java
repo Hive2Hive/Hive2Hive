@@ -118,10 +118,11 @@ public class UserProfileManager {
 	 * @param pid the process identifier
 	 * @param modifier the implementation where the modification is done
 	 * @throws GetFailedException if the profile cannot be fetched
+	 * @throws PutFailedException if the user profile cannot be put
 	 * @throws AbortModifyException if the modification was aborted
 	 */
-	public void modifyUserProfile(String pid, IUserProfileModification modifier) throws GetFailedException,
-			PutFailedException, AbortModifyException {
+	public void modifyUserProfile(String pid, IUserProfileModification modifier)
+			throws GetFailedException, PutFailedException, AbortModifyException {
 		PutQueueEntry entry = new PutQueueEntry(pid);
 		modifyQueue.add(entry);
 
@@ -269,8 +270,8 @@ public class UserProfileManager {
 						logger.warn("Process {} never finished doing modifications. Abort the put request.",
 								modifying.getPid());
 						modifying.abort();
-						modifying.setPutError(new PutFailedException(String.format(
-								"Too long modification. Only %s ms are allowed.", MAX_MODIFICATION_TIME)));
+						modifying.setPutError(new PutFailedException(
+								String.format("Too long modification. Only %s ms are allowed.", MAX_MODIFICATION_TIME)));
 						modifying.notifyPut();
 					}
 				}

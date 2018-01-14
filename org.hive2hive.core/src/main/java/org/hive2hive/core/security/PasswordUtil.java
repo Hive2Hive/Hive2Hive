@@ -90,6 +90,7 @@ public final class PasswordUtil {
 	 * Returns a salted PBKDF2 hash of the password.
 	 * 
 	 * @param password the password to hash
+	 * @param salt the salt value
 	 * @return a salted PBKDF2 hash of the password
 	 */
 	public static byte[] generateHash(char[] password, byte[] salt) {
@@ -102,7 +103,7 @@ public final class PasswordUtil {
 	 * 
 	 * @param password The UserPassword from which the AES key is derivated.
 	 * @param pin The pin of the user (used for salting)
-	 * @param keyLength The desired key lengt<h of the resulting AES key.
+	 * @param keyLength The desired key length of the resulting AES key.
 	 * @return Returns the derived symmetric AES key of desired size.
 	 */
 	public static SecretKey generateAESKeyFromPassword(String password, String pin, AES_KEYLENGTH keyLength) {

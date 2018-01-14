@@ -41,6 +41,7 @@ public class NetworkManager {
 	/**
 	 * Connects to the network based on the provided {@link INetworkConfiguration}s in the constructor.
 	 * 
+	 * @param networkConfiguration the network configuration
 	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
 	public boolean connect(INetworkConfiguration networkConfiguration) {
@@ -51,6 +52,10 @@ public class NetworkManager {
 
 	/**
 	 * Uses an existing peer for DHT interaction
+	 * 
+	 * @param peer the peer to connect
+	 * @param startReplication flag to enable replication
+	 * @return <code>true</code> if the connection was successful, <code>false</code> otherwise
 	 */
 	public boolean connect(PeerDHT peer, boolean startReplication) {
 		this.eventBus = new EventBus();
@@ -62,7 +67,6 @@ public class NetworkManager {
 	 * Disconnects from the network.
 	 * 
 	 * @param keepSession <code>false</code> if the session should also be wiped.
-	 * 
 	 * @return <code>true</code> if the disconnection was successful, <code>false</code> otherwise
 	 */
 	public boolean disconnect(boolean keepSession) {
@@ -100,13 +104,16 @@ public class NetworkManager {
 
 	/**
 	 * Sets the session of the logged in user in order to receive messages.
+	 * 
+	 * @param session set the session
 	 */
 	public void setSession(H2HSession session) {
 		this.session = session;
 	}
 
 	/**
-	 * Returns the session of the currently logged in user.
+	 * @return the session of the currently logged in user.
+	 * @throws NoSessionException if the session is not set
 	 */
 	public H2HSession getSession() throws NoSessionException {
 		if (session == null) {

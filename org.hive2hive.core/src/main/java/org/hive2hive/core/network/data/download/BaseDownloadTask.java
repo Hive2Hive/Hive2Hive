@@ -183,6 +183,7 @@ public abstract class BaseDownloadTask implements Serializable, IFileEventGenera
 	/**
 	 * Join the download process
 	 * 
+	 * @param process the process to join
 	 * @throws ProcessExecutionException if there was an error while downloading
 	 * @throws InterruptedException if the process was interrupted or was unable to wait
 	 */

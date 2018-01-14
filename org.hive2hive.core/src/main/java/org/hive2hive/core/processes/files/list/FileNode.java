@@ -140,6 +140,11 @@ public class FileNode {
 
 	/**
 	 * Returns a list of all nodes in preorder. One can specify whether only files, folders or both is desired
+	 * 
+	 * @param root the root node
+	 * @param addFiles if files should be added to the list
+	 * @param addFolders if folders should be added to the list
+	 * @return a pre-ordered list of nodes
 	 */
 	public static List<FileNode> getNodeList(FileNode root, boolean addFiles, boolean addFolders) {
 		if (!addFiles && !addFolders) {

@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A process step which puts a {@link UserProfileTask} object.</br>
+ * A process step which puts a {@link UserProfileTask} object.<br>
  * <b>Important:</b> Use only this process step to put some data into the network so that in case of failure a
  * appropriate handling is triggered.
  * 

@@ -14,7 +14,7 @@ import org.hive2hive.core.processes.context.interfaces.IGetMetaFileContext;
  * <ul>
  * <li>Download by giving the file key</li>
  * <li>Download by giving the full path of the file</li>
- * <ul>
+ * </ul>
  * 
  * @author Nico
  *
@@ -71,7 +71,7 @@ public class DownloadFileContext implements IGetMetaFileContext {
 	}
 
 	/**
-	 * Returns whether the download should happen to the default destination, same as in user profile
+	 * @return Returns whether the download should happen to the default destination, same as in user profile
 	 */
 	public boolean downloadToDefaultDestination() {
 		return destination == null;
@@ -82,7 +82,7 @@ public class DownloadFileContext implements IGetMetaFileContext {
 	}
 
 	/**
-	 * Returns whether the newest version should be downloaded
+	 * @return Returns whether the newest version should be downloaded
 	 */
 	public boolean downloadNewestVersion() {
 		return versionToDownload == NEWEST_VERSION_INDEX;

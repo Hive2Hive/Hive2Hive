@@ -19,6 +19,7 @@ public class MoveNotificationMessageFactory extends BaseNotificationMessageFacto
 	/**
 	 * Message factory for notification messages when a file has been moved
 	 * 
+	 * @param encryption the encryption implementation
 	 * @param sourceFileName the original file name
 	 * @param destFileName the new file name (considers renaming of the files)
 	 * @param oldParent the former parent key
@@ -40,7 +41,6 @@ public class MoveNotificationMessageFactory extends BaseNotificationMessageFacto
 
 	@Override
 	public UserProfileTask createUserProfileTask(String sender) {
-		return new MoveUserProfileTask(sender, generateProtectionKeys(), sourceFileName, destFileName,
-				oldParent, newParent);
+		return new MoveUserProfileTask(sender, generateProtectionKeys(), sourceFileName, destFileName, oldParent, newParent);
 	}
 }

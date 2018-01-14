@@ -18,7 +18,6 @@ import org.hive2hive.core.model.versioned.UserProfile;
 import org.hive2hive.core.network.data.IUserProfileModification;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
-import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,7 @@ public class UpdateUserProfileTask extends UserProfileTask implements IUserProfi
 			// notify own other clients
 			notifyOtherClients(new UpdateNotificationMessageFactory(networkManager.getEncryption(), updatedFile));
 			logger.debug("Notified other clients that a file has been updated by another user.");
-		} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException | NoSessionException e) {
+		} catch (IllegalArgumentException | NoPeerConnectionException | NoSessionException e) {
 			logger.error("Could not notify other clients of me about the updated file.", e);
 		}
 

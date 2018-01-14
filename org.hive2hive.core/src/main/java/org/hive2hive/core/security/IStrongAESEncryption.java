@@ -16,22 +16,22 @@ public interface IStrongAESEncryption {
 	/**
 	 * Encrypt the data with a large AES key
 	 * 
-	 * @param data
-	 * @param key
-	 * @param initVector
-	 * @return encrypted data
-	 * @throws GeneralSecurityException
+	 * @param data the data
+	 * @param key the secret key
+	 * @param initVector the init-vector
+	 * @return encrypted the encrypted data
+	 * @throws GeneralSecurityException if the data cannot be encrypted for any reason.
 	 */
 	byte[] encryptStrongAES(byte[] data, SecretKey key, byte[] initVector) throws GeneralSecurityException;
 
 	/**
 	 * Decrypt the data with a large AES key
 	 * 
-	 * @param data
-	 * @param key
-	 * @param initVector
-	 * @return decrypted data
-	 * @throws GeneralSecurityException
+	 * @param data the data
+	 * @param key the secret key
+	 * @param initVector the init-vector
+	 * @return decrypted datathe decrypted data
+	 * @throws GeneralSecurityException if the data cannot be decrypted for any reason.
 	 */
 	byte[] decryptStrongAES(byte[] data, SecretKey key, byte[] initVector) throws GeneralSecurityException;
 }

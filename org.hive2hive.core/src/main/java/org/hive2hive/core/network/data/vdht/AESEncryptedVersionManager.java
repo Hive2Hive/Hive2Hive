@@ -39,7 +39,8 @@ public class AESEncryptedVersionManager<T extends BaseVersionedNetworkContent> e
 	// additional cache for encrypted data
 	private Cache<EncryptedNetworkContent> encryptedContentCache = new Cache<EncryptedNetworkContent>();
 
-	public AESEncryptedVersionManager(DataManager dataManager, SecretKey encryptionKey, String locationKey, String contentKey) {
+	public AESEncryptedVersionManager(DataManager dataManager, SecretKey encryptionKey, String locationKey,
+			String contentKey) {
 		this(dataManager, dataManager.getEncryption(), encryptionKey, locationKey, contentKey);
 	}
 
@@ -53,7 +54,8 @@ public class AESEncryptedVersionManager<T extends BaseVersionedNetworkContent> e
 	/**
 	 * Performs a get call (blocking) and decrypts the received version.
 	 * 
-	 * @throws GetFailedException
+	 * @return the fetched data
+	 * @throws GetFailedException if the data cannot be get
 	 */
 	@SuppressWarnings("unchecked")
 	public T get() throws GetFailedException {
@@ -169,8 +171,8 @@ public class AESEncryptedVersionManager<T extends BaseVersionedNetworkContent> e
 							throw new GetFailedException("Cannot decrypt the version.");
 						} catch (Exception e) {
 							logger.error("Cannot get the version.", e);
-							throw new GetFailedException(String.format("Cannot get the version. reason = '%s'",
-									e.getMessage()));
+							throw new GetFailedException(
+									String.format("Cannot get the version. reason = '%s'", e.getMessage()));
 						}
 					}
 				}
@@ -181,7 +183,9 @@ public class AESEncryptedVersionManager<T extends BaseVersionedNetworkContent> e
 	/**
 	 * Encrypts the modified user profile and puts it (blocking).
 	 * 
-	 * @throws PutFailedException
+	 * @param networkContent the content to store
+	 * @param protectionKeys the keys to protect the data
+	 * @throws PutFailedException if the content cannot be put.
 	 */
 	public void put(T networkContent, KeyPair protectionKeys) throws PutFailedException {
 		try {

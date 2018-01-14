@@ -100,6 +100,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	/**
 	 * Set whether this peer is firewalled (or behind a NAT) or not.
 	 * 
+	 * @param isFirewalled the flag whether this peer is behind a firewall
 	 * @return this instance
 	 */
 	public NetworkConfiguration setFirewalled(boolean isFirewalled) {
@@ -111,6 +112,7 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * If this peer is {@link #isFirewalled}, you could use UPnP to configure the port mapping at the NAT
 	 * device.
 	 * 
+	 * @param tryUpnp the flag whether upnp setup should be tried
 	 * @return this instance
 	 */
 	public NetworkConfiguration tryUPnP(boolean tryUpnp) {
@@ -159,8 +161,8 @@ public class NetworkConfiguration implements INetworkConfiguration {
 	 * @return the network configuration
 	 */
 	public static NetworkConfiguration create(String nodeID, InetAddress bootstrapAddress) {
-		return new NetworkConfiguration().setNodeId(nodeID).setPort(AUTO_PORT)
-				.setBootstrap(bootstrapAddress, H2HConstants.H2H_PORT);
+		return new NetworkConfiguration().setNodeId(nodeID).setPort(AUTO_PORT).setBootstrap(bootstrapAddress,
+				H2HConstants.H2H_PORT);
 	}
 
 	/**

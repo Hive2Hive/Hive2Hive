@@ -37,7 +37,7 @@ public class NetworkTestUtil {
 
 	/**
 	 * Creates a network with the given number of nodes. First node in the list is the
-	 * initial node where all other nodes bootstrapped to him.</br>
+	 * initial node where all other nodes bootstrapped to him.<br>
 	 * <b>Important:</b> After usage please shutdown the network. See {@link NetworkTestUtil#shutdownNetwork}
 	 * 
 	 * @param numberOfNodes
@@ -146,7 +146,7 @@ public class NetworkTestUtil {
 
 	/**
 	 * Creates a <code>Hive2Hive</code> network with the given number of nodes. First node in the list is the
-	 * initial node where all other nodes bootstrapped to him.</br>
+	 * initial node where all other nodes bootstrapped to him.<br>
 	 * <b>Important:</b> After usage please shutdown the network. See {@link NetworkTestUtil#shutdownNetwork}
 	 * 
 	 * @param numberOfNodes

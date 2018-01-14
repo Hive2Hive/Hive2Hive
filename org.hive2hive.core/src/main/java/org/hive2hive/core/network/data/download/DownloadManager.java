@@ -47,6 +47,9 @@ public class DownloadManager {
 
 	/**
 	 * Add a new task to download a file. The download is automatically started in the background
+	 * 
+	 * @param task the task to submit
+	 * @throws NoPeerConnectionException if the peer is not connected
 	 */
 	public void submit(BaseDownloadTask task) throws NoPeerConnectionException {
 		logger.debug("Submitted to download {}", task.getDestinationName());
@@ -93,6 +96,8 @@ public class DownloadManager {
 
 	/**
 	 * Start / continue the downloads
+	 * 
+	 * @throws NoPeerConnectionException if the peer is not connected
 	 */
 	public void startBackgroundProcess() throws NoPeerConnectionException {
 		executor = Executors.newFixedThreadPool(H2HConstants.CONCURRENT_DOWNLOADS);

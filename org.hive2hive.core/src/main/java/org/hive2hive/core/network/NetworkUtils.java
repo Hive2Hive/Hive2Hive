@@ -46,6 +46,7 @@ public class NetworkUtils {
 	 * 
 	 * @param port
 	 *            the port to check for availability
+	 * @return <code>true</code> if the port is available
 	 */
 	public static boolean isPortAvailable(int port) {
 		if (port < 0 || port > 65535) {
@@ -82,7 +83,7 @@ public class NetworkUtils {
 	 * @param list
 	 *            a list of {@link PeerAddress} peer addresses
 	 * @return
-	 *         the peer address with the lowest node id
+	 * 		the peer address with the lowest node id
 	 */
 	public static PeerAddress choseFirstPeerAddress(List<PeerAddress> list) {
 		if (list == null || list.isEmpty()) {

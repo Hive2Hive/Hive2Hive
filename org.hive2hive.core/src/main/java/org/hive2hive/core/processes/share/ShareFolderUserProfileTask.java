@@ -20,7 +20,6 @@ import org.hive2hive.core.network.data.IUserProfileModification;
 import org.hive2hive.core.network.data.UserProfileManager;
 import org.hive2hive.core.network.userprofiletask.UserProfileTask;
 import org.hive2hive.core.processes.files.add.AddNotificationMessageFactory;
-import org.hive2hive.processframework.exceptions.InvalidProcessStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,8 +85,7 @@ public class ShareFolderUserProfileTask extends UserProfileTask implements IUser
 					notifyOtherClients(new AddNotificationMessageFactory(networkManager.getEncryption(), sharedFile, null));
 					logger.debug("Notified other client(s) that new (shared) file '{}' are available for download.",
 							sharedFile.getFullPath());
-				} catch (IllegalArgumentException | NoPeerConnectionException | InvalidProcessStateException
-						| NoSessionException e) {
+				} catch (IllegalArgumentException | NoPeerConnectionException | NoSessionException e) {
 					logger.error("Could not notify other client(s) of me about the shared file '{}'.",
 							sharedFile.getFullPath(), e);
 				}

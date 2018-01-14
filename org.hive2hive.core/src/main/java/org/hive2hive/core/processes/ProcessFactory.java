@@ -176,8 +176,8 @@ public final class ProcessFactory {
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If the peer is not connected to the network.
 	 */
-	public IProcessComponent<Void> createLogoutProcess(NetworkManager networkManager) throws NoPeerConnectionException,
-			NoSessionException {
+	public IProcessComponent<Void> createLogoutProcess(NetworkManager networkManager)
+			throws NoPeerConnectionException, NoSessionException {
 
 		H2HSession session = networkManager.getSession();
 
@@ -214,9 +214,9 @@ public final class ProcessFactory {
 	 * Process to create a new file. Note that this is only applicable for a single file, not a whole file
 	 * tree.
 	 * 
-	 * @param file
-	 * @param networkManager
-	 * @param fileConfiguration
+	 * @param file the file to add
+	 * @param networkManager the network manager
+	 * @param fileConfiguration the file configuration
 	 * @return the process component
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
@@ -280,6 +280,12 @@ public final class ProcessFactory {
 
 	/**
 	 * Process for downloading the newest version to the default location.
+	 * 
+	 * @param file the file to download
+	 * @param networkManager the network manager
+	 * @return the process
+	 * @throws NoPeerConnectionException if the peer is not connected
+	 * @throws NoSessionException if there is no user session. Login first.
 	 */
 	public IProcessComponent<Void> createDownloadFileProcess(File file, NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
@@ -289,6 +295,12 @@ public final class ProcessFactory {
 
 	/**
 	 * Process for downloading the newest version to the default location.
+	 * 
+	 * @param fileKey the file key to download
+	 * @param networkManager the network manager
+	 * @return the process
+	 * @throws NoPeerConnectionException if the peer is not connected
+	 * @throws NoSessionException if there is no user session. Login first.
 	 */
 	public IProcessComponent<Void> createDownloadFileProcess(PublicKey fileKey, NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
@@ -299,6 +311,14 @@ public final class ProcessFactory {
 	/**
 	 * Process for downloading with some extra parameters. This can for example be used to restore a file. The
 	 * version and the filename are only effective for files, not for folders.
+	 * 
+	 * @param fileKey the file key to download
+	 * @param versionToDownload the version to download
+	 * @param destination the destination to download the file to
+	 * @param networkManager the network manager
+	 * @return the process
+	 * @throws NoPeerConnectionException if the peer is not connected
+	 * @throws NoSessionException if there is no user session. Login first.
 	 */
 	public IProcessComponent<Void> createDownloadFileProcess(PublicKey fileKey, int versionToDownload, File destination,
 			NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException {
@@ -310,6 +330,15 @@ public final class ProcessFactory {
 	 * Process for downloading with some extra parameters. This can for example be used to restore a file. The
 	 * version and the filename are only effective for files, not for folders. Either give the file key or the
 	 * absolute file as argument.
+	 * 
+	 * @param fileKey the file key to download
+	 * @param file the file to download
+	 * @param versionToDownload the version to download
+	 * @param destination the destination to download the file to
+	 * @param networkManager the network manager
+	 * @return the process
+	 * @throws NoPeerConnectionException if the peer is not connected
+	 * @throws NoSessionException if there is no user session. Login first.
 	 */
 	public IProcessComponent<Void> createDownloadFileProcess(PublicKey fileKey, File file, int versionToDownload,
 			File destination, NetworkManager networkManager) throws NoPeerConnectionException, NoSessionException {
@@ -331,8 +360,8 @@ public final class ProcessFactory {
 	 * Deletes the specified file. Note that this is only valid for a single file or an empty folder
 	 * (non-recursive)
 	 * 
-	 * @param file
-	 * @param networkManager
+	 * @param file the file to delete
+	 * @param networkManager the network manager
 	 * @return the process component
 	 * @throws NoPeerConnectionException If the peer is not connected to the network.
 	 * @throws NoSessionException If no user has logged in.
@@ -425,7 +454,8 @@ public final class ProcessFactory {
 	 * 
 	 * @param networkManager The network manager / node on which the file list operations should be executed.
 	 * @return A file list process.
-	 * @throws NoSessionException
+	 * @throws NoPeerConnectionException if the peer is not connected.
+	 * @throws NoSessionException if the user has no session. Login first.
 	 */
 	public IProcessComponent<FileNode> createFileListProcess(NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
@@ -439,8 +469,8 @@ public final class ProcessFactory {
 	}
 
 	public IProcessComponent<Void> createNotificationProcess(final BaseNotificationMessageFactory messageFactory,
-			final Set<String> usersToNotify, NetworkManager networkManager) throws NoPeerConnectionException,
-			NoSessionException {
+			final Set<String> usersToNotify, NetworkManager networkManager)
+			throws NoPeerConnectionException, NoSessionException {
 
 		// create a context here to provide the necessary data
 		INotifyContext context = new INotifyContext() {

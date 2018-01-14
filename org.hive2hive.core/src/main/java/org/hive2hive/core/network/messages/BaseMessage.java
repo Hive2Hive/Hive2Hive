@@ -15,18 +15,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is the base class of all messages used by <code>Hive2Hive</code>.</br>
+ * This is the base class of all messages used by <code>Hive2Hive</code>.<br>
  * All messages are sent to their destination in an asynchronous manner.<br>
- * </br>
+ * <br>
  * 
- * <b>Design decision:</b></br> All messages in <code>Hive2Hive</code> have to
+ * <b>Design decision:</b><br> All messages in <code>Hive2Hive</code> have to
  * be send asynchronously. The reason is simply to avoid timeouts caused by
  * blocking threads which wait for the messages return/completion. If we wait
  * for a message to return and block the current thread (the synchronous way of
  * doing it) the current node itself is not able to reply on incoming messages.
  * This leads to timeouts for requesters and as a consequence to messages routed
  * to the 'wrong' peer/node because <code>TomP2P</code> thinks the current node
- * has left the network...</br></br>
+ * has left the network...<br><br>
  * 
  * Messages are sent by the {@link MessageManager}. For more details please have
  * a look at {@link MessageManager#send(BaseMessage, PublicKey)}.
@@ -69,7 +69,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	}
 
 	/**
-	 * Constructor for an asynchronous message.</br> This constructor creates an
+	 * Constructor for an asynchronous message.<br> This constructor creates an
 	 * asynchronous message with the default sending behavior {@link SendingBehavior#SEND_MAX_ALLOWED_TIMES}.
 	 * 
 	 * @param messageID
@@ -82,8 +82,8 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	}
 
 	/**
-	 * Constructor for an asynchronous message.</br>
-	 * A message ID is generated.</br>
+	 * Constructor for an asynchronous message.<br>
+	 * A message ID is generated.<br>
 	 * This constructor creates an asynchronous message with the default sending behavior
 	 * {@link SendingBehavior#SEND_MAX_ALLOWED_TIMES}.
 	 * 
@@ -155,7 +155,7 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 * 
 	 * @param networkManager
 	 *            the {@link NetworkManager} to be used by this message
-	 * @throws NoPeerConnectionException
+	 * @throws NoPeerConnectionException if the peer has no connection
 	 */
 	public void setNetworkManager(NetworkManager networkManager) throws NoPeerConnectionException {
 		this.networkManager = networkManager;
@@ -171,10 +171,10 @@ public abstract class BaseMessage implements Runnable, Serializable {
 
 	/**
 	 * This method is called on the receiver node (the one responsible for {@link #targetKey}) of this
-	 * message. It is used to check if the target node is able/willing to handle this message at all.</br>
+	 * message. It is used to check if the target node is able/willing to handle this message at all.<br>
 	 * 
-	 * <b>Important:</b></br> All concrete subclasses have to implement this
-	 * method and adhere to the following points:</br>
+	 * <b>Important:</b><br> All concrete subclasses have to implement this
+	 * method and adhere to the following points:<br>
 	 * <ul>
 	 * <li>This method must terminate as quickly as possible.</li>
 	 * <li>No blocking in any way is allowed.</li>
@@ -189,11 +189,11 @@ public abstract class BaseMessage implements Runnable, Serializable {
 	 * This method is called if a failure is detected while sending this message. The idea is that sending
 	 * failures are handled by the message itself, because the message is the only entity which knows how to
 	 * perform from the point of a failure on. Some messages don't need do be sent again, while others need a
-	 * redirect or wish to inform special (potential several) customers about the failure.</br>
+	 * redirect or wish to inform special (potential several) customers about the failure.<br>
 	 * This abstract class implements the default behavior for {@link SendingBehavior#SEND_MAX_ALLOWED_TIMES}.
 	 * Subclasses which need a different or more elaborated failure handling have to extend or override this
-	 * method.</br>
-	 * </br>
+	 * method.<br>
+	 * <br>
 	 * This method analyzes the reply and give <code>true</code> if a resend of the message is recommend and a
 	 * <code>false</code> if not.
 	 * 

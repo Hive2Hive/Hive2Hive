@@ -27,6 +27,8 @@ public abstract class BaseNotificationMessageFactory {
 
 	/**
 	 * Generates the protection keys for the user profile task. This is just a convenience method
+	 * 
+	 * @return the generated protection keys
 	 */
 	protected KeyPair generateProtectionKeys() {
 		return encryption.generateRSAKeyPair(H2HConstants.KEYLENGTH_PROTECTION);
@@ -35,7 +37,7 @@ public abstract class BaseNotificationMessageFactory {
 	/**
 	 * Create a private message to notify clients of the same user.
 	 * 
-	 * @param receiver
+	 * @param receiver the receivers peer address
 	 * @return the message for notifying own clients
 	 */
 	public abstract BaseDirectMessage createPrivateNotificationMessage(PeerAddress receiver);
@@ -43,6 +45,7 @@ public abstract class BaseNotificationMessageFactory {
 	/**
 	 * Create a user profile task to put it into the queue of other users.
 	 * 
+	 * @param sender the sender
 	 * @return the user profile task or <code>null</code> if none is required
 	 */
 	public abstract UserProfileTask createUserProfileTask(String sender);
@@ -51,8 +54,8 @@ public abstract class BaseNotificationMessageFactory {
 	 * After putting the {@link UserProfileTask} in the queue of the other users, notify them with this
 	 * message
 	 * 
-	 * @param receiver
-	 * @param userId
+	 * @param receiver the receivers peer address
+	 * @param userId the user id
 	 * @return the message to other users clients (master node)
 	 */
 	public BaseDirectMessage createHintNotificationMessage(PeerAddress receiver, String userId) {

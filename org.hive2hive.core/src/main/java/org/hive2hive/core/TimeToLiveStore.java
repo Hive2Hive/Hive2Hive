@@ -66,11 +66,13 @@ public class TimeToLiveStore {
 	}
 
 	/**
-	 * Converts an integer number of days to seconds (which are used by the {@link TimeToLiveStore}). If an
-	 * Integer overflow happens, {@link Integer#MAX_VALUE} is returned.
+	 * Converts an integer number of days to seconds (which are used by the
+	 * {@link TimeToLiveStore}). If an Integer overflow happens,
+	 * {@link Integer#MAX_VALUE} is returned.
 	 * 
 	 * @param days
-	 * @return seconds
+	 *            the number of days
+	 * @return seconds the number of seconds
 	 */
 	public static int convertDaysToSeconds(int days) {
 		assert days > 0;

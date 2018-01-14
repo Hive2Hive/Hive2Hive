@@ -25,6 +25,8 @@ public class H2HDefaultEncryption implements IH2HEncryption {
 
 	/**
 	 * Create a default encryption using bouncy castle as the security provider
+	 * 
+	 * @param serializer the data serializer
 	 */
 	public H2HDefaultEncryption(IH2HSerialize serializer) {
 		this(serializer, BouncyCastleProvider.PROVIDER_NAME, new BCStrongAESEncryption());
@@ -54,8 +56,8 @@ public class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey) throws IOException,
-			GeneralSecurityException {
+	public EncryptedNetworkContent encryptAES(BaseNetworkContent content, SecretKey aesKey)
+			throws IOException, GeneralSecurityException {
 		byte[] serialized = serializer.serialize(content);
 		byte[] initVector = EncryptionUtil.generateIV();
 		byte[] encryptedContent = EncryptionUtil.encryptAES(serialized, aesKey, initVector, securityProvider, strongAES);
@@ -66,16 +68,16 @@ public class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey) throws ClassNotFoundException,
-			IOException, GeneralSecurityException {
+	public BaseNetworkContent decryptAES(EncryptedNetworkContent content, SecretKey aesKey)
+			throws ClassNotFoundException, IOException, GeneralSecurityException {
 		byte[] decrypted = EncryptionUtil.decryptAES(content.getCipherContent(), aesKey, content.getInitVector(),
 				securityProvider, strongAES);
 		return (BaseNetworkContent) serializer.deserialize(decrypted);
 	}
 
 	@Override
-	public HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey) throws IOException,
-			GeneralSecurityException {
+	public HybridEncryptedContent encryptHybrid(BaseNetworkContent content, PublicKey publicKey)
+			throws IOException, GeneralSecurityException {
 		byte[] serialized = serializer.serialize(content);
 
 		HybridEncryptedContent encryptHybrid = encryptHybrid(serialized, publicKey);
@@ -96,15 +98,15 @@ public class H2HDefaultEncryption implements IH2HEncryption {
 	}
 
 	@Override
-	public byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey) throws ClassNotFoundException,
-			IOException, GeneralSecurityException {
+	public byte[] decryptHybridRaw(HybridEncryptedContent content, PrivateKey privateKey)
+			throws ClassNotFoundException, IOException, GeneralSecurityException {
 		return EncryptionUtil.decryptHybrid(content, privateKey, securityProvider, strongAES);
 	}
 
 	/**
 	 * The toString() method of a public key
 	 * 
-	 * @param key
+	 * @param key the public key
 	 * @return the string representation of the public key
 	 */
 	public static String key2String(PublicKey key) {
@@ -114,8 +116,8 @@ public class H2HDefaultEncryption implements IH2HEncryption {
 	/**
 	 * Compares two key pairs (either one can be null)
 	 * 
-	 * @param keypair1
-	 * @param keypair2
+	 * @param keypair1 the first keypair
+	 * @param keypair2 the second keypair
 	 * @return if keypair1 matches keypair2
 	 */
 	public static boolean compare(KeyPair keypair1, KeyPair keypair2) {

@@ -20,9 +20,10 @@ public class FileIndex extends Index {
 	/**
 	 * Constructor for child nodes of type 'file'
 	 * 
-	 * @param parent
-	 * @param keyPair
-	 * @param name
+	 * @param parent the parent folder
+	 * @param keyPair the file key pair
+	 * @param name the name of the file
+	 * @param latestVersionHash the hash of the latest version
 	 */
 	public FileIndex(FolderIndex parent, KeyPair keyPair, String name, byte[] latestVersionHash) {
 		super(keyPair, name, parent);
@@ -32,6 +33,8 @@ public class FileIndex extends Index {
 
 	/**
 	 * Copy constructor
+	 * 
+	 * @param fileIndex the index to copy
 	 */
 	public FileIndex(FileIndex fileIndex) {
 		super(fileIndex.fileKeys, fileIndex.name, fileIndex.parent);

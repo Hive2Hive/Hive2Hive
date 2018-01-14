@@ -46,13 +46,14 @@ public class FileRecursionUtil {
 	 * @param files a list of files to upload
 	 * @param action whether the files are for updating or as new files
 	 * @param networkManager the network manager with a session
+	 * @param fileConfiguration the file configuration
 	 * @return the root process (containing multiple async components) that manages the upload correctly
-	 * @throws NoSessionException
-	 * @throws NoPeerConnectionException
+	 * @throws NoSessionException if the user is not logged in
+	 * @throws NoPeerConnectionException if the peer has no connection
 	 */
 	public static IProcessComponent<Void> buildUploadProcess(List<File> files, FileProcessAction action,
-			NetworkManager networkManager, IFileConfiguration fileConfiguration) throws NoSessionException,
-			NoPeerConnectionException {
+			NetworkManager networkManager, IFileConfiguration fileConfiguration)
+			throws NoSessionException, NoPeerConnectionException {
 		// the root process
 		SyncProcess rootProcess = new SyncProcess();
 
@@ -106,8 +107,8 @@ public class FileRecursionUtil {
 	 * @param files list of files to delete in preorder
 	 * @param networkManager the network manager with a session
 	 * @return the (async) root process component
-	 * @throws NoSessionException
-	 * @throws NoPeerConnectionException
+	 * @throws NoSessionException if the user is not logged in
+	 * @throws NoPeerConnectionException if the peer has no connection
 	 */
 	public static AsyncComponent<Void> buildDeletionProcess(List<File> files, NetworkManager networkManager)
 			throws NoSessionException, NoPeerConnectionException {
@@ -118,8 +119,8 @@ public class FileRecursionUtil {
 		// asynchronous components, we simply delete them all in the same thread (reverse preorder of course)
 		Collections.reverse(files);
 		for (File file : files) {
-			IProcessComponent<Void> deletionProcess = ProcessFactory.instance()
-					.createDeleteFileProcess(file, networkManager);
+			IProcessComponent<Void> deletionProcess = ProcessFactory.instance().createDeleteFileProcess(file,
+					networkManager);
 			rootProcess.add(deletionProcess);
 		}
 
@@ -130,11 +131,11 @@ public class FileRecursionUtil {
 	 * This is a workaround to delete files when a {@link FolderIndex} is already existent. Since the node is
 	 * already here, the deletion could be speed up because it must not be looked up in the user profile.
 	 * 
-	 * @param files
-	 * @param networkManager
-	 * @return the process component
-	 * @throws NoSessionException
-	 * @throws NoPeerConnectionException
+	 * @param files list of files to delete
+	 * @param networkManager the network manager with a session
+	 * @return the process component the (async) root process component
+	 * @throws NoSessionException if the user is not logged in
+	 * @throws NoPeerConnectionException if the peer has no connection
 	 */
 	@Deprecated
 	public static IProcessComponent<Future<Void>> buildDeletionProcessFromNodelist(List<Index> files,
@@ -154,7 +155,8 @@ public class FileRecursionUtil {
 	 * @param files the files to download (order does not depend)
 	 * @param networkManager the connected node (note, it must have a session)
 	 * @return the root process component containing all sub-processes (and sub-tasks)
-	 * @throws NoSessionException
+	 * @throws NoSessionException if the user is not logged in
+	 * @throws NoPeerConnectionException if the peer has no connection
 	 */
 	public static IProcessComponent<Void> buildDownloadProcess(List<Index> files, NetworkManager networkManager)
 			throws NoPeerConnectionException, NoSessionException {
@@ -239,7 +241,7 @@ public class FileRecursionUtil {
 	 * Get a list of all files and subfiles in the root directory. The files are visited and returned in
 	 * preorder
 	 * 
-	 * @param root
+	 * @param root the root file
 	 * @return a flat list of all files in preorder
 	 */
 	public static List<File> getPreorderList(File root) {
