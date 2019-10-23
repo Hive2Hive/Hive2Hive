@@ -40,6 +40,8 @@ public class FileBufferHolder implements IFileBufferHolder {
 
 	/**
 	 * Add a file to the buffer
+	 * 
+	 * @param file the file to add to the buffer
 	 */
 	public synchronized void addFile(File file) {
 		fileBuffer.add(file);
@@ -47,6 +49,8 @@ public class FileBufferHolder implements IFileBufferHolder {
 
 	/**
 	 * Set the files which are in sync with the DHT
+	 * 
+	 * @param fileNode the base file node to sync recursively
 	 */
 	public void setSyncFiles(FileNode fileNode) {
 		syncFiles = new HashSet<FileNode>();

@@ -11,7 +11,7 @@ public interface IFileBuffer {
 	 * The file is added to a buffer which waits a certain time. This ensures that the listener is not called
 	 * for both parent folder and containing files, causing race-conditions at Hive2Hive.
 	 * 
-	 * @param file
+	 * @param file the file to add to the buffer
 	 */
 	void addFileToBuffer(File file);
 }

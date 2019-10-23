@@ -28,7 +28,7 @@ public class DeleteFileBuffer extends BaseFileBuffer {
 	/**
 	 * Process the files in the buffer after the buffering time exceeded.
 	 * 
-	 * @param buffer
+	 * @param buffer the buffer holder
 	 */
 	protected void processBuffer(IFileBufferHolder buffer) {
 		List<File> bufferedFiles = buffer.getFileBuffer();

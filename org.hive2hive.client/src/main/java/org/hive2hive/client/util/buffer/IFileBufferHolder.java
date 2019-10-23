@@ -9,12 +9,12 @@ import org.hive2hive.core.processes.files.list.FileNode;
 public interface IFileBufferHolder {
 
 	/**
-	 * Get the flat set of files which are in sync with the DHT (use it to filter your files in the buffer)
+	 * @return the flat set of files which are in sync with the DHT (use it to filter your files in the buffer)
 	 */
 	public Set<FileNode> getSyncFiles();
 
 	/**
-	 * Get the list of files in the buffer
+	 * @return the list of files in the buffer
 	 */
 	public List<File> getFileBuffer();
 }

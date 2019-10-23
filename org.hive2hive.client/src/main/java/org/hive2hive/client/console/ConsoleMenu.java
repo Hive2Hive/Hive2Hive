@@ -24,9 +24,9 @@ public abstract class ConsoleMenu {
 	}
 
 	/**
-	 * Specifies the {@link H2HConsoleMenuItem}s of this menu.<br/>
+	 * Specifies the {@link H2HConsoleMenuItem}s of this menu.<br>
 	 * <b>Note:</b> Not all {@link H2HConsoleMenuItem}s are specified here, as they might also be specified
-	 * in-line in {@link ConsoleMenu#addMenuItems()}.</br>
+	 * in-line in {@link ConsoleMenu#addMenuItems()}.<br>
 	 * <b>Note:</b> {@link H2HConsoleMenuItem}s with preconditions should be specified by this method.
 	 */
 	protected void createItems() {

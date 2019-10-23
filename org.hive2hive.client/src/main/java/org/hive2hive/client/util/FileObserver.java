@@ -25,18 +25,18 @@ public class FileObserver {
 	/**
 	 * A file observer that uses the specified interval to check for file changes.
 	 * 
-	 * @param rootDirectory
-	 * @param ms
+	 * @param rootDirectory the root directory to monitor
+	 * @param interval the interval in milliseconds to observe changes
 	 */
-	public FileObserver(File rootDirectory, long ms) {
+	public FileObserver(File rootDirectory, long interval) {
 		this.observer = new FileAlterationObserver(rootDirectory);
-		this.monitor = new FileAlterationMonitor(ms, observer);
+		this.monitor = new FileAlterationMonitor(interval, observer);
 	}
 
 	/**
 	 * A file observer that uses the default interval to check for file changes.
 	 * 
-	 * @param rootDirectory
+	 * @param rootDirectory the root directory to monitor
 	 */
 	public FileObserver(File rootDirectory) {
 		this(rootDirectory, 1000);
