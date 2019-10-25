@@ -4,7 +4,7 @@
 
 	<groupId>org.hive2hive</groupId>
 	<artifactId>org.hive2hive.parent</artifactId>
-	<version>1.2.3-SNAPSHOT</version>
+	<version>${hive2hive.version}</version>
 	<packaging>pom</packaging>
 
 	<name>Hive2Hive</name>
@@ -46,6 +46,7 @@
 	</modules>
 
 	<properties>
+		<hive2hive.version>1.2.3-SNAPSHOT</hive2hive.version>
 		<!-- platform independent encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
