@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.hive2hive</groupId>
 		<artifactId>org.hive2hive.parent</artifactId>
-		<version>${hive2hive.version}</version>
+		<version>1.2.4</version>
 	</parent>
 
 	<artifactId>org.hive2hive.core</artifactId>
