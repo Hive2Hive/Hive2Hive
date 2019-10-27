@@ -46,7 +46,7 @@
 	</modules>
 
 	<properties>
-		<hive2hive.version>1.2.3</hive2hive.version>
+		<hive2hive.version>1.2.4-SNAPSHOT</hive2hive.version>
 		<!-- platform independent encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
