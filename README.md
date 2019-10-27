@@ -184,13 +184,8 @@ There are three easy ways to get and include the Hive2Hive library into your pro
 If you just want to use the library, either refer to option 1 or 2.  
 If you want to [contribute to the project](#contribution), please refer to option 3.
 - **Option 1: Add Maven dependency** *(recommended)*  
-  You can add the latest stable release as an [Apache Maven](http://maven.apache.org/) dependency and fetch it from our repository. Add the following to your `pom.xml` and make sure to select the most recent version.  
+  You can add the latest stable release as an [Apache Maven](http://maven.apache.org/) dependency. Add the following to your `pom.xml` and make sure to select the most recent version.  
 ```xml
-<repository>
-  <id>hive2hive.org</id>
-  <url>http://repo.hive2hive.org</url>
-</repository>
-...
 <dependency>
   <groupId>org.hive2hive</groupId>
   <artifactId>org.hive2hive.core</artifactId>
