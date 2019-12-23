@@ -1,4 +1,4 @@
-# ![Hive2Hive logo](http://hive2hive.com/wp-content/uploads/2014/04/Hive2Hive_Icon-e1398611873118.png) Hive2Hive
+# Hive2Hive
 [![Build Status](https://travis-ci.org/Hive2Hive/Hive2Hive.svg?branch=master)](https://travis-ci.org/Hive2Hive/Hive2Hive)
 
 [Hive2Hive](https://github.com/Hive2Hive/Hive2Hive/wiki) is an open-source library, written in Java, for secure, distributed, P2P-based file synchronization and sharing. It is built on top of [TomP2P](https://github.com/tomp2p/TomP2P), an advanced, high-performance DHT for multi-key-value pairs. The Hive2Hive project is licensed under the [MIT License](http://opensource.org/licenses/MIT) and any contribution is welcome.
@@ -179,7 +179,7 @@ On top of that, Hive2Hive provides additional features such as security and vers
 
 ## Installation
 
-There are three easy ways to get and include the Hive2Hive library into your project. ([more](http://hive2hive.com/download/))
+There are three easy ways to get and include the Hive2Hive library into your project.
 
 If you just want to use the library, either refer to option 1 or 2.  
 If you want to [contribute to the project](#contribution), please refer to option 3.
@@ -200,7 +200,6 @@ If you want to [contribute to the project](#contribution), please refer to optio
 ## Documentation
 
 - For more details and documentation of the Hive2Hive project, please visit the [GitHub Wiki](https://github.com/Hive2Hive/Hive2Hive/wiki).
-- You can also take a look at our project website at [www.hive2hive.com](http://www.hive2hive.com).
 - The source code itself is thoroughly documented using JavaDoc.
 
 ## Contribution
@@ -220,9 +219,3 @@ There are several things - from simple to complex - you can do to help:
 - Help the community by answering questions on StackOverflow (tagged with [`hive2hive`](http://stackoverflow.com/questions/tagged/hive2hive))
 
 **Also, if you are a professional cryptographer with interest in this project, any feedback on the project is very welcome!**
-
-## Contact
-
-If you have any questions, feel uncomfortable or uncertain about an issue or your changes, feel free to reach us via email at [info@hive2hive.com](mailto:info@hive2hive.com). Please consider posting your question on StackOverflow (using the [`hive2hive`](http://stackoverflow.com/questions/tagged/hive2hive) tag) in case it is a technical question that might interest other developers, too.
-
-We provide you with all information you need and will happily help you via email, Skype, remote pairing or whatever you are comfortable with.
