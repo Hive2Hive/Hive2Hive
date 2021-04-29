@@ -30,10 +30,10 @@ public class FileUtil {
 	 * @param serializer the serializer to use
 	 * @throws IOException if the data cannot be serialized or stored
 	 */
-	public static void writePersistentMetaData(IFileAgent fileAgent, PublicKeyManager keyManager, IH2HSerialize serializer)
+	public static void writePersistentMetaData(org.hive2hive.core.file.IFileAgent fileAgent, PublicKeyManager keyManager, IH2HSerialize serializer)
 			throws IOException {
 		// generate the new persistent meta data
-		PersistentMetaData metaData = new PersistentMetaData();
+		org.hive2hive.core.file.PersistentMetaData metaData = new org.hive2hive.core.file.PersistentMetaData();
 
 		// add the public keys
 		if (keyManager != null) {
@@ -51,17 +51,17 @@ public class FileUtil {
 	 * @param serializer the serializer to use
 	 * @return the read meta data (never null)
 	 */
-	public static PersistentMetaData readPersistentMetaData(IFileAgent fileAgent, IH2HSerialize serializer) {
+	public static org.hive2hive.core.file.PersistentMetaData readPersistentMetaData(org.hive2hive.core.file.IFileAgent fileAgent, IH2HSerialize serializer) {
 		try {
 			byte[] content = fileAgent.readCache(H2HConstants.META_FILE_NAME);
 			if (content == null || content.length == 0) {
 				logger.warn("Not found the meta data. Create new one");
-				return new PersistentMetaData();
+				return new org.hive2hive.core.file.PersistentMetaData();
 			}
-			return (PersistentMetaData) serializer.deserialize(content);
+			return (org.hive2hive.core.file.PersistentMetaData) serializer.deserialize(content);
 		} catch (IOException | ClassNotFoundException e) {
 			logger.error("Cannot deserialize meta data. Reason: {}", e.getMessage());
-			return new PersistentMetaData();
+			return new org.hive2hive.core.file.PersistentMetaData();
 		}
 	}
 
@@ -81,7 +81,7 @@ public class FileUtil {
 	 * @param child the child file
 	 * @return the relative file
 	 */
-	public static File relativize(File base, File child) {
+	public static File relativize(File base, File child) throws SecurityException{
 		return new File(base.toURI().relativize(child.toURI()).getPath());
 	}
 
@@ -134,7 +134,7 @@ public class FileUtil {
 	 * @param file the file to check
 	 * @return whether the file is in the managed directory
 	 */
-	public static boolean isInH2HDirectory(IFileAgent fileAgent, File file) {
+	public static boolean isInH2HDirectory(org.hive2hive.core.file.IFileAgent fileAgent, File file) {
 		return fileAgent == null ? false : isInH2HDirectory(file, fileAgent.getRoot());
 	}
 
